@@ -9,6 +9,7 @@ const wrapText = require("wrap-text");
 import { OpenAI } from "langchain/llms";
 import { BaseChain, loadSummarizationChain } from "langchain/chains";
 import { AnalyzeDocumentChain } from "langchain/chains";
+import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
 
 const configuration = new Configuration({
     apiKey: process.env.OPENAI_API_KEY,
@@ -22,33 +23,42 @@ export default async function handler(
     res: NextApiResponse
 ) {
     try {
-        const mediumText = (<string>req.body.mediumText);
+        const mediumText = JSON.parse(req.body).mediumText;
         const model = new OpenAI({ temperature: 0 });
         /** Load the summarization chain. */
-        let res1;
+        let resSummarization;
         try {
-            const combineDocsChain = loadSummarizationChain(model);
-            console.log(combineDocsChain);
+
+            /* Split the text into chunks. */
+            const textSplitter = new RecursiveCharacterTextSplitter({ chunkSize: 1000 });
+            const docs = await textSplitter.createDocuments([mediumText]);
+            /** Call the summarization chain. */
+            const chainS = loadSummarizationChain(model);
+
+            resSummarization = await chainS.call({
+                input_documents: docs,
+            });
+
+            console.log("resSummarization");
+            console.log(resSummarization);
 
             /** Pass this into the AnalyzeDocumentChain. */
-            const chain = new AnalyzeDocumentChain({
-                combineDocumentsChain: combineDocsChain,
-            });
+            // const chain = new AnalyzeDocumentChain({
+            //     combineDocumentsChain: combineDocsChain,
+            // });
 
-            res1 = await chain.call({
-                input_document: mediumText,
-            });
+            // res1 = await chain.call({
+            //     input_document: mediumText,
+            // });
         } catch (e) {
             console.log(e);
         }
-
-        console.log(res1);
 
         // console.log('Encoded this string looks like: ', encoded.length)
 
         return res.status(200).json({
             name: "",
-            content: res1 !== undefined ? res1.text : "",
+            content: resSummarization !== undefined ? resSummarization.text : "",
             success: true,
         } as { name: string; content: string; format: string; success: boolean });
     } catch (e: any) {

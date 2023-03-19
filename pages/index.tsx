@@ -11,6 +11,7 @@ const inter = Inter({ subsets: ['latin'] })
 export default function Home() {
   const [mediumUrl, setMediumUrl] = useState('');
   const [twitterThread, setTwitterThread] = useState('');
+  const [mediumSummary, setMediumSummary] = useState('');
   const [apiStep, setApiStep] = useState('');
   const [loadingAPICall, setLoadingAPICall] = useState(false);
 
@@ -22,14 +23,10 @@ export default function Home() {
       .then((data) => {
 
         setApiStep('Formatting Medium Text...');
-
         fetch('/api/llm/gpt3/mediumToSummary', {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
           body: JSON.stringify({
-            mediumText: data.content
+            mediumText: data.section
           })
         })
           .then((res) => res.json())
@@ -41,7 +38,7 @@ export default function Home() {
             else {
 
               setApiStep('Converting to Twitter Thread\...');
-
+              setMediumSummary(data.content);
               fetch('/api/llm/gpt3/mediumToThread?mediumText=' + data.content)
                 .then((res) => res.json())
                 .then((data) => {
@@ -100,6 +97,11 @@ export default function Home() {
             </>
           }
         </div>
+        <p>
+          Medium Summary:
+            {"\n"}
+            {mediumSummary}
+        </p>
         <p>
           Twitter Thread:
             {"\n"}
