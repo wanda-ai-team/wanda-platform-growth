@@ -4,26 +4,42 @@ import { Inter } from 'next/font/google'
 import styles from '@/styles/Home.module.css'
 import { useState } from 'react'
 import { Button, Input } from '@chakra-ui/react'
+import { ColorRing } from 'react-loader-spinner'
 
 const inter = Inter({ subsets: ['latin'] })
 
 export default function Home() {
   const [mediumUrl, setMediumUrl] = useState('');
   const [twitterThread, setTwitterThread] = useState('');
+  const [apiStep, setApiStep] = useState('');
+  const [loadingAPICall, setLoadingAPICall] = useState(false);
 
   function getTextFromMediumPage() {
+    setLoadingAPICall(true);
+    setApiStep('Getting Medium Section...');
     fetch('/api/webScrapping/getMediumSection?url=' + mediumUrl)
       .then((res) => res.json())
       .then((data) => {
+        setApiStep('Converting to Twitter Thread...');
         fetch('/api/llm/gpt3/mediumToThread?mediumText=' + data.section)
           .then((res) => res.json())
           .then((data) => {
             console.log(data);
-            setTwitterThread(data.content)
+            if (data.suceess === false) {
+              setTwitterThread("Error");
+            }
+            else {
+              setTwitterThread(data.content)
+            }
+            setLoadingAPICall(false);
           }).catch((err) => {
+            setLoadingAPICall(false);
+            setTwitterThread('Error: ' + err);
             console.log(err);
           });
       }).catch((err) => {
+        setLoadingAPICall(false);
+        setTwitterThread('Error: ' + err);
         console.log(err);
       });
   }
@@ -40,7 +56,24 @@ export default function Home() {
         <Input placeholder='Medium URL' value={mediumUrl}
           onChange={(e) => setMediumUrl(e.target.value)} />
         <Button colorScheme='purple' onClick={getTextFromMediumPage}>Submit</Button>
+        <div>
+          {loadingAPICall &&
+            <>
+              <p>{apiStep}</p>
+              <ColorRing
+                visible={true}
+                height="80"
+                width="80"
+                ariaLabel="blocks-loading"
+                wrapperStyle={{}}
+                wrapperClass="blocks-wrapper"
+                colors={['#e15b64', '#f47e60', '#f8b26a', '#abbd81', '#849b87']}
+              />
+            </>
+          }
+        </div>
         <p>
+          Twitter Thread:
           {twitterThread}
         </p>
       </main>
