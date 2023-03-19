@@ -5,8 +5,6 @@ import {
     OpenAIApi,
 } from "openai";
 
-const OpenAI = require("openai-api");
-
 const configuration = new Configuration({
     apiKey: process.env.OPENAI_API_KEY,
 });
@@ -22,12 +20,11 @@ export default async function handler(
         const mediumText = (<string>req.query.mediumText);
         let basePromptPrefix = "";
 
-        console.log("mediumText");
+        //Prompt for the GPT-3 model - 17 Tokens
         basePromptPrefix = `
-Create me a Twitter thread from this Medium article:\n
+Create me a Twitter thread based on the summary of this Medium Blog Post:\n
 ${mediumText}\n
 Twitter Thread:\n`;
-
 
         const completion = await openai.createChatCompletion({
             model: "gpt-3.5-turbo",
