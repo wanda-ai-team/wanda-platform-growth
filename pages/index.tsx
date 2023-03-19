@@ -20,8 +20,18 @@ export default function Home() {
     fetch('/api/webScrapping/getMediumSection?url=' + mediumUrl)
       .then((res) => res.json())
       .then((data) => {
-        setApiStep('Converting to Twitter Thread...');
-        fetch('/api/llm/gpt3/mediumToThread?mediumText=' + data.section)
+
+        setApiStep('Formatting Medium Text...');
+
+        fetch('/api/llm/gpt3/mediumToSummary', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            mediumText: data.content
+          })
+        })
           .then((res) => res.json())
           .then((data) => {
             console.log(data);
@@ -29,14 +39,33 @@ export default function Home() {
               setTwitterThread("Error");
             }
             else {
-              setTwitterThread(data.content)
+
+              setApiStep('Converting to Twitter Thread\...');
+
+              fetch('/api/llm/gpt3/mediumToThread?mediumText=' + data.content)
+                .then((res) => res.json())
+                .then((data) => {
+                  console.log(data);
+                  if (data.suceess === false) {
+                    setTwitterThread("Error");
+                  }
+                  else {
+                    setTwitterThread(data.content)
+                  }
+                  setLoadingAPICall(false);
+                }).catch((err) => {
+                  setLoadingAPICall(false);
+                  setTwitterThread('Error: ' + err);
+                  console.log(err);
+                });
+
             }
-            setLoadingAPICall(false);
           }).catch((err) => {
             setLoadingAPICall(false);
             setTwitterThread('Error: ' + err);
             console.log(err);
           });
+
       }).catch((err) => {
         setLoadingAPICall(false);
         setTwitterThread('Error: ' + err);
@@ -67,14 +96,14 @@ export default function Home() {
                 ariaLabel="blocks-loading"
                 wrapperStyle={{}}
                 wrapperClass="blocks-wrapper"
-                colors={['#e15b64', '#f47e60', '#f8b26a', '#abbd81', '#849b87']}
-              />
+                colors={['#e15b64', '#f47e60', '#f8b26a', '#abbd81', '#849b87']} />
             </>
           }
         </div>
         <p>
           Twitter Thread:
-          {twitterThread}
+            {"\n"}
+            {twitterThread}
         </p>
       </main>
     </>
