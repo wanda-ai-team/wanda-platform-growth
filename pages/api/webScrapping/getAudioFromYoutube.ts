@@ -5,14 +5,19 @@ import { ytDownloader } from "@derimalec/ytdl-to-mp3";
 const downloadAudio = async (videoId: string, pathFile: string) => {
     // download returns the full path, with the song name + mp3 extension on it.
     console.log("downloadAudio");
-    const { path } = await ytDownloader.download(
-        videoId,
-        pathFile,
-        "lowestaudio"
-    );
-    console.log("downloadAudio 2");
+    try {
+        const { path } = await ytDownloader.download(
+            videoId,
+            pathFile,
+            "lowestaudio"
+        );
+        console.log("downloadAudio 2");
 
-    return path;
+        return path;
+    } catch (e: any) {
+        console.log(e);
+        return "";
+    }
 };
 
 export default async function handler(
