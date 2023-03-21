@@ -1,113 +1,150 @@
-import Head from 'next/head'
-import Image from 'next/image'
-import { Inter } from 'next/font/google'
+
 import styles from '@/styles/Home.module.css'
 import { useState } from 'react'
 import { Button, Input } from '@chakra-ui/react'
 import { ColorRing } from 'react-loader-spinner'
-
-const inter = Inter({ subsets: ['latin'] })
+import TwitterThread from '@/components/text/twitterThread/twitterThread'
+import { getSubtitlesFromYoutube } from '@/utils/api/video/getSubtitlesFromYoutube'
+import { getTextSummary } from '@/utils/api/text/getTextSummary'
+import { convertTextToThread } from '@/utils/api/text/convertTextToThread'
+import { getAudioFromYoutube } from '@/utils/api/video/getAudioFromYoutube'
+import { speechToText } from '@/utils/api/AIConvert/speechToText'
+import { getBlogText } from '@/utils/api/text/getBlogText'
 
 export default function Home() {
   const [mediumUrl, setMediumUrl] = useState('');
+  const [youtubeURL, setYoutubeURL] = useState('');
   const [twitterThread, setTwitterThread] = useState('');
-  const [mediumSummary, setMediumSummary] = useState('');
+  const [summary, setSummary] = useState('');
   const [apiStep, setApiStep] = useState('');
   const [loadingAPICall, setLoadingAPICall] = useState(false);
+  const [twitterThreadText, setTwitterThreadText] = useState(['']);
+  const [numberOfTweets, setNumberOfTweets] = useState(1);
 
-  function getTextFromMediumPage() {
+  async function youtubeToThread() {
+    const subtitles = await getYoutubeSubtitles();
+    if (subtitles !== "") {
+      await summarizeTextAndCreateThread(subtitles);
+    }
+    else {
+      setApiStep('No Subtitles Found, calling Batman to fix this ...');
+      const response = await getAudioFromYoutube(youtubeURL);
+      if (response.success) {
+        const summary = await speechToText(youtubeURL, response.content);
+        if(summary.success){
+          await summarizeTextAndCreateThread(summary.content);
+        }
+      }
+    }
+    setLoadingAPICall(false);
+    setApiStep('');
+  }
+  
+
+  async function blogToThread() {
     setLoadingAPICall(true);
-    setApiStep('Getting Medium Section...');
-    fetch('/api/webScrapping/getMediumSection?url=' + mediumUrl)
-      .then((res) => res.json())
-      .then((data) => {
+    setApiStep('Getting Medium Text...');
+    const response = await getBlogText(mediumUrl)
+    if (response.success) {	
+      await summarizeTextAndCreateThread(response.content)
+    } else {
+      setTwitterThread("Error");
+    }
+    setLoadingAPICall(false);
+    setApiStep('');
+  }
 
-        setApiStep('Formatting Medium Text...');
-        fetch('/api/llm/gpt3/mediumToSummary', {
-          method: 'POST',
-          body: JSON.stringify({
-            mediumText: data.section
-          })
-        })
-          .then((res) => res.json())
-          .then((data) => {
-            console.log(data);
-            if (data.suceess === false) {
-              setTwitterThread("Error");
-            }
-            else {
+  async function getYoutubeSubtitles() {
+    setApiStep('Getting Subtitles from Video...');
+    setLoadingAPICall(true);
+    const response = await getSubtitlesFromYoutube(youtubeURL);
+    if (response.success) {
+      setTwitterThread(response !== undefined ? response.content : '');
+      return response.content;
+    }
+    else {
+      if (response.content === '') {
+        return "";
+      }
+      else {
+        setTwitterThread("Error");
+        return "";
+      }
+    }
 
-              setApiStep('Converting to Twitter Thread\...');
-              setMediumSummary(data.content);
-              fetch('/api/llm/gpt3/mediumToThread?mediumText=' + data.content)
-                .then((res) => res.json())
-                .then((data) => {
-                  console.log(data);
-                  if (data.suceess === false) {
-                    setTwitterThread("Error");
-                  }
-                  else {
-                    setTwitterThread(data.content)
-                  }
-                  setLoadingAPICall(false);
-                }).catch((err) => {
-                  setLoadingAPICall(false);
-                  setTwitterThread('Error: ' + err);
-                  console.log(err);
-                });
+  }
 
-            }
-          }).catch((err) => {
-            setLoadingAPICall(false);
-            setTwitterThread('Error: ' + err);
-            console.log(err);
-          });
+  async function summarizeTextAndCreateThread(data: any) {
+    setApiStep('Formatting Text...');
+    const response = await getTextSummary(data);
+    if (response.success) {
+      setApiStep('Converting to Twitter Thread\...');
+      setSummary(response.content);
+      const reponseConvert = await convertTextToThread(response.content);
+      if (reponseConvert.success) {
+        reponseConvert.content.forEach((element: string | any[]) => {
+        });
+        setNumberOfTweets(reponseConvert.content.length);
+        setTwitterThreadText(reponseConvert.content)
+      }
+      else {
+        setTwitterThread("Error");
+      }
+    } else {
+      setTwitterThread("Error");
+    }
 
-      }).catch((err) => {
-        setLoadingAPICall(false);
-        setTwitterThread('Error: ' + err);
-        console.log(err);
-      });
+    setLoadingAPICall(false);
   }
 
   return (
-    <>
-      <Head>
-        <title>Create Next App</title>
-        <meta name="description" content="Generated by create next app" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
-      <main className={styles.main}>
-        <Input placeholder='Medium URL' value={mediumUrl}
-          onChange={(e) => setMediumUrl(e.target.value)} />
-        <Button colorScheme='purple' onClick={getTextFromMediumPage}>Submit</Button>
-        <div>
-          {loadingAPICall &&
-            <>
-              <p>{apiStep}</p>
-              <ColorRing
-                visible={true}
-                height="80"
-                width="80"
-                ariaLabel="blocks-loading"
-                wrapperStyle={{}}
-                wrapperClass="blocks-wrapper"
-                colors={['#e15b64', '#f47e60', '#f8b26a', '#abbd81', '#849b87']} />
-            </>
-          }
+    <div className={styles.main}>
+      <div className={styles.inputs}>
+        <div className={styles.links}>
+          <Input placeholder='Medium URL' value={mediumUrl}
+            onChange={(e) => setMediumUrl(e.target.value)} />
+          <Button isDisabled={mediumUrl.length <= 0} colorScheme='purple' onClick={blogToThread}>Transform blog post</Button>
         </div>
+        <div className={styles.links}>
+          <Input placeholder='Youtube URL' value={youtubeURL}
+            onChange={(e) => setYoutubeURL(e.target.value)} />
+          <Button isDisabled={youtubeURL.length <= 0} colorScheme='purple' onClick={youtubeToThread}>Transform youtube video</Button>
+        </div>
+      </div>
+      <div>
+        {loadingAPICall &&
+          <>
+            <p>{apiStep}</p>
+            <ColorRing
+              visible={true}
+              height="80"
+              width="80"
+              ariaLabel="blocks-loading"
+              wrapperStyle={{}}
+              wrapperClass="blocks-wrapper"
+              colors={['#e15b64', '#f47e60', '#f8b26a', '#abbd81', '#849b87']} />
+          </>
+        }
+      </div>
+      <div>
         <p>
-          Medium Summary:
-            {"\n"}
-            {mediumSummary}
+          Summary:
+          {"\n"}
+          {summary}
         </p>
+      </div>
+      <div>
         <p>
           Twitter Thread:
-            {"\n"}
-            {twitterThread}
+          {"\n"}
         </p>
-      </main>
-    </>
+        {twitterThreadText}
+        {/* <TwitterThread
+          setNumberOfTweets={setNumberOfTweets}
+          numberOfTweets={numberOfTweets}
+          setTwitterThreadText={setTwitterThreadText}
+          twitterThreadText={twitterThreadText} /> */}
+      </div>
+    </div>
   )
 }
