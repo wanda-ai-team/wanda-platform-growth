@@ -21,6 +21,8 @@ export default async function handler(
 ) {
     try {
         const videoID1 = (<string>req.query.videoID);
+        console.log("downloadAudio");
+        console.log(videoID1);
 
         const path = await downloadAudio(videoID1, './youtubeVideos/');
 
