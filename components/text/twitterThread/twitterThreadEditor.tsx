@@ -1,6 +1,6 @@
 import { Textarea } from '@chakra-ui/react'
 
-const TwitterThreadEditor = ({ setTwitterThreadText, twitterThreadText, index }) => {
+const TwitterThreadEditor = ({ setTwitterThreadText, twitterThreadText, index }: { setTwitterThreadText: any; twitterThreadText: any; index: any; }) => {
 
     let handleInputChange = (e: { target: { value: any; }; }) => {
         let newArr = [...twitterThreadText];

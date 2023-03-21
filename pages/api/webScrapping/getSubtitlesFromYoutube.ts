@@ -1,7 +1,6 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
 import type { NextApiRequest, NextApiResponse } from "next";
-import { getSubtitles } from 'youtube-captions-scraper';
-
+var getSubtitles = require('youtube-captions-scraper').getSubtitles;
 
 export default async function handler(
     req: NextApiRequest,
@@ -15,7 +14,6 @@ export default async function handler(
             videoID: videoID1, // youtube video id
             lang: 'en' // default: `en`
         }).then((captions: any) => {
-            console.log(captions);
             captions = captions.map((caption: any) => caption.text);
             captions = captions.join('');
             captions = captions.replace(/(\r\n|\n|\r)/gm, "");

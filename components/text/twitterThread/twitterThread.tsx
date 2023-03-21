@@ -1,7 +1,7 @@
 import { Button, Textarea } from '@chakra-ui/react'
 import TwitterThreadEditor from './twitterThreadEditor';
 
-const TwitterThread = ({ setNumberOfTweets, numberOfTweets, twitterThreadText, setTwitterThreadText }) => {
+const TwitterThread = ({ setNumberOfTweets, numberOfTweets, twitterThreadText, setTwitterThreadText }: { setNumberOfTweets: any; numberOfTweets: any; twitterThreadText: any; setTwitterThreadText: any }) => {
 
     function changeNumberOfTweets(add: boolean) {
         if (add) {
@@ -20,7 +20,7 @@ const TwitterThread = ({ setNumberOfTweets, numberOfTweets, twitterThreadText, s
 
     return (
         [...Array(numberOfTweets)].map((i, index) => (
-            <div>
+            <div key={index}>
                 <TwitterThreadEditor setTwitterThreadText={setTwitterThreadText} twitterThreadText={twitterThreadText[index]} index={index} />
                 <Button onClick={() => changeNumberOfTweets(true)}> Add new tweet </Button>
                 <Button onClick={() => changeNumberOfTweets(false)}> Remove tweet </Button>
