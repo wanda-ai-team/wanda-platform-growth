@@ -23,7 +23,7 @@ export default async function handler(
     res: NextApiResponse
 ) {
     try {
-        const mediumText = JSON.parse(req.body).mediumText;
+        const text = JSON.parse(req.body).text;
         const model = new OpenAI({ temperature: 0 });
         /** Load the summarization chain. */
         let resSummarization;
@@ -31,7 +31,7 @@ export default async function handler(
 
             /* Split the text into chunks. */
             const textSplitter = new RecursiveCharacterTextSplitter({ chunkSize: 1000 });
-            const docs = await textSplitter.createDocuments([mediumText]);
+            const docs = await textSplitter.createDocuments([text]);
             /** Call the summarization chain. */
             const chainS = loadSummarizationChain(model);
 

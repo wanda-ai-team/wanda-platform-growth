@@ -11,19 +11,18 @@ const configuration = new Configuration({
 
 const openai = new OpenAIApi(configuration);
 
-
 export default async function handler(
     req: NextApiRequest,
     res: NextApiResponse
 ) {
     try {
-        const mediumText = (<string>req.query.mediumText);
+        const text = (<string>req.query.text);
         let basePromptPrefix = "";
 
         //Prompt for the GPT-3 model - 17 Tokens
         basePromptPrefix = `
-Create me a Twitter thread based on the summary of this Medium Blog Post:\n
-${mediumText}\n
+Create me a Twitter thread based on this summary:\n
+${text}\n
 Twitter Thread:\n`;
 
         const completion = await openai.createChatCompletion({
@@ -31,12 +30,14 @@ Twitter Thread:\n`;
             messages: [{ role: "user", content: basePromptPrefix }],
             temperature: 0.7,
         });
+        const finalTweet = completion.data.choices[0].message?.content.split("\n\n");
+
 
         return res.status(200).json({
             name: "",
-            content: completion.data.choices[0].message?.content,
+            content: finalTweet,
             success: true,
-        } as { name: string; content: string; format: string; success: boolean });
+        } as { name: string; content: string[]; format: string; success: boolean });
     } catch (e: any) {
         console.log(e);
         let message =

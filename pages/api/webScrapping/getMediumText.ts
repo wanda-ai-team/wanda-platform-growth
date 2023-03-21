@@ -38,9 +38,15 @@ export default async function handler(
     const { data } = await axios.get(url)
     const $ = cheerio.load(data)
     const section = $('section').text()
-
+    let responseText
+    if(section.length > 0) {
+        responseText = section
+    } else {
+        responseText = $('main').text()
+    }
+    
     // Rest of the API logic
-    res.json({ section: section })
+    res.json({ section: responseText })
 
 
 }
