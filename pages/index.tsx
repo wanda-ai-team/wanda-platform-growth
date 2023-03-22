@@ -27,13 +27,11 @@ export default function Home() {
       await summarizeTextAndCreateThread(subtitles);
     }
     else {
-      setApiStep('No Subtitles Found, calling Batman to fix this ...');
+      setApiStep('No Subtitles Found, calling Batman to fix this, Batsignal can take some minutes ...');
       const response = await getAudioFromYoutube(youtubeURL);
       if (response.success) {
-        const summary = await speechToText(youtubeURL, response.content);
-        if(summary.success){
-          await summarizeTextAndCreateThread(summary.content);
-        }
+        console.log(response.content);
+          await summarizeTextAndCreateThread(response.content);
       }
     }
     setLoadingAPICall(false);
@@ -82,8 +80,6 @@ export default function Home() {
       setSummary(response.content);
       const reponseConvert = await convertTextToThread(response.content);
       if (reponseConvert.success) {
-        reponseConvert.content.forEach((element: string | any[]) => {
-        });
         setNumberOfTweets(reponseConvert.content.length);
         setTwitterThreadText(reponseConvert.content)
       }
