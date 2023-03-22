@@ -30,17 +30,16 @@ export default async function handler(
         try {
 
             /* Split the text into chunks. */
-            const textSplitter = new RecursiveCharacterTextSplitter({ chunkSize: 1000 });
+            const textSplitter = new RecursiveCharacterTextSplitter({ chunkSize: 2000 });
             const docs = await textSplitter.createDocuments([text]);
             /** Call the summarization chain. */
             const chainS = loadSummarizationChain(model);
 
+
             resSummarization = await chainS.call({
                 input_documents: docs,
             });
-
-            console.log("resSummarization");
-            console.log(resSummarization);
+            console.log('docs', resSummarization)
 
             /** Pass this into the AnalyzeDocumentChain. */
             // const chain = new AnalyzeDocumentChain({

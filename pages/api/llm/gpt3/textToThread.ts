@@ -25,12 +25,22 @@ Create me a Twitter thread based on this summary:\n
 ${text}\n
 Twitter Thread:\n`;
 
-        const completion = await openai.createChatCompletion({
-            model: "gpt-3.5-turbo",
-            messages: [{ role: "user", content: basePromptPrefix }],
+        // const completion = await openai.createChatCompletion({
+        //     model: "text-davinci-003",
+        //     messages: [{ role: "user", content: basePromptPrefix }],
+        //     temperature: 0.7,
+        // });
+
+        const completion = await openai.createCompletion({
+            model: "text-davinci-003",
+            prompt: basePromptPrefix,
             temperature: 0.7,
+            max_tokens: 2024,
         });
-        const finalTweet = completion.data.choices[0].message?.content.split("\n\n");
+
+
+        const finalTweet = completion.data.choices[0].text!.split("\n\n");
+        console.log(finalTweet);
 
 
         return res.status(200).json({
