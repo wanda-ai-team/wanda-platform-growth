@@ -30,8 +30,11 @@ export default function Home() {
       setApiStep('No Subtitles Found, calling Batman to fix this, Batsignal can take some minutes ...');
       const response = await getAudioFromYoutube(youtubeURL);
       if (response.success) {
-        console.log(response.content);
-          await summarizeTextAndCreateThread(response.content);
+        setApiStep('Converting Audio ...');
+        const responseWhisper = await speechToText(response.content);
+        if (responseWhisper.success) {
+          await summarizeTextAndCreateThread(responseWhisper.content);
+        }
       }
     }
     setLoadingAPICall(false);

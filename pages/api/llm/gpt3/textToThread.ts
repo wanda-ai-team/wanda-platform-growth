@@ -35,13 +35,10 @@ Twitter Thread:\n`;
             model: "text-davinci-003",
             prompt: basePromptPrefix,
             temperature: 0.7,
-            max_tokens: 2024,
+            max_tokens: 1024,
         });
 
-
         const finalTweet = completion.data.choices[0].text!.split("\n\n");
-        console.log(finalTweet);
-
 
         return res.status(200).json({
             name: "",
