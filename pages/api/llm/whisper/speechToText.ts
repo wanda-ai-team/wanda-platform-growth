@@ -42,7 +42,7 @@ export default async function handler(
 
         const response = await fetch(httpbin, { method: 'POST', body: formData, headers: formData1 });
         const resW = await response.json();
-
+        console.log(resW);
         data2 = (resW as { text: '' }).text;
 
         if(data2 === undefined || data2 === null || data2 === ""){
