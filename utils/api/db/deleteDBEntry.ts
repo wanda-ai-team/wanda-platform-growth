@@ -18,22 +18,16 @@ async function deleteDBEntry(
     );
   }
 
-  const success = await collectionValue
-    .get()
-    .then(async function (querySnapshot: any[]) {
-
-      querySnapshot.forEach(async function (doc: { id: any; }) {
-        await db.collection(collection).doc(doc.id).delete();
-      });
-      return true;
-      
-    })
+  const coll = await collectionValue.get()
     .catch(function (error: any) {
       console.log("Error getting documents: ", error);
-      return false;
+      return [];
     });
 
-  return success;
+    coll.forEach(async function (doc: { id: any; }) {
+      await db.collection(collection).doc(doc.id).delete();
+    });
+    return true;
 }
 
 export default deleteDBEntry;
