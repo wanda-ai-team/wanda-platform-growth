@@ -34,7 +34,7 @@ export default async function handler(
 
         await deleteDBEntry("youtubeVideos", ["videoId"], ["=="], [result], 1);
 
-        const abc = await new File(audioValue, 'abc.mp3', { type: 'audio/mp3' });
+        const abc = new File(audioValue, 'abc.mp3', { type: 'audio/mp3' });
 
         formData1.set('Authorization', "Bearer " + process.env.OPENAI_API_KEY);
         formData.set('model', 'whisper-1');

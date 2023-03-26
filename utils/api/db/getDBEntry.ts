@@ -18,18 +18,16 @@ async function getDBEntry(
       conditionValue[i]
     );
   }
-  return await collectionValue
-    .get()
-    .then(async function (querySnapshot: any[]) {
-      querySnapshot.forEach(async function (doc: { id: any; data: () => any; }) {
-        response.push({ id: doc.id, data: doc.data() });
-      });
-      return response;
-    })
-    .catch(function (error: any) {
-      console.log("Error getting documents: ", error);
-      return [];
-    });
+  const coll = await collectionValue.get().catch(function (error: any) {
+    console.log("Error getting documents: ", error);
+    return [];
+  });
+
+  coll.forEach(async function (doc: { id: any; data: () => any; }) {
+    response.push({ id: doc.id, data: doc.data() });
+  });
+
+  return response;
 
 }
 
