@@ -112,7 +112,7 @@ export default function Home() {
       </div>
       <div>
         {loadingAPICall &&
-          <>
+          <div >
             <p>{apiStep}</p>
             <ColorRing
               visible={true}
@@ -122,7 +122,7 @@ export default function Home() {
               wrapperStyle={{}}
               wrapperClass="blocks-wrapper"
               colors={['#e15b64', '#f47e60', '#f8b26a', '#abbd81', '#849b87']} />
-          </>
+          </div>
         }
       </div>
       <div>

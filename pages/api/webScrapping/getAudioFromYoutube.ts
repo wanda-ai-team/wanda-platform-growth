@@ -1,6 +1,8 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
+import createDBEntry from "@/utils/api/db/createDBEntry";
 import type { NextApiRequest, NextApiResponse } from "next";
 const ytdl = require('ytdl-core');
+
 
 const downloadAudio = async (videoId: string, pathFile: string, res: any) => {
     console.log("downloadAudio");
@@ -8,9 +10,17 @@ const downloadAudio = async (videoId: string, pathFile: string, res: any) => {
 
         const stream = await ytdl(videoId, { filter: 'audioonly' })
         let result: any[] = [];
+        let resultA: any[] = [];
+        let value = 0;
 
         await new Promise<void>((resolve, reject) => {
             stream.on('data', function (chunk: any) {
+                value += chunk.byteLength;
+                if (value > 1000000) {
+                    resultA.push(result);
+                    result = [];
+                    value = 0;
+                }
                 result.push(chunk);
             }).on('finish', async () => {
                 resolve();
@@ -18,6 +28,12 @@ const downloadAudio = async (videoId: string, pathFile: string, res: any) => {
                 reject(err);
             });
         });
+
+        console.log(resultA.length)
+
+        for (let i = 0; i < resultA.length; i++) {
+            await createDBEntry("youtubeVideos", { videoId: videoId, audio: resultA[i] });
+        }
 
         return result;
     } catch (e: any) {
@@ -40,7 +56,7 @@ export default async function handler(
             });
         } else {
             return res.status(200).json({
-                content: path,
+                content: videoID1,
                 success: true,
             });
         }
