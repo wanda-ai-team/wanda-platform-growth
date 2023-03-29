@@ -21,14 +21,12 @@ export default async function handler(
 
         //Prompt for the GPT-3 model - 17 Tokens
         basePromptPrefix = `
-Create me a Twitter thread based on this summary:\n
-${text}\n
-Twitter Thread:\n`;
+Create me a Instagram Carrousel post based on this summary: ${text}`;
 
-        const completion = await openai.createChatCompletion({
-            model: "gpt-4",
-            messages: [{ role: "user", content: basePromptPrefix }],
-            temperature: 0.7,
+        const completion = await openai.createImage({
+            prompt: basePromptPrefix,
+            n: 1,
+            size: "1024x1024",
         });
 
         // const completion = await openai.createCompletion({
@@ -39,12 +37,11 @@ Twitter Thread:\n`;
         // });
 
         // const finalTweet = completion.data.choices[0].text!.split("\n\n");
-        const finalTweet = completion.data.choices[0].message?.content;
-        console.log(finalTweet);
+        const image = completion.data.data[0].url;
 
         return res.status(200).json({
             name: "",
-            content: finalTweet,
+            content: image,
             success: true,
         } as { name: string; content: string; format: string; success: boolean });
     } catch (e: any) {
