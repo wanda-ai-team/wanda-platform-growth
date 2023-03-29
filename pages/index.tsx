@@ -10,6 +10,7 @@ import { convertTextToThread } from '@/utils/api/text/convertTextToThread'
 import { getAudioFromYoutube } from '@/utils/api/video/getAudioFromYoutube'
 import { speechToText } from '@/utils/api/AIConvert/speechToText'
 import { getBlogText } from '@/utils/api/text/getBlogText'
+import { convertTextToImage } from '@/utils/api/image/convertTextToImage'
 
 export default function Home() {
   const [mediumUrl, setMediumUrl] = useState('');
@@ -21,10 +22,22 @@ export default function Home() {
   const [twitterThreadText, setTwitterThreadText] = useState(['']);
   const [numberOfTweets, setNumberOfTweets] = useState(1);
 
-  async function youtubeToThread() {
+  async function youtubeTransformText(){
+    youtubeToThread(true);
+  }
+
+  async function youtubeTransformImage(){
+    youtubeToThread(false);
+  }
+
+  async function youtubeToThread(text: boolean) {
     const subtitles = await getYoutubeSubtitles();
     if (subtitles !== "") {
-      await summarizeTextAndCreateThread(subtitles);
+      if(text){
+        await summarizeTextAndCreateThread(subtitles);
+      }else{
+        await summarizeTextAndInstagramPost(subtitles)
+      }
     }
     else {
       setApiStep('No Subtitles Found, calling Batman to fix this, Batsignal can take some minutes ...');
@@ -33,7 +46,11 @@ export default function Home() {
         setApiStep('Converting Audio ...');
         const responseWhisper = await speechToText(response.content);
         if (responseWhisper.success) {
-          await summarizeTextAndCreateThread(responseWhisper.content);
+          if(text){
+            await summarizeTextAndCreateThread(responseWhisper.content);
+          }else{
+            await summarizeTextAndInstagramPost(responseWhisper.content)
+          }
         }
       }
     }
@@ -75,6 +92,26 @@ export default function Home() {
 
   }
 
+  async function summarizeTextAndInstagramPost(data: any) {
+    setApiStep('Formatting Text...');
+    const response = await getTextSummary(data);
+    if (response.success) {
+      setApiStep('Converting to Instagram\...');
+      setSummary(response.content);
+      const reponseConvert = await convertTextToImage(response.content);
+      if (reponseConvert.success) {
+        setTwitterThreadText(reponseConvert.content)
+      }
+      else {
+        setTwitterThread("Error");
+      }
+    } else {
+      setTwitterThread("Error");
+    }
+
+    setLoadingAPICall(false);
+  }
+
   async function summarizeTextAndCreateThread(data: any) {
     setApiStep('Formatting Text...');
     const response = await getTextSummary(data);
@@ -107,7 +144,8 @@ export default function Home() {
         <div className={styles.links}>
           <Input placeholder='Youtube URL' value={youtubeURL}
             onChange={(e) => setYoutubeURL(e.target.value)} />
-          <Button isDisabled={youtubeURL.length <= 0} colorScheme='purple' onClick={youtubeToThread}>Transform youtube video</Button>
+          <Button isDisabled={youtubeURL.length <= 0} colorScheme='purple' onClick={youtubeTransformText}>Transform youtube video to Thread</Button>
+          {/* <Button isDisabled={youtubeURL.length <= 0} colorScheme='purple' onClick={youtubeTransformImage}>Transform youtube video to Instagram</Button> */}
         </div>
       </div>
       <div>
