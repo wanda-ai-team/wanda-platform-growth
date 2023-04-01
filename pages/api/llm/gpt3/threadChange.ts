@@ -17,32 +17,31 @@ export default async function handler(
 ) {
     try {
         const text = (<string>req.query.text);
+        const tweet1 = (<string>req.query.tweet);
         let basePromptPrefix = "";
 
         //Prompt for the GPT-3 model - 17 Tokens
         basePromptPrefix = `
-Create me a Twitter thread based on the following summary.\n
-The thread should have an engaging first tweet, talk about the topic in-depth, and end with a tldr.\n
-It should have more than 3 tweets.\n
-Summary: ${text}\n
-Twitter Thread:\n`;
+Rewrite the following tweet based on the request:
+Request: ${text}
+Tweet: ${tweet1}`;
 
-        const completion = await openai.createChatCompletion({
-            model: "gpt-4",
-            messages: [{ role: "user", content: basePromptPrefix }],
+        // const completion = await openai.createChatCompletion({
+        //     model: "gpt-4",
+        //     messages: [{ role: "user", content: basePromptPrefix }],
+        //     temperature: 0.7,
+        // });
+
+        const completion = await openai.createCompletion({
+            model: "text-davinci-003",
+            prompt: basePromptPrefix,
             temperature: 0.7,
+            max_tokens: 1024,
         });
 
-        // const completion = await openai.createCompletion({
-        //     model: "text-davinci-003",
-        //     prompt: basePromptPrefix,
-        //     temperature: 0.7,
-        //     max_tokens: 1024,
-        // });
-        
-
-        // const finalTweet = completion.data.choices[0].text!;
-        const finalTweet = completion.data.choices[0].message?.content;
+        const finalTweet = completion.data.choices[0].text!;
+        // const finalTweet = completion.data.choices[0].message?.content;
+        console.log(finalTweet);
 
         return res.status(200).json({
             name: "",

@@ -35,6 +35,7 @@ export default async function handler(
     // Run the middleware
     await runMiddleware(req, res, cors)
     const url = (<string>req.query.url);
+    console.log('url', url)
     const { data } = await axios.get(url)
     const $ = cheerio.load(data)
     const section = $('section').text()
@@ -43,6 +44,11 @@ export default async function handler(
         responseText = section
     } else {
         responseText = $('main').text()
+        if(section.length > 0) {
+            responseText = section
+        } else {
+            responseText = $('tbody').text()
+        }
     }
     
     // Rest of the API logic

@@ -27,6 +27,7 @@ async function deleteDBEntry(
     coll.forEach(async function (doc: { id: any; }) {
       await db.collection(collection).doc(doc.id).delete();
     });
+    
     return true;
 }
 
