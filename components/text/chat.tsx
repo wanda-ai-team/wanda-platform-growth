@@ -1,29 +1,31 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, Key } from 'react'
 import Head from 'next/head'
 import styles from '../../styles/Chat.module.css'
 import Image from 'next/image'
 import ReactMarkdown from 'react-markdown'
 import { changeTwitterThread } from '@/utils/api/text/changeTwitterThread'
 
-const Chat = ({ selectedTweets, twitterThreadText, setTwitterThreadTextPerTweet }) => {
+const Chat = ({ selectedTweets, twitterThreadText, setTwitterThreadTextPerTweet }: { selectedTweets: any; twitterThreadText: any; setTwitterThreadTextPerTweet: any; }) => {
 
     const [userInput, setUserInput] = useState("");
-    const [history, setHistory] = useState([]);
+    const [history, setHistory] = useState<any[]>([]);
     const [loading, setLoading] = useState(false);
-    const [messages, setMessages] = useState([
+    const [messages, setMessages] = useState<any[]>([
         {
             "message": "Hi there! What do you want to change?",
             "type": "apiMessage"
         }
     ]);
 
-    const messageListRef = useRef(null);
-    const textAreaRef = useRef(null);
+    const messageListRef = useRef<any>(null);
+    const textAreaRef = useRef<any>(null);
 
     // Auto scroll chat to bottom
     useEffect(() => {
         const messageList = messageListRef.current;
-        messageList.scrollTop = messageList.scrollHeight;
+        if(messageList){
+            messageList.scrollTop = messageList.scrollHeight;
+        }
     }, [messages]);
 
     // Focus on text field on load
@@ -33,7 +35,7 @@ const Chat = ({ selectedTweets, twitterThreadText, setTwitterThreadTextPerTweet 
 
     // Handle errors
     const handleError = () => {
-        setMessages((prevMessages) => [...prevMessages, { "message": "Oops! There seems to be an error. Please try again.", "type": "apiMessage" }]);
+        setMessages((prevMessages: any) => [...prevMessages, { "message": "Oops! There seems to be an error. Please try again.", "type": "apiMessage" }]);
         setLoading(false);
         setUserInput("");
     }
@@ -46,7 +48,7 @@ const Chat = ({ selectedTweets, twitterThreadText, setTwitterThreadTextPerTweet 
             return;
         }
 
-        setMessages((prevMessages) => [...prevMessages, { "message": userInput, "type": "userMessage" }]);
+        setMessages((prevMessages: any) => [...prevMessages, { "message": userInput, "type": "userMessage" }]);
 
         // Send user question and history to API
 
@@ -64,7 +66,7 @@ const Chat = ({ selectedTweets, twitterThreadText, setTwitterThreadTextPerTweet 
             }
         });
 
-        setMessages((prevMessages) => [...prevMessages, { "message": "Changing tweet", "type": "apiMessage" }]);
+        setMessages((prevMessages: any) => [...prevMessages, { "message": "Changing tweet", "type": "apiMessage" }]);
 
         const reponseConvert = await changeTwitterThread(userRequest, tweets[0]);
 
@@ -73,7 +75,7 @@ const Chat = ({ selectedTweets, twitterThreadText, setTwitterThreadTextPerTweet 
             return;
         } else {
 
-            setMessages((prevMessages) => [...prevMessages, { "message": "Tweet correctly changed", "type": "apiMessage" }]);
+            setMessages((prevMessages: any) => [...prevMessages, { "message": "Tweet correctly changed", "type": "apiMessage" }]);
         }
 
         let newArr = [...twitterThreadText];
@@ -120,7 +122,7 @@ const Chat = ({ selectedTweets, twitterThreadText, setTwitterThreadTextPerTweet 
         <main >
             <div className={styles.cloud}>
                 <div ref={messageListRef} className={styles.messagelist}>
-                    {messages.map((message, index) => {
+                    {messages.map((message: { type: string; message: string }, index: Key | null | undefined) => {
                         return (
                             // The latest message sent by the user will be animated while waiting for a response
                             <div key={index} className={message.type === "userMessage" && loading && index === messages.length - 1 ? styles.usermessagewaiting : message.type === "apiMessage" ? styles.apimessage : styles.usermessage}>
