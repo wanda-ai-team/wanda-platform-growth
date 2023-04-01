@@ -1,8 +1,6 @@
 
 import admin from 'firebase-admin';
 
-console.log("process.env.FIREBASE_PROJECT_ID")
-console.log(process.env.FIREBASE_PROJECT_ID)
 if (!admin.apps.length) {
   try {
     admin.initializeApp({

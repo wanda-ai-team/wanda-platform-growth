@@ -1,15 +1,19 @@
-import { Button, Textarea } from '@chakra-ui/react'
+import { Button, Checkbox, Textarea } from '@chakra-ui/react'
 import TwitterThreadEditor from './twitterThreadEditor';
 
-const TwitterThread = ({ setNumberOfTweets, numberOfTweets, twitterThreadText, setTwitterThreadText }: { setNumberOfTweets: any; numberOfTweets: any; twitterThreadText: any; setTwitterThreadText: any }) => {
+const TwitterThread = ({ setNumberOfTweets, numberOfTweets, twitterThreadText, setTwitterThreadText, setSelectedTweets, selectedTweets }:
+    { setNumberOfTweets: any; numberOfTweets: any; twitterThreadText: any; setTwitterThreadText: any; setSelectedTweets: any; selectedTweets: any; }) => {
 
-    function changeNumberOfTweets(add: boolean) {
+    function changeNumberOfTweets(add: boolean, index: number, i: string) {
         if (add) {
-            setTwitterThreadText([...twitterThreadText, ''])
+            let newArr = [...twitterThreadText];
+            newArr.splice(index+1, 0, '');
+            setTwitterThreadText([...newArr]);
+            // setTwitterThreadText([...twitterThreadText, ''])
             setNumberOfTweets(numberOfTweets + 1)
         } else {
             if (numberOfTweets === 1) return;
-            setTwitterThreadText((twitterThreadText: any[]) => (twitterThreadText.slice(0, -1)));
+            setTwitterThreadText((twitterThreadText: any[]) => twitterThreadText.filter((s: any, i: any) => (i != index)))
             setNumberOfTweets(
                 numberOfTweets > 1
                     ? (numberOfTweets - 1)
@@ -18,12 +22,20 @@ const TwitterThread = ({ setNumberOfTweets, numberOfTweets, twitterThreadText, s
         }
     }
 
+    function changeSelected(index: number, checked: boolean) {
+        let newArr = [...selectedTweets];
+        newArr[index] = checked;
+        setSelectedTweets(newArr);
+    }
+
+
     return (
-        [...Array(numberOfTweets)].map((i, index) => (
+        twitterThreadText.map((i: any, index: number) => (
             <div key={index}>
-                <TwitterThreadEditor setTwitterThreadText={setTwitterThreadText} twitterThreadText={twitterThreadText[index]} index={index} />
-                <Button onClick={() => changeNumberOfTweets(true)}> Add new tweet </Button>
-                <Button onClick={() => changeNumberOfTweets(false)}> Remove tweet </Button>
+                <TwitterThreadEditor setTwitterThreadText={setTwitterThreadText} twitterThreadText={twitterThreadText} index={index} />
+                <Button onClick={() => changeNumberOfTweets(true, index, i)}> Add new tweet </Button>
+                <Button onClick={() => changeNumberOfTweets(false, index, i)}> Remove tweet </Button>
+                <Checkbox checked={selectedTweets[i]} onChange={(e) => changeSelected(index, e.target.checked)}> Select tweet </Checkbox>
             </div>
         ))
     );

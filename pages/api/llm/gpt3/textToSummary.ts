@@ -6,6 +6,7 @@ import {
 import { OpenAI } from "langchain/llms";
 import { loadSummarizationChain } from "langchain/chains";
 import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
+import { PromptTemplate } from "langchain/prompts";
 
 const configuration = new Configuration({
     apiKey: process.env.OPENAI_API_KEY,
@@ -18,22 +19,41 @@ export default async function handler(
     res: NextApiResponse
 ) {
     try {
-        const text = JSON.parse(req.body).text;
+        const docsT = JSON.parse(req.body).text;
         const model = new OpenAI({ temperature: 0 });
         /** Load the summarization chain. */
         let resSummarization;
         try {
+            console.log('text', "text")
 
             /* Split the text into chunks. */
-            const textSplitter = new RecursiveCharacterTextSplitter({ chunkSize: 2000 });
-            const docs = await textSplitter.createDocuments([text]);
-            /** Call the summarization chain. */
-            const chainS = loadSummarizationChain(model);
+            const textSplitter = new RecursiveCharacterTextSplitter({ chunkSize: 1000 });
+            const template = `Create a long and in-depth summary, that should touch all the important points about: 
+            {text}
+            SUMMARY: `;
 
+            const docs = await textSplitter.createDocuments([docsT]);
+            /** Call the summarization chain. */
+
+            const model = new OpenAI({ temperature: 0 });
+
+            const prompt = new PromptTemplate({
+                inputVariables: ["text"],
+                template: template,
+            });
+
+            const chainS = loadSummarizationChain(model,
+                {
+                    prompt: prompt,
+                    type: "map_reduce"
+                });
+            
+            
 
             resSummarization = await chainS.call({
-                input_documents: docs,
+                input_documents: docs
             });
+
             console.log('docs', resSummarization)
         } catch (e) {
             console.log(e);

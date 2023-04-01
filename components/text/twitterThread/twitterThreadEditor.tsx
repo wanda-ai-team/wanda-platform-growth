@@ -5,11 +5,11 @@ const TwitterThreadEditor = ({ setTwitterThreadText, twitterThreadText, index }:
     let handleInputChange = (e: { target: { value: any; }; }) => {
         let newArr = [...twitterThreadText];
         newArr[index] = e.target.value;
-        setTwitterThreadText(newArr);
+        setTwitterThreadText([...newArr]);
     }
     return (
         <Textarea
-            value={twitterThreadText}
+            value={twitterThreadText[index]}
             onChange={handleInputChange}
             maxLength={280}
             placeholder='Here is a sample placeholder'
