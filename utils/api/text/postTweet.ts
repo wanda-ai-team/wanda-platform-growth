@@ -1,5 +1,10 @@
 async function postTweet(content: any) {
-    return await fetch('/api/twitter/postTweet?text=' + content)
+    return await fetch('/api/twitter/postTweet', {
+        method: 'POST',
+        body: JSON.stringify({
+            thread: content
+        })
+    })
         .then((res) => res.json())
         .then((data) => {
             if (data.suceess === false) {

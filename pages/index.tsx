@@ -30,9 +30,18 @@ export default function Home() {
   const [selectedTweets, setSelectedTweets] = useState<any>([]);
   const [numberOfTweets, setNumberOfTweets] = useState(1);
   const { data: session } = useSession()
+  const [threadPostResult, setThreadPostResult] = useState('');
+  const [postingThread, setPostingThread] = useState(false);
 
   async function postTweet1() {
-    await postTweet("post");
+    setPostingThread(true);
+    const threadResult = await postTweet(twitterThreadTextPerTweet);
+    if (threadResult.success) {
+      setThreadPostResult(threadResult.content);
+    } else {
+      setThreadPostResult('Error');
+    }
+    setPostingThread(false);
   }
 
   async function youtubeTransformText() {
@@ -154,83 +163,93 @@ export default function Home() {
     setLoadingAPICall(false);
   }
 
+
   return (
-    <div className={styles.main}>
+    <>
       {session &&
-        <>
-          Signed in as {session.user.email} <br />
-          <button onClick={() => signOut()}>Sign out</button>
-        </>
+        <div className={styles.logout}>
+          <button onClick={() => signOut()}>Signed in as {session.user.name}</button>
+        </div>
       }
 
-      <h2> 1. Post URL </h2>
 
-      <div className={styles.inputs}>
-        {/* <div className={styles.links}>
-          <Input placeholder='Medium URL' value={mediumUrl}
-            onChange={(e) => setMediumUrl(e.target.value)} />
-          <Button isDisabled={mediumUrl.length <= 0} colorScheme='purple' onClick={blogToThread}>Transform to thread</Button>
-        </div> */}
-        <div className={styles.links}>
-          <Input placeholder='URL (works with Medium and Youtube)' value={youtubeURL}
-            onChange={(e) => setYoutubeURL(e.target.value)} />
-          <Button isDisabled={youtubeURL.length <= 0} colorScheme='purple' onClick={youtubeTransformText}>Convert to thread</Button>
-          {/* <Button isDisabled={youtubeURL.length <= 0} colorScheme='purple' onClick={youtubeTransformImage}>Transform youtube video to Instagram</Button> */}
-        </div>
-      </div>
-
-      <h2> 2. Check Summary </h2>
-
-      <div>
-        {loadingAPICall &&
-          <div >
-            <p>{apiStep}</p>
-            <ColorRing
-              visible={true}
-              height="80"
-              width="80"
-              ariaLabel="blocks-loading"
-              wrapperStyle={{}}
-              wrapperClass="blocks-wrapper"
-              colors={['#e15b64', '#f47e60', '#f8b26a', '#abbd81', '#849b87']} />
+      <div className={styles.main}>
+        <h2> 1. Post URL </h2>
+        <div className={styles.inputs}>
+          <div className={styles.links}>
+            <Input placeholder='URL (works with Medium and Youtube)' value={youtubeURL} className={styles.input} onChange={(e) => setYoutubeURL(e.target.value)} />
+            <Button isDisabled={youtubeURL.length <= 0} colorScheme='purple' onClick={youtubeTransformText}>Convert to thread</Button>
           </div>
-        }
+        </div>
+
+        <div>
+          {loadingAPICall &&
+            <div >
+              <p>{apiStep}</p>
+              <ColorRing
+                visible={true}
+                height="80"
+                width="80"
+                ariaLabel="blocks-loading"
+                wrapperStyle={{}}
+                wrapperClass="blocks-wrapper"
+                colors={['#e15b64', '#f47e60', '#f8b26a', '#abbd81', '#849b87']} />
+            </div>
+          }
+        </div>
+        <h2> 2. Check Summary </h2>
+        <div>
+          <p>
+            Summary:
+            {"\n"}
+            {summary}
+          </p>
+        </div>
+
+        <h2> 3. Edit & Publish Thread </h2>
+        <div>
+          {selectedTweets}
+
+          <Grid templateColumns='repeat(2, 1fr)' gap={6}>
+            <GridItem w='40vw' style={{ display: 'flex', justifyContent: 'start', flexDirection: 'column', alignItems: 'center' }} >
+              <TwitterThread
+                setNumberOfTweets={setNumberOfTweets}
+                numberOfTweets={numberOfTweets}
+                setTwitterThreadText={setTwitterThreadTextPerTweet}
+                twitterThreadText={twitterThreadTextPerTweet}
+                setSelectedTweets={setSelectedTweets}
+                selectedTweets={selectedTweets} />
+
+
+              {postingThread &&
+                <div >
+                  <ColorRing
+                    visible={true}
+                    height="80"
+                    width="80"
+                    ariaLabel="blocks-loading"
+                    wrapperStyle={{}}
+                    wrapperClass="blocks-wrapper"
+                    colors={['#e15b64', '#f47e60', '#f8b26a', '#abbd81', '#849b87']} />
+                </div>
+              }
+              {threadPostResult !== '' &&
+                <a href={threadPostResult}>
+                  {threadPostResult}
+                </a>
+              }
+              <Button style={{ backgroundColor: '#1DA1F2', marginTop: '25px' }} isDisabled={twitterThreadTextPerTweet.length <= 1} onClick={postTweet1}> Tweet Thread </Button>
+            </GridItem>
+
+            <GridItem w='40vw' >
+              <Chat selectedTweets={selectedTweets} twitterThreadText={twitterThreadTextPerTweet} setTwitterThreadTextPerTweet={setTwitterThreadTextPerTweet} />
+            </GridItem>
+
+          </Grid>
+
+        </div>
+
       </div>
-      <div>
-        <p>
-          Summary:
-          {"\n"}
-          {summary}
-        </p>
-      </div>
-      <div>
-        <p>
-          Twitter Thread:
-          {"\n"}
-        </p>
-        {selectedTweets}
-
-        <Grid templateColumns='repeat(2, 1fr)' gap={6}>
-          <GridItem w='40vw'  >
-            <TwitterThread
-              setNumberOfTweets={setNumberOfTweets}
-              numberOfTweets={numberOfTweets}
-              setTwitterThreadText={setTwitterThreadTextPerTweet}
-              twitterThreadText={twitterThreadTextPerTweet}
-              setSelectedTweets={setSelectedTweets}
-              selectedTweets={selectedTweets} />
-          </GridItem>
-
-          <GridItem w='40vw' >
-            <Chat selectedTweets={selectedTweets} twitterThreadText={twitterThreadTextPerTweet} setTwitterThreadTextPerTweet={setTwitterThreadTextPerTweet} />
-          </GridItem>
-
-        </Grid>
-        <Button onClick={postTweet1}>Ola</Button>
-        <a target="_blank" href={"https://twitter.com/intent/tweet?text=" + twitterThreadTextPerTweet} >
-          Tweet</a>
-      </div>
-
-    </div>
+    </>
   )
 }

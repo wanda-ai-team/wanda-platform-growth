@@ -95,6 +95,22 @@ body {
     rgb(var(--background-start-rgb));
 }
 
+body,
+html {
+  @apply leading-[normal] m-0;
+  padding: 0;
+  margin: 0;
+  font-family: 'Basier Circle', sans-serif !important
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-style: normal;
+  font-weight: 600 !important
+}
+
 a {
   color: inherit;
   text-decoration: none;

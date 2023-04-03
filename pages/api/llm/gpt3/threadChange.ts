@@ -22,8 +22,11 @@ export default async function handler(
 
         //Prompt for the GPT-3 model - 17 Tokens
         basePromptPrefix = `
-Rewrite the following tweet based on the request:
-Request: ${text}
+Please ignore all previous instructions. 
+Please respond only in the english language.
+You are a Twitter Creator with a large fan following.
+Rewrite the following tweet, that belongs to a thread.
+The rewritten tweet should follow this new style: ${text}
 Tweet: ${tweet1}`;
 
         // const completion = await openai.createChatCompletion({
@@ -39,7 +42,7 @@ Tweet: ${tweet1}`;
             max_tokens: 1024,
         });
 
-        const finalTweet = completion.data.choices[0].text!;
+        const finalTweet = completion.data.choices[0].text!.trim();
         // const finalTweet = completion.data.choices[0].message?.content;
         console.log(finalTweet);
 

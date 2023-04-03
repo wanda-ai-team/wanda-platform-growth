@@ -21,9 +21,24 @@ export default async function handler(
 
         //Prompt for the GPT-3 model - 17 Tokens
         basePromptPrefix = `
-Create me a Twitter thread based on the following summary.\n
-The thread should have an engaging first tweet, talk about the topic in-depth, and end with a tldr.\n
-It should have more than 3 tweets.\n
+Please ignore all previous instructions. 
+Please respond only in the english language.
+You are a Twitter Creator with a large fan following. 
+You have a Casual tone of voice. 
+You have a Analytical writing style. 
+Create a Twitter thread on the topic of the summary.
+There should be around 5 to 8 tweets. 
+After writing the tweets, please add a separator line.
+Include emojis and hashtags in some of the tweets.
+Try to use unique emojis in some of the tweets.
+The first tweet should have a hook and entice the readers.
+The last tweet should have a small summary of the thread.
+Talk in-depth of the topic on all the tweets
+Do not repeat yourself.
+Do not self reference.
+Do not explain what you are doing.
+Do not explain what you are going to do.
+Start directly by writing down the tweets.
 Summary: ${text}\n
 Twitter Thread:\n`;
 
@@ -43,6 +58,8 @@ Twitter Thread:\n`;
 
         // const finalTweet = completion.data.choices[0].text!;
         const finalTweet = completion.data.choices[0].message?.content;
+
+        console.log(finalTweet);
 
         return res.status(200).json({
             name: "",

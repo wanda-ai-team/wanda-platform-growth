@@ -1,0 +1,10 @@
+.threadBox{
+    width: 75%;
+}
+
+.threadBoxButtons{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+}
