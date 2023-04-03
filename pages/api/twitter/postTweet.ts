@@ -5,54 +5,62 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "../auth/[...nextauth]";
 import { TwitterApi } from 'twitter-api-v2';
 
-
-
 export default async function handler(
     req: NextApiRequest,
     res: NextApiResponse
 ) {
     try {
-
         const session = await getServerSession(req, res, authOptions);
-        console.log(session);
-        // const user = getDBEntry("accounts", { username: "test" });
 
-        const twitterClient = new TwitterApi("AAAAAAAAAAAAAAAAAAAAAE8OmQEAAAAArCzWzk8ggBRFtCWLrQbZ9LE6jvw%3DY8jppwJAlbjGd33nk0WCSPWXbDaxw51SdTgh663oBfESUa1QCL"
+        const thread = JSON.parse(req.body).thread;
+        if (
+            session === null ||
+            session === undefined ||
+            session.user === null ||
+            session.user === undefined
+        ) {
+            console.log("Missing session error");
+            res.status(400).end();
+            return;
+        }
 
-            // appKey: "8bB9Vbpz0lw9FGdtWim3fYuAn",
-            // appSecret: "G2VAkbHQCmhcOm8SwbZUrgLLSejsTGoMUV9yzle40xYiQaeG1l",
-            // accessToken: "dnRIdFNXVVdQbk1qdmZIMG0zMm06MTpjaQ",
-            // accessSecret: "U0RNbCWV3Z7HfvnopnCbNsig5hYd9sHR-E13TEsLMQYsEs4bzd"
-
-            // clientId: "dnRIdFNXVVdQbk1qdmZIMG0zMm06MTpjaQ",
-            // clientSecret: "U0RNbCWV3Z7HfvnopnCbNsig5hYd9sHR-E13TEsLMQYsEs4bzd",
-            //dnRIdFNXVVdQbk1qdmZIMG0zMm06MTpjaQ
-            //U0RNbCWV3Z7HfvnopnCbNsig5hYd9sHR-E13TEsLMQYsEs4bzd
+        const user = await getDBEntry(
+            "accounts",
+            ["userId"],
+            ["=="],
+            [session.user.id],
+            1
         );
-        console.log("twitterClient");
-        const readOnlyClient = twitterClient.v2;
-        await readOnlyClient.tweetThread([
-            'Hello, lets talk about Twitter!',
-            'Twitter is a fantastic social network. Look at this:',
-            'This thread is automatically made with twitter-api-v2 :D',
-        ]).then((response: any) => {
-            console.log(response);
+
+        const twitterClient = new TwitterApi({
+            appKey: process.env.TWITTER_CLIENT_ID as string,
+            appSecret: process.env.TWITTER_CLIENT_SECRET as string,
+            accessToken: user[0].data.oauth_token,
+            accessSecret: user[0].data.oauth_token_secret,
         });
 
-        return res.status(200).json({
-            content: "videoID1",
-            success: true,
-        });
+        const threadF = await twitterClient.v1.tweetThread(thread);
+        if (threadF.length > 0) {
+            return res.status(200).json({
+                content: "https://twitter.com/" + threadF[0].user.screen_name + "/status/" + threadF[0].id_str,
+                success: true,
+            });
+        } else {
+            return res.status(400).json({
+                content: "threadF",
+                success: false,
+            });
+        }
 
 
     } catch (e: any) {
         console.log(e);
         return res.status(400).json({
-            reason: e,
+            content: e.data.errors[0].message !== undefined ? e.data.errors[0].message : "error",
             success: false,
         } as {
             name: string;
-            reason: string;
+            content: string;
             success: boolean;
         });
     }
