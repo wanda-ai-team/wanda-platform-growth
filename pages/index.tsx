@@ -62,7 +62,7 @@ export default function Home() {
 
   async function convertSummaryS(summaryN: string) {
 
-    const response = await fetch("/api/llm/gpt3", {
+    const response = await fetch("/api/llm/gpt3/textToThreadStream", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
