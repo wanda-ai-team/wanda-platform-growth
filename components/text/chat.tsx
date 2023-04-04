@@ -173,9 +173,6 @@ const Chat = ({ selectedTweets, twitterThreadText, setTwitterThreadTextPerTweet 
                         </button>
                     </form>
                 </div>
-                <div className={styles.footer}>
-                    <p>Powered by <a href="https://github.com/hwchase17/langchain" target="_blank">LangChain</a>. Built by <a href="https://twitter.com/chillzaza_" target="_blank">Zahid</a>.</p>
-                </div>
             </div>
         </main>
     )

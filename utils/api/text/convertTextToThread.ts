@@ -1,5 +1,5 @@
-async function convertTextToThread(content: any) {
-    return await fetch('/api/llm/gpt3/textToThread?text=' + content)
+async function convertTextToThread(content: string, output: string) {
+    return await fetch('/api/llm/gpt3/textToThread?text=' + content + '&output=' + output)
         .then((res) => res.json())
         .then((data) => {
             if (data.suceess === false) {
