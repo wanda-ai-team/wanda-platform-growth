@@ -1,7 +1,7 @@
 
 import styles from '@/styles/Home.module.css'
 import { useState } from 'react'
-import { Button, Grid, GridItem, Input } from '@chakra-ui/react'
+import { Button, Grid, GridItem, Input, Select, Textarea } from '@chakra-ui/react'
 import { ColorRing } from 'react-loader-spinner'
 import TwitterThread from '@/components/text/twitterThread/twitterThread'
 import { getSubtitlesFromYoutube } from '@/utils/api/video/getSubtitlesFromYoutube'
@@ -18,6 +18,8 @@ import { postTweet } from '@/utils/api/text/postTweet'
 import { useSession, signIn, signOut } from "next-auth/react"
 import Chat from '@/components/text/chat'
 
+const outputs = ['Twitter', 'Instagram', 'Linkedin', 'Blog'];
+
 export default function Home() {
   const [mediumUrl, setMediumUrl] = useState('');
   const [youtubeURL, setYoutubeURL] = useState('');
@@ -27,10 +29,12 @@ export default function Home() {
   const [loadingAPICall, setLoadingAPICall] = useState(false);
   const [twitterThreadText, setTwitterThreadText] = useState(['']);
   const [twitterThreadTextPerTweet, setTwitterThreadTextPerTweet] = useState(['']);
+  const [convertedText, setConvertedText] = useState('');
   const [selectedTweets, setSelectedTweets] = useState<any>([]);
   const [numberOfTweets, setNumberOfTweets] = useState(1);
   const { data: session } = useSession()
   const [threadPostResult, setThreadPostResult] = useState('');
+  const [outputSelected, setOutputSelected] = useState("");
   const [postingThread, setPostingThread] = useState(false);
 
   async function postTweet1() {
@@ -143,15 +147,19 @@ export default function Home() {
     setApiStep('Formatting Text...');
     const response = await getTextSummary(data);
     if (response.success) {
-      setApiStep('Converting to Twitter Thread\...');
+      setApiStep('Converting to ' + outputSelected + '\...');
       setSummary(response.content);
-      const reponseConvert = await convertTextToThread(response.content);
+      const reponseConvert = await convertTextToThread(response.content, outputSelected);
       if (reponseConvert.success) {
-        setNumberOfTweets(reponseConvert.content.split("\n\n").length);
-        setTwitterThreadText(reponseConvert.content);
-        setTwitterThreadTextPerTweet(reponseConvert.content.split("\n\n"));
-        const tweets = new Array(reponseConvert.content.split("\n\n").length).fill(false);
-        setSelectedTweets(tweets);
+        if(outputSelected === 'Twitter'){
+          setNumberOfTweets(reponseConvert.content.split("\n\n").length);
+          setTwitterThreadText(reponseConvert.content);
+          setTwitterThreadTextPerTweet(reponseConvert.content.split("\n\n"));
+          const tweets = new Array(reponseConvert.content.split("\n\n").length).fill(false);
+          setSelectedTweets(tweets);
+        }else{
+          setConvertedText(reponseConvert.content)
+        }
       }
       else {
         setTwitterThread("Error");
@@ -161,6 +169,46 @@ export default function Home() {
     }
 
     setLoadingAPICall(false);
+  }
+
+  function getTwitterThread() {
+    return (
+      <>
+        <TwitterThread
+          setNumberOfTweets={setNumberOfTweets}
+          numberOfTweets={numberOfTweets}
+          setTwitterThreadText={setTwitterThreadTextPerTweet}
+          twitterThreadText={twitterThreadTextPerTweet}
+          setSelectedTweets={setSelectedTweets}
+          selectedTweets={selectedTweets} />
+        {
+          postingThread &&
+          <div>
+            <ColorRing
+              visible={true}
+              height="80"
+              width="80"
+              ariaLabel="blocks-loading"
+              wrapperStyle={{}}
+              wrapperClass="blocks-wrapper"
+              colors={['#e15b64', '#f47e60', '#f8b26a', '#abbd81', '#849b87']} />
+          </div>
+        }
+        {
+          threadPostResult !== '' &&
+          <a href={threadPostResult}>
+            {threadPostResult}
+          </a>
+        }
+        <Button style={{ backgroundColor: '#1DA1F2', marginTop: '25px' }} isDisabled={twitterThreadTextPerTweet.length <= 1} onClick={postTweet1}> Tweet Thread </Button>
+      </>
+    )
+  }
+
+  let handleInputChange = (e: { target: { value: any; }; }) => {
+    let newArr = [...twitterThreadText];
+    newArr[0] = e.target.value;
+    setTwitterThreadText([...newArr]);
   }
 
 
@@ -178,7 +226,14 @@ export default function Home() {
         <div className={styles.inputs}>
           <div className={styles.links}>
             <Input placeholder='URL (works with Medium and Youtube)' value={youtubeURL} className={styles.input} onChange={(e) => setYoutubeURL(e.target.value)} />
-            <Button isDisabled={youtubeURL.length <= 0} colorScheme='purple' onClick={youtubeTransformText}>Convert to thread</Button>
+            <div className={styles.input}>
+              <Select placeholder='Select Output' onChange={(e) => setOutputSelected(e.target.value)} value={outputSelected} >
+                {outputs.map((output, index) => (
+                  <option key={index} value={output}>{output}</option>
+                ))}
+              </Select>
+            </div>
+            <Button isDisabled={(youtubeURL.length <= 0 || outputSelected === "")} colorScheme='purple' onClick={youtubeTransformText}>Convert to {outputSelected}</Button>
           </div>
         </div>
 
@@ -212,33 +267,17 @@ export default function Home() {
 
           <Grid templateColumns='repeat(2, 1fr)' gap={6}>
             <GridItem w='40vw' style={{ display: 'flex', justifyContent: 'start', flexDirection: 'column', alignItems: 'center' }} >
-              <TwitterThread
-                setNumberOfTweets={setNumberOfTweets}
-                numberOfTweets={numberOfTweets}
-                setTwitterThreadText={setTwitterThreadTextPerTweet}
-                twitterThreadText={twitterThreadTextPerTweet}
-                setSelectedTweets={setSelectedTweets}
-                selectedTweets={selectedTweets} />
-
-
-              {postingThread &&
-                <div >
-                  <ColorRing
-                    visible={true}
-                    height="80"
-                    width="80"
-                    ariaLabel="blocks-loading"
-                    wrapperStyle={{}}
-                    wrapperClass="blocks-wrapper"
-                    colors={['#e15b64', '#f47e60', '#f8b26a', '#abbd81', '#849b87']} />
-                </div>
+              {outputSelected === 'Twitter' ?
+                getTwitterThread()
+                :
+                outputSelected !== '' &&
+                <Textarea
+                  style={{ height: '90%' }}
+                  value={convertedText}
+                  onChange={handleInputChange}
+                  placeholder='Here is a sample placeholder'
+                  size='lg' />
               }
-              {threadPostResult !== '' &&
-                <a href={threadPostResult}>
-                  {threadPostResult}
-                </a>
-              }
-              <Button style={{ backgroundColor: '#1DA1F2', marginTop: '25px' }} isDisabled={twitterThreadTextPerTweet.length <= 1} onClick={postTweet1}> Tweet Thread </Button>
             </GridItem>
 
             <GridItem w='40vw' >

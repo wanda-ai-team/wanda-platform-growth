@@ -8,8 +8,6 @@ import { useEffect } from "react";
 import styles from '@/styles/Login.module.css'
 
 export default function Login({ providers }: InferGetServerSidePropsType<typeof getServerSideProps>) {
-  console.log("Login page")
-  console.log(process.env.FIREBASE_API_KEY)
 
   const { data: session, status } = useSession();
   
@@ -62,7 +60,7 @@ export default function Login({ providers }: InferGetServerSidePropsType<typeof 
           />
           <div className={styles.box}>
             <div>
-              <h2 > Welcome to Wanda! </h2>
+              <h2> Welcome to Wanda! </h2>
             </div>
             <div>
               {Object.values(providers).map((provider: any) => (

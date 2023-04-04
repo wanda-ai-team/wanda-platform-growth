@@ -1,4 +1,5 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
+import { textToBlogPostPrompt, textToInstagramCarrouselTextPrompt, textToLinkedInPostPrompt, textToTwitterThreadPrompt } from "@/utils/globalPrompts";
 import type { NextApiRequest, NextApiResponse } from "next";
 import {
     Configuration,
@@ -17,30 +18,39 @@ export default async function handler(
 ) {
     try {
         const text = (<string>req.query.text);
+        let output = (<string>req.query.output);
+        output = output.toLowerCase();
+        console.log("output");
+        console.log(output);
         let basePromptPrefix = "";
 
-        //Prompt for the GPT-3 model - 17 Tokens
-        basePromptPrefix = `
-Please ignore all previous instructions. 
-Please respond only in the english language.
-You are a Twitter Creator with a large fan following. 
-You have a Casual tone of voice. 
-You have a Analytical writing style. 
-Create a Twitter thread on the topic of the summary.
-There should be around 5 to 8 tweets. 
-After writing the tweets, please add a separator line.
-Include emojis and hashtags in some of the tweets.
-Try to use unique emojis in some of the tweets.
-The first tweet should have a hook and entice the readers.
-The last tweet should have a small summary of the thread.
-Talk in-depth of the topic on all the tweets
-Do not repeat yourself.
-Do not self reference.
-Do not explain what you are doing.
-Do not explain what you are going to do.
-Start directly by writing down the tweets.
-Summary: ${text}\n
+        switch (output) {
+            case "twitter":
+                basePromptPrefix = 
+textToTwitterThreadPrompt + `Summary: ${text}\n
 Twitter Thread:\n`;
+                break;
+            case "instagram":
+                basePromptPrefix = 
+textToInstagramCarrouselTextPrompt + `Summary: ${text}\n
+Instagram Carousel:\n`;
+                break;
+            case "linkedin":
+                basePromptPrefix = 
+textToLinkedInPostPrompt + `Summary: ${text}\n
+Linkedin Post:\n`;
+                break;
+            case "blog":
+                basePromptPrefix = 
+textToBlogPostPrompt + `Summary: ${text}\n
+Blog Post:\n`;
+                break;
+            default:
+                break;
+        }        
+
+        
+        console.log(basePromptPrefix);
 
         const completion = await openai.createChatCompletion({
             model: "gpt-4",
@@ -48,15 +58,6 @@ Twitter Thread:\n`;
             temperature: 0.7,
         });
 
-        // const completion = await openai.createCompletion({
-        //     model: "text-davinci-003",
-        //     prompt: basePromptPrefix,
-        //     temperature: 0.7,
-        //     max_tokens: 1024,
-        // });
-        
-
-        // const finalTweet = completion.data.choices[0].text!;
         const finalTweet = completion.data.choices[0].message?.content;
 
         console.log(finalTweet);
