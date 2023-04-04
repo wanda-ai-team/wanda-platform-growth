@@ -74,7 +74,7 @@ Blog Post:\n`;
 
         const payload = {
             model: "text-davinci-003",
-            prompt,
+            prompt: basePromptPrefix,
             temperature: 0.7,
             top_p: 1,
             frequency_penalty: 0,
