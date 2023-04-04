@@ -7,6 +7,8 @@ import { OpenAI } from "langchain/llms";
 import { loadSummarizationChain } from "langchain/chains";
 import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
 import { PromptTemplate } from "langchain/prompts";
+import updateDBEntry from "@/utils/api/db/createDBEntry";
+import getDBEntry from "@/utils/api/db/getDBEntry";
 
 const configuration = new Configuration({
     apiKey: process.env.OPENAI_API_KEY,
@@ -20,41 +22,57 @@ export default async function handler(
 ) {
     try {
         const docsT = JSON.parse(req.body).text;
+        let url = JSON.parse(req.body).url;
+        url = url.replace("www.", "");
+        url = url.replace("https://", "");
         const model = new OpenAI({ temperature: 0 });
         /** Load the summarization chain. */
         let resSummarization;
         try {
-            console.log('text', "text")
 
-            /* Split the text into chunks. */
-            const textSplitter = new RecursiveCharacterTextSplitter({ chunkSize: 1000 });
-            const template = `Create a long and in-depth summary, that should touch all the important points about: 
+
+            const summary = await getDBEntry("summaries", ["url"], ["=="], [url], 1);
+
+            if (summary.length > 0) {
+                return res.status(200).json({
+                    name: "",
+                    content: summary[0].data.summary,
+                    success: true,
+                } as { name: string; content: string; format: string; success: boolean });
+            }
+            else {
+                /* Split the text into chunks. */
+                const textSplitter = new RecursiveCharacterTextSplitter({ chunkSize: 1000 });
+                const template = `Create a long and in-depth summary, that should touch all the important points about: 
             {text}
             SUMMARY: `;
 
-            const docs = await textSplitter.createDocuments([docsT]);
-            /** Call the summarization chain. */
+                const docs = await textSplitter.createDocuments([docsT]);
+                /** Call the summarization chain. */
 
-            const model = new OpenAI({ temperature: 0 });
+                const model = new OpenAI({ temperature: 0 });
 
-            const prompt = new PromptTemplate({
-                inputVariables: ["text"],
-                template: template,
-            });
-
-            const chainS = loadSummarizationChain(model,
-                {
-                    prompt: prompt,
-                    type: "map_reduce"
+                const prompt = new PromptTemplate({
+                    inputVariables: ["text"],
+                    template: template,
                 });
-            
-            
 
-            resSummarization = await chainS.call({
-                input_documents: docs
-            });
+                const chainS = loadSummarizationChain(model,
+                    {
+                        prompt: prompt,
+                        type: "map_reduce"
+                    });
 
-            console.log('docs', resSummarization)
+
+
+                resSummarization = await chainS.call({
+                    input_documents: docs
+                });
+
+
+                updateDBEntry("summaries", { url: url, summary: resSummarization.text })
+            }
+
         } catch (e) {
             console.log(e);
         }

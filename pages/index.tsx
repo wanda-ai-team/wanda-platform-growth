@@ -18,7 +18,7 @@ import { postTweet } from '@/utils/api/text/postTweet'
 import { useSession, signIn, signOut } from "next-auth/react"
 import Chat from '@/components/text/chat'
 
-const outputs = ['Twitter', 'Instagram', 'Linkedin', 'Blog'];
+const outputs = ['Twitter', 'Instagram', 'Linkedin', 'Blog', 'Test'];
 
 export default function Home() {
   const [mediumUrl, setMediumUrl] = useState('');
@@ -37,6 +37,65 @@ export default function Home() {
   const [outputSelected, setOutputSelected] = useState("");
   const [postingThread, setPostingThread] = useState(false);
 
+  async function convertSummary(summaryN: string) {
+    console.log('convertSummary');
+    setLoadingAPICall(true);
+    setApiStep('Converting to ' + outputSelected + '\...');
+    const reponseConvert = await convertTextToThread(summaryN, outputSelected);
+    if (reponseConvert.success) {
+      if (outputSelected === 'Twitter') {
+        setNumberOfTweets(reponseConvert.content.split("\n\n").length);
+        setTwitterThreadText(reponseConvert.content);
+        setTwitterThreadTextPerTweet(reponseConvert.content.split("\n\n"));
+        const tweets = new Array(reponseConvert.content.split("\n\n").length).fill(false);
+        setSelectedTweets(tweets);
+      } else {
+        setConvertedText(reponseConvert.content)
+      }
+    }
+    else {
+      setTwitterThread("Error");
+    }
+    setApiStep('');
+    setLoadingAPICall(false);
+  }
+
+  async function convertSummaryS(summaryN: string) {
+
+    const response = await fetch("/api/generate", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        text: summaryN,
+        output: outputSelected,
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(response.statusText);
+    }
+
+    const data = response.body;
+    if (!data) {
+      return;
+    }
+    const reader = data.getReader();
+    const decoder = new TextDecoder();
+    let done = false;
+
+    while (!done) {
+      const { value, done: doneReading } = await reader.read();
+      done = doneReading;
+      const chunkValue = decoder.decode(value);
+      setConvertedText((prev) => prev + chunkValue);
+    }
+
+
+
+  }
+
   async function postTweet1() {
     setPostingThread(true);
     const threadResult = await postTweet(twitterThreadTextPerTweet);
@@ -48,40 +107,28 @@ export default function Home() {
     setPostingThread(false);
   }
 
-  async function youtubeTransformText() {
-    if (youtubeURL === '') return;
-    if (youtubeURL.includes("youtube")) {
-      youtubeToThread(true);
+  async function youtubeTransformText(youtubeURLN: string) {
+    if (youtubeURLN === '') return;
+    if (youtubeURLN.includes("youtube")) {
+      youtubeToThread(youtubeURLN);
     } else {
-      blogToThread();
+      blogToThread(youtubeURLN);
     }
   }
 
-  async function youtubeTransformImage() {
-    youtubeToThread(false);
-  }
-
-  async function youtubeToThread(text: boolean) {
+  async function youtubeToThread(youtubeURLN: string) {
     const subtitles = await getYoutubeSubtitles();
     if (subtitles !== "") {
-      if (text) {
-        await summarizeTextAndCreateThread(subtitles);
-      } else {
-        await summarizeTextAndInstagramPost(subtitles)
-      }
+      await summarizeTextAndCreateThread(subtitles, youtubeURLN);
     }
     else {
       setApiStep('No Subtitles Found, calling Batman to fix this, Batsignal can take some minutes ...');
-      const response = await getAudioFromYoutube(youtubeURL);
+      const response = await getAudioFromYoutube(youtubeURLN);
       if (response.success) {
         setApiStep('Converting Audio ...');
         const responseWhisper = await speechToText(response.content);
         if (responseWhisper.success) {
-          if (text) {
-            await summarizeTextAndCreateThread(responseWhisper.content);
-          } else {
-            await summarizeTextAndInstagramPost(responseWhisper.content)
-          }
+          await summarizeTextAndCreateThread(responseWhisper.content, youtubeURLN);
         }
       }
     }
@@ -90,12 +137,12 @@ export default function Home() {
   }
 
 
-  async function blogToThread() {
+  async function blogToThread(youtubeURLN: string) {
     setLoadingAPICall(true);
     setApiStep('Getting Medium Text...');
-    const response = await getBlogText(youtubeURL)
+    const response = await getBlogText(youtubeURLN)
     if (response.success) {
-      await summarizeTextAndCreateThread(response.content)
+      await summarizeTextAndCreateThread(response.content, youtubeURLN)
     } else {
       setTwitterThread("Error");
     }
@@ -123,47 +170,11 @@ export default function Home() {
 
   }
 
-  async function summarizeTextAndInstagramPost(data: any) {
+  async function summarizeTextAndCreateThread(data: any, url: string) {
     setApiStep('Formatting Text...');
-    const response = await getTextSummary(data);
+    const response = await getTextSummary(data, url);
     if (response.success) {
-      setApiStep('Converting to Instagram\...');
       setSummary(response.content);
-      const reponseConvert = await convertTextToImage(response.content);
-      if (reponseConvert.success) {
-        setTwitterThreadText(reponseConvert.content)
-      }
-      else {
-        setTwitterThread("Error");
-      }
-    } else {
-      setTwitterThread("Error");
-    }
-
-    setLoadingAPICall(false);
-  }
-
-  async function summarizeTextAndCreateThread(data: any) {
-    setApiStep('Formatting Text...');
-    const response = await getTextSummary(data);
-    if (response.success) {
-      setApiStep('Converting to ' + outputSelected + '\...');
-      setSummary(response.content);
-      const reponseConvert = await convertTextToThread(response.content, outputSelected);
-      if (reponseConvert.success) {
-        if(outputSelected === 'Twitter'){
-          setNumberOfTweets(reponseConvert.content.split("\n\n").length);
-          setTwitterThreadText(reponseConvert.content);
-          setTwitterThreadTextPerTweet(reponseConvert.content.split("\n\n"));
-          const tweets = new Array(reponseConvert.content.split("\n\n").length).fill(false);
-          setSelectedTweets(tweets);
-        }else{
-          setConvertedText(reponseConvert.content)
-        }
-      }
-      else {
-        setTwitterThread("Error");
-      }
     } else {
       setTwitterThread("Error");
     }
@@ -225,15 +236,30 @@ export default function Home() {
         <h2> 1. Post URL </h2>
         <div className={styles.inputs}>
           <div className={styles.links}>
-            <Input placeholder='URL (works with Medium and Youtube)' value={youtubeURL} className={styles.input} onChange={(e) => setYoutubeURL(e.target.value)} />
-            <div className={styles.input}>
-              <Select placeholder='Select Output' onChange={(e) => setOutputSelected(e.target.value)} value={outputSelected} >
-                {outputs.map((output, index) => (
-                  <option key={index} value={output}>{output}</option>
-                ))}
-              </Select>
-            </div>
-            <Button isDisabled={(youtubeURL.length <= 0 || outputSelected === "")} colorScheme='purple' onClick={youtubeTransformText}>Convert to {outputSelected}</Button>
+            <Input placeholder='URL (works with Medium and Youtube)' value={youtubeURL} className={styles.input} onChange={(e) => {
+              console.log("calling setYoutubeURL");
+              setYoutubeURL(e.target.value);
+              console.log(e.target.value);
+              if (e.target.value !== "") {
+                console.log("calling youtubeTransformText");
+                youtubeTransformText(e.target.value)
+              }
+            }} />
+            {summary !== '' &&
+              <>
+                <p>
+                </p>
+                Summary:
+                <p> </p>
+
+                <Textarea
+                  style={{ height: '10vh', width: '40vw' }}
+                  value={summary}
+                  onChange={(e) => { setSummary(e.target.value) }}
+                  placeholder='Here is a sample placeholder'
+                  size='lg' />
+              </>
+            }
           </div>
         </div>
 
@@ -252,13 +278,23 @@ export default function Home() {
             </div>
           }
         </div>
-        <h2> 2. Check Summary </h2>
+        <h2> 2. Convert </h2>
         <div>
-          <p>
-            Summary:
-            {"\n"}
-            {summary}
-          </p>
+          <div className={styles.options}>
+            <Select placeholder='Select Output' onChange={(e) => setOutputSelected(e.target.value)} value={outputSelected} >
+              {outputs.map((output, index) => (
+                <option key={index} value={output}>{output}</option>
+              ))}
+            </Select>
+            <Button isDisabled={(youtubeURL.length <= 0 || outputSelected === "")} colorScheme='purple' onClick={() => {
+              if (outputSelected === 'Test') {
+                convertSummaryS(summary)
+              } else {
+                convertSummary(summary)
+              }
+            }}>Convert to {outputSelected}</Button>
+
+          </div>
         </div>
 
         <h2> 3. Edit & Publish Thread </h2>

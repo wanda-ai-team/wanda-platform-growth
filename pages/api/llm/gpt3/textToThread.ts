@@ -20,37 +20,36 @@ export default async function handler(
         const text = (<string>req.query.text);
         let output = (<string>req.query.output);
         output = output.toLowerCase();
-        console.log("output");
-        console.log(output);
         let basePromptPrefix = "";
 
         switch (output) {
             case "twitter":
                 basePromptPrefix = 
-textToTwitterThreadPrompt + `Summary: ${text}\n
+textToTwitterThreadPrompt + `
+Summary: ${text}\n
 Twitter Thread:\n`;
                 break;
             case "instagram":
                 basePromptPrefix = 
-textToInstagramCarrouselTextPrompt + `Summary: ${text}\n
+textToInstagramCarrouselTextPrompt + `
+Summary: ${text}\n
 Instagram Carousel:\n`;
                 break;
             case "linkedin":
                 basePromptPrefix = 
-textToLinkedInPostPrompt + `Summary: ${text}\n
+textToLinkedInPostPrompt + `
+Summary: ${text}\n
 Linkedin Post:\n`;
                 break;
             case "blog":
                 basePromptPrefix = 
-textToBlogPostPrompt + `Summary: ${text}\n
+textToBlogPostPrompt + `
+Summary: ${text}\n
 Blog Post:\n`;
                 break;
             default:
                 break;
-        }        
-
-        
-        console.log(basePromptPrefix);
+        }
 
         const completion = await openai.createChatCompletion({
             model: "gpt-4",
@@ -59,8 +58,6 @@ Blog Post:\n`;
         });
 
         const finalTweet = completion.data.choices[0].message?.content;
-
-        console.log(finalTweet);
 
         return res.status(200).json({
             name: "",
