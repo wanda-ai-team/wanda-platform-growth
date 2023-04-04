@@ -20,10 +20,8 @@ export const config = {
 const openai = new OpenAIApi(configuration);
 
 const handler = async (req: Request): Promise<Response> => {
-    const { text } = (await req.json()) as {
+    const { text, output} = (await req.json()) as {
         text?: string;
-    };
-    let { output } = (await req.json()) as {
         output?: string;
     };
     if (!output || !text) {
