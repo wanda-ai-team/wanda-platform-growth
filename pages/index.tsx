@@ -61,6 +61,8 @@ export default function Home() {
   }
 
   async function convertSummaryS(summaryN: string) {
+    setLoadingAPICall(true);
+    setApiStep('Converting to ' + outputSelected + '\...');
     const response = await fetch("/api/llm/gpt3/textToThreadStream", {
       method: "POST",
       headers: {
@@ -95,22 +97,37 @@ export default function Home() {
       if (chunkValue === '\n') {
         if (newTweet) {
           index++;
-          setNumberOfTweets(index => index + 1);
-          setTwitterThreadTextPerTweet([...tweetThread]);
+          setNumberOfTweets(index);
           newTweet = false;
         } else {
           newTweet = true;
         }
       }
 
+      if(chunkValue === '\n\n') {
+        index++;
+        setNumberOfTweets(index);
+      }
+
+      console.log('chunkValue', chunkValue)
+      console.log('chunkValue', chunkValue === '\n')
+      console.log('chunkValue', chunkValue === '\n\n')
       if (outputSelected === 'Twitter') {
         if (!newTweet) {
-          tweetThread[index] = tweetThread[index] + chunkValue;
+          if (chunkValue !== '\n') {
+            if (tweetThread[index] !== undefined) {
+              tweetThread[index] = tweetThread[index] + chunkValue;
+            } else {
+              tweetThread[index] = chunkValue;
+            }
+            setTwitterThreadTextPerTweet([...tweetThread]);
+          }
         }
       } else {
         setConvertedText((prev) => prev + chunkValue);
       }
     }
+    setLoadingAPICall(false);
   }
 
   async function postTweet1() {
@@ -317,7 +334,7 @@ export default function Home() {
             </Select>
             <Button isDisabled={(youtubeURL.length <= 0 || outputSelected === "")} colorScheme='purple' onClick={() => {
               if (outputSelected === 'Twitter') {
-                convertSummary(summary)
+                convertSummaryS(summary)
               } else {
                 convertSummaryS(summary)
               }

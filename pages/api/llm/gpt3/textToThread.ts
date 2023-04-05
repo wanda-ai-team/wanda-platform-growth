@@ -58,6 +58,8 @@ Blog Post:\n`;
         });
 
         const finalTweet = completion.data.choices[0].message?.content;
+        
+        console.log(finalTweet);
 
         return res.status(200).json({
             name: "",
