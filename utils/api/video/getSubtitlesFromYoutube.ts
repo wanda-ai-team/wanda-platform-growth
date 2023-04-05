@@ -1,4 +1,5 @@
 async function getSubtitlesFromYoutube(youtubeURL: string) {
+    console.log(youtubeURL)
     return await fetch('/api/webScrapping/getSubtitlesFromYoutube?videoID=' + youtubeURL)
         .then((res) => res.json())
         .then((data) => {
