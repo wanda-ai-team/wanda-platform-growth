@@ -76,10 +76,7 @@ Blog Post:\n`;
             model: "text-davinci-003",
             prompt: basePromptPrefix,
             temperature: 0.7,
-            top_p: 1,
-            frequency_penalty: 0,
-            presence_penalty: 0,
-            max_tokens: 200,
+            max_tokens: 1024,
             stream: true,
             n: 1,
         };

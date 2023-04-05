@@ -9,6 +9,7 @@ export default async function handler(
     let videoID1 = (<string>req.query.videoID);
     videoID1 = videoID1.replace('https://www.youtube.com/watch?v=', '');
     videoID1 = videoID1.replace('watch?v=', '');
+    console.log(videoID1);
     try {
         const data2 = await getSubtitles({
             videoID: videoID1, // youtube video id

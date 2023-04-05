@@ -117,7 +117,7 @@ export default function Home() {
   }
 
   async function youtubeToThread(youtubeURLN: string) {
-    const subtitles = await getYoutubeSubtitles();
+    const subtitles = await getYoutubeSubtitles(youtubeURLN);
     if (subtitles !== "") {
       await summarizeTextAndCreateThread(subtitles, youtubeURLN);
     }
@@ -150,10 +150,10 @@ export default function Home() {
     setApiStep('');
   }
 
-  async function getYoutubeSubtitles() {
+  async function getYoutubeSubtitles(youtubeURLN: string) {
     setApiStep('Getting Subtitles from Video...');
     setLoadingAPICall(true);
-    const response = await getSubtitlesFromYoutube(youtubeURL);
+    const response = await getSubtitlesFromYoutube(youtubeURLN);
     if (response.success) {
       setTwitterThread(response !== undefined ? response.content : '');
       return response.content;
