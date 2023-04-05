@@ -61,7 +61,6 @@ export default function Home() {
   }
 
   async function convertSummaryS(summaryN: string) {
-
     const response = await fetch("/api/llm/gpt3/textToThreadStream", {
       method: "POST",
       headers: {
@@ -84,16 +83,34 @@ export default function Home() {
     const reader = data.getReader();
     const decoder = new TextDecoder();
     let done = false;
+    let newTweet = false;
+    let index = 0;
+    let tweetThread: string[] = [];
 
     while (!done) {
       const { value, done: doneReading } = await reader.read();
       done = doneReading;
       const chunkValue = decoder.decode(value);
-      setConvertedText((prev) => prev + chunkValue);
+
+      if (chunkValue === '\n') {
+        if (newTweet) {
+          index++;
+          setNumberOfTweets(index => index + 1);
+          setTwitterThreadTextPerTweet([...tweetThread]);
+          newTweet = false;
+        } else {
+          newTweet = true;
+        }
+      }
+
+      if (outputSelected === 'Twitter') {
+        if (!newTweet) {
+          tweetThread[index] = tweetThread[index] + chunkValue;
+        }
+      } else {
+        setConvertedText((prev) => prev + chunkValue);
+      }
     }
-
-
-
   }
 
   async function postTweet1() {
@@ -217,9 +234,21 @@ export default function Home() {
   }
 
   let handleInputChange = (e: { target: { value: any; }; }) => {
-    let newArr = [...twitterThreadText];
-    newArr[0] = e.target.value;
-    setTwitterThreadText([...newArr]);
+    if (outputSelected === 'twitter') {
+      let newArr = [...twitterThreadText];
+      newArr[0] = e.target.value;
+      setTwitterThreadText([...newArr]);
+    }
+    else {
+      setConvertedText(e.target.value)
+    }
+  }
+
+
+  let handleInputSChange = (e: { target: { value: any; }; }) => {
+    let inputValue = e.target.value
+    console.log(inputValue)
+    setSummary(inputValue)
   }
 
 
@@ -255,7 +284,7 @@ export default function Home() {
                 <Textarea
                   style={{ height: '10vh', width: '40vw' }}
                   value={summary}
-                  onChange={(e) => { setSummary(e.target.value) }}
+                  onChange={(e) => { handleInputSChange(e); console.log(e) }}
                   placeholder='Here is a sample placeholder'
                   size='lg' />
               </>
@@ -287,10 +316,10 @@ export default function Home() {
               ))}
             </Select>
             <Button isDisabled={(youtubeURL.length <= 0 || outputSelected === "")} colorScheme='purple' onClick={() => {
-              if (outputSelected === 'Test') {
-                convertSummaryS(summary)
-              } else {
+              if (outputSelected === 'Twitter') {
                 convertSummary(summary)
+              } else {
+                convertSummaryS(summary)
               }
             }}>Convert to {outputSelected}</Button>
 
