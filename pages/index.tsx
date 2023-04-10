@@ -10,21 +10,28 @@ import { convertTextToThread } from '@/utils/api/text/convertTextToThread'
 import { getAudioFromYoutube } from '@/utils/api/video/getAudioFromYoutube'
 import { speechToText } from '@/utils/api/AIConvert/speechToText'
 import { getBlogText } from '@/utils/api/text/getBlogText'
-import { convertTextToImage } from '@/utils/api/image/convertTextToImage'
 
-import { TwitterApi } from 'twitter-api-v2';
-import { changeTwitterThread } from '@/utils/api/text/changeTwitterThread'
 import { postTweet } from '@/utils/api/text/postTweet'
-import { useSession, signIn, signOut } from "next-auth/react"
+import { useSession, signOut } from "next-auth/react"
 import Chat from '@/components/text/chat'
+import { getAudioTranscript } from '@/utils/api/audio/getAudioTranscript'
 
-const outputs = ['Twitter', 'Instagram', 'Linkedin', 'Blog', 'Test'];
+const outputsWithPlatform = [
+  { platform: 'Twitter', outputs: ['Thread'] },
+  { platform: 'Instagram', outputs: ['Carousel', 'Post'] },
+  { platform: 'Linkedin', outputs: ['Post'] },
+  { platform: 'Blog', outputs: ['Post', 'Article'] },
+  // { platform: 'Transcript', outputs: ['Transcript'] }
+];
+
+const input = ['URL', 'Text'];
 
 export default function Home() {
   const [mediumUrl, setMediumUrl] = useState('');
   const [youtubeURL, setYoutubeURL] = useState('');
   const [twitterThread, setTwitterThread] = useState('');
   const [summary, setSummary] = useState('');
+  const [inputText, setInputText] = useState('');
   const [apiStep, setApiStep] = useState('');
   const [loadingAPICall, setLoadingAPICall] = useState(false);
   const [twitterThreadText, setTwitterThreadText] = useState(['']);
@@ -35,6 +42,8 @@ export default function Home() {
   const { data: session } = useSession()
   const [threadPostResult, setThreadPostResult] = useState('');
   const [outputSelected, setOutputSelected] = useState("");
+  const [outputSelectedO, setOutputSelectedO] = useState("");
+  const [outputSelectedI, setOutputSelectedI] = useState(input[0]);
   const [postingThread, setPostingThread] = useState(false);
 
   async function convertSummary(summaryN: string) {
@@ -60,7 +69,9 @@ export default function Home() {
     setLoadingAPICall(false);
   }
 
-  async function convertSummaryS(summaryN: string) {
+  async function convertSummaryS(summaryN: string, text: boolean) {
+    console.log('convertSummary');
+    console.log(text);
     setLoadingAPICall(true);
     setApiStep('Converting to ' + outputSelected + '\...');
     const response = await fetch("/api/llm/gpt3/textToThreadStream", {
@@ -71,15 +82,17 @@ export default function Home() {
       body: JSON.stringify({
         text: summaryN,
         output: outputSelected,
+        outputO: outputSelectedO,
+        isText: text,
       }),
     });
-
     if (!response.ok) {
       throw new Error(response.statusText);
     }
 
     const data = response.body;
     if (!data) {
+      console.log("chunkValue");
       return;
     }
     const reader = data.getReader();
@@ -89,11 +102,17 @@ export default function Home() {
     let index = 0;
     let tweetThread: string[] = [];
 
+    console.log("chunkValue", "char");
+
     while (!done) {
+
+      console.log("chunkValue12", "doneReading");
       const { value, done: doneReading } = await reader.read();
       done = doneReading;
+      console.log("chunkValue12", doneReading);
       const chunkValue = decoder.decode(value);
 
+      console.log(chunkValue);
       if (chunkValue === '\n') {
         if (newTweet) {
           index++;
@@ -104,14 +123,10 @@ export default function Home() {
         }
       }
 
-      if(chunkValue === '\n\n') {
+      if (chunkValue === '\n\n') {
         index++;
         setNumberOfTweets(index);
       }
-
-      console.log('chunkValue', chunkValue)
-      console.log('chunkValue', chunkValue === '\n')
-      console.log('chunkValue', chunkValue === '\n\n')
       if (outputSelected === 'Twitter') {
         if (!newTweet) {
           if (chunkValue !== '\n') {
@@ -142,12 +157,32 @@ export default function Home() {
   }
 
   async function youtubeTransformText(youtubeURLN: string) {
-    if (youtubeURLN === '') return;
-    if (youtubeURLN.includes("youtube")) {
-      youtubeToThread(youtubeURLN);
+    console.log(youtubeURLN)
+    if (outputSelectedI !== 'URL') {
+      textToSummary(inputText);
     } else {
-      blogToThread(youtubeURLN);
+      if (youtubeURLN === '') return;
+      if (youtubeURLN.includes("youtube")) {
+        youtubeToThread(youtubeURLN);
+      } else {
+        if(youtubeURLN.includes("spotify")){    
+          console.log("youtubeURLN")
+          getAudioTranscript("https://open.spotify.com/episode/6KSA3AdTUc3LLUocRCHCJL?si=5vw8HIzYSqKAPP6h6MRpaQ", "");
+        }
+        else{
+          blogToThread(youtubeURLN);
+        }
+      }
     }
+  }
+
+
+  async function textToSummary(text: string) {
+    setLoadingAPICall(true);
+    setApiStep('Getting Medium Text...');
+    await summarizeTextAndCreateThread(text, "null")
+    setLoadingAPICall(false);
+    setApiStep('');
   }
 
   async function youtubeToThread(youtubeURLN: string) {
@@ -279,18 +314,45 @@ export default function Home() {
 
 
       <div className={styles.main}>
-        <h2> 1. Post URL </h2>
+        <h2> 1. Post Content </h2>
+        <div className={styles.options}>
+          <Select onChange={(e) => setOutputSelectedI(e.target.value)} value={outputSelectedI} >
+            {input.map((value, index) => (
+              <option key={index} value={value}>{value}</option>
+            ))}
+          </Select>
+        </div>
         <div className={styles.inputs}>
           <div className={styles.links}>
-            <Input placeholder='URL (works with Medium and Youtube)' value={youtubeURL} className={styles.input} onChange={(e) => {
-              console.log("calling setYoutubeURL");
-              setYoutubeURL(e.target.value);
-              console.log(e.target.value);
-              if (e.target.value !== "") {
-                console.log("calling youtubeTransformText");
-                youtubeTransformText(e.target.value)
-              }
-            }} />
+
+            {outputSelectedI !== 'Text' &&
+              <Input placeholder={outputSelectedI === 'URL' ? 'URL (works with Medium and Youtube)' : 'URL (works with spotify)'} value={youtubeURL} className={styles.input} onChange={(e) => {
+                setYoutubeURL(e.target.value);
+                if (e.target.value !== "") {
+                  if(outputSelectedI === 'URL'){
+                    console.log(e.target.value)
+                    youtubeTransformText(e.target.value);
+                  }else{
+                    getAudioTranscript(e.target.value);
+                  }
+                }
+              }} />
+            }
+
+            {outputSelectedI === 'Text' &&
+              <Textarea
+                style={{ height: '10vh', width: '40vw' }}
+                value={inputText}
+                onChange={(e) => {
+                  setInputText(e.target.value)
+                  if (e.target.value !== "") {
+                    youtubeTransformText(e.target.value)
+                  }
+                }}
+                placeholder='Paste your text here'
+                size='lg' />
+            }
+
             {summary !== '' &&
               <>
                 <p>
@@ -327,16 +389,28 @@ export default function Home() {
         <h2> 2. Convert </h2>
         <div>
           <div className={styles.options}>
-            <Select placeholder='Select Output' onChange={(e) => setOutputSelected(e.target.value)} value={outputSelected} >
-              {outputs.map((output, index) => (
+
+
+            <Select placeholder='Select Platform' onChange={(e) => setOutputSelected(e.target.value)} value={outputSelected} >
+              {outputsWithPlatform.map((output, index) => (
+                <option key={index} value={output.platform}>{output.platform}</option>
+              ))}
+            </Select>
+
+            <Select placeholder='Select Output' onChange={(e) => setOutputSelectedO(e.target.value)} value={outputSelectedO} >
+              {outputsWithPlatform.filter(plat => plat.platform === outputSelected)[0].outputs.map((output, index) => (
                 <option key={index} value={output}>{output}</option>
               ))}
             </Select>
-            <Button isDisabled={(youtubeURL.length <= 0 || outputSelected === "")} colorScheme='purple' onClick={() => {
+            <Button isDisabled={(youtubeURL.length <= 0 || outputSelected === "" || outputSelectedO === "")} colorScheme='purple' onClick={() => {
               if (outputSelected === 'Twitter') {
-                convertSummaryS(summary)
+                convertSummaryS(summary, false)
               } else {
-                convertSummaryS(summary)
+                if (outputSelectedO === 'Text') {
+                  convertSummaryS(inputText, true)
+                } else {
+                  convertSummaryS(summary, false)
+                }
               }
             }}>Convert to {outputSelected}</Button>
 

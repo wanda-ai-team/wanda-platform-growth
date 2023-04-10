@@ -20,63 +20,83 @@ export const config = {
 const openai = new OpenAIApi(configuration);
 
 const handler = async (req: Request): Promise<Response> => {
-    let { text, output} = (await req.json()) as {
+    let { text, output, outputO, isText } = (await req.json()) as {
         text?: string;
         output?: string;
+        outputO?: string;
+        isText?: boolean;
     };
-    if (!output || !text) {
+    if (!output || !text || !outputO || isText === undefined) {
         return new Response('Bad Request', { status: 400 });
     }
-
-    console.log("text", text);
-    console.log("output", output);
-    const encoder = new TextEncoder();
-    const decoder = new TextDecoder();
-    let counter = 0;
     try {
         output = output.toLowerCase();
+        outputO = outputO.toLowerCase();
         let basePromptPrefix = "";
 
         switch (output) {
             case "twitter":
-                basePromptPrefix =
-                    textToTwitterThreadPrompt + `
+                if (outputO === "thread") {
+                    basePromptPrefix =
+                        textToTwitterThreadPrompt + `
 Summary: ${text}\n
 Twitter Thread:\n`;
+                }
                 break;
             case "instagram":
-                basePromptPrefix =
-                    textToInstagramCarrouselTextPrompt + `
+                if (outputO === "post") {
+                    basePromptPrefix =
+                        textToInstagramCarrouselTextPrompt + `
 Summary: ${text}\n
 Instagram Carousel:\n`;
+                }
+                break;
+            case "instagram":
+                if (outputO === "carousel") {
+                    basePromptPrefix =
+                        textToInstagramCarrouselTextPrompt + `
+Summary: ${text}\n
+Instagram Carousel:\n`;
+                }
                 break;
             case "linkedin":
-                basePromptPrefix =
-                    textToLinkedInPostPrompt + `
+                if (outputO === "post") {
+                    console.log("linkedin post");
+                    basePromptPrefix =
+                        textToLinkedInPostPrompt + `
 Summary: ${text}\n
 Linkedin Post:\n`;
+                }
                 break;
             case "blog":
-                basePromptPrefix =
-                    textToBlogPostPrompt + `
+                if (outputO === "post") {
+                    basePromptPrefix =
+                        textToBlogPostPrompt + `
 Summary: ${text}\n
 Blog Post:\n`;
+                }
                 break;
-            case "test":
-                basePromptPrefix =
-                    textToBlogPostPrompt + `
+            case "blog":
+                if (outputO === "article") {
+                    basePromptPrefix =
+                        textToBlogPostPrompt + `
 Summary: ${text}\n
 Blog Post:\n`;
+                }
                 break;
             default:
+                console.log("linkedin post1");
                 break;
         }
 
+        
+
         const payload = {
-            model: "text-davinci-003",
-            prompt: basePromptPrefix,
+            model: "gpt-3.5-turbo",
+            // model: "text-davinci-003",
+            // prompt: basePromptPrefix,
+            messages: [{ role: "user", content: basePromptPrefix }],
             temperature: 0.7,
-            max_tokens: 1024,
             stream: true,
             n: 1,
         };
