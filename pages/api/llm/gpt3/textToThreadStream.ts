@@ -50,13 +50,13 @@ Twitter Thread:\n`;
 Summary: ${text}\n
 Instagram Carousel:\n`;
                 }
-                break;
-            case "instagram":
                 if (outputO === "carousel") {
+                    console.log("linkedin carousel");
                     basePromptPrefix =
                         textToInstagramCarrouselTextPrompt + `
 Summary: ${text}\n
 Instagram Carousel:\n`;
+
                 }
                 break;
             case "linkedin":
@@ -85,11 +85,8 @@ Blog Post:\n`;
                 }
                 break;
             default:
-                console.log("linkedin post1");
                 break;
         }
-
-        
 
         const payload = {
             model: "gpt-3.5-turbo",
@@ -103,7 +100,6 @@ Blog Post:\n`;
 
         const stream = await OpenAIStream(payload);
         return new Response(stream);
-        console.log("stream");
         // return res.status(200).send(stream);
         // // return new Response(stream).status(200);
         // return res.status(200).json({
