@@ -398,9 +398,9 @@ export default function Home() {
             </Select>
 
             <Select placeholder='Select Output' onChange={(e) => setOutputSelectedO(e.target.value)} value={outputSelectedO} >
-              {outputsWithPlatform.filter(plat => plat.platform === outputSelected)[0].outputs.map((output, index) => (
+              {outputsWithPlatform.filter(plat => plat.platform === outputSelected)[0] !== undefined ? outputsWithPlatform.filter(plat => plat.platform === outputSelected)[0].outputs.map((output, index) => (
                 <option key={index} value={output}>{output}</option>
-              ))}
+              )) : <></>}
             </Select>
             <Button isDisabled={(youtubeURL.length <= 0 || outputSelected === "" || outputSelectedO === "")} colorScheme='purple' onClick={() => {
               if (outputSelected === 'Twitter') {
