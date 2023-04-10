@@ -102,14 +102,11 @@ export default function Home() {
     let index = 0;
     let tweetThread: string[] = [];
 
-    console.log("chunkValue", "char");
 
     while (!done) {
 
-      console.log("chunkValue12", "doneReading");
       const { value, done: doneReading } = await reader.read();
       done = doneReading;
-      console.log("chunkValue12", doneReading);
       const chunkValue = decoder.decode(value);
 
       console.log(chunkValue);
@@ -135,6 +132,7 @@ export default function Home() {
             } else {
               tweetThread[index] = chunkValue;
             }
+            tweetThread[index] = tweetThread[index].replace('\n', '');
             setTwitterThreadTextPerTweet([...tweetThread]);
           }
         }

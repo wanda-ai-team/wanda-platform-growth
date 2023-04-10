@@ -1,14 +1,14 @@
 async function getTextSummary(data: any, url: string) {
-    return await fetch('/api/llm/gpt3/textToSummary', {
+    return await fetch('https://langchain-py.vercel.app/', {
         method: 'POST',
         body: JSON.stringify({
-            text: data,
+            docsT: data,
             url: url
         })
     })
         .then((res) => res.json())
         .then((data) => {
-            console.log(data);
+            return { content: data, success: true };
             if (data.success === false) {
                 return { content: "Error", success: false };
             }

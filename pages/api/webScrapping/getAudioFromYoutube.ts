@@ -29,7 +29,7 @@ const downloadAudio = async (videoId: string, pathFile: string, res: any) => {
             });
         });
 
-        console.log(resultA.length)
+        console.log(resultA)
 
         for (let i = 0; i < resultA.length; i++) {
             await createDBEntry("youtubeVideos", { videoId: videoId, audio: resultA[i] });

@@ -20,6 +20,8 @@ export default async function handler(
             captions = captions.replace(/(\r\n|\n|\r)/gm, "");
             return captions;
         });
+        
+        console.log(data2)
         return res.status(200).json({
             subtitles: data2,
             success: true,
