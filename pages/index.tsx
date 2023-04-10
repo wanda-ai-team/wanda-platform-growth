@@ -333,7 +333,7 @@ export default function Home() {
                     console.log(e.target.value)
                     youtubeTransformText(e.target.value);
                   }else{
-                    getAudioTranscript(e.target.value);
+                    // getAudioTranscript(e.target.value);
                   }
                 }
               }} />
