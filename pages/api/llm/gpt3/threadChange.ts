@@ -35,15 +35,14 @@ Tweet: ${tweet1}`;
         //     temperature: 0.7,
         // });
 
-        const completion = await openai.createCompletion({
-            model: "text-davinci-003",
-            prompt: basePromptPrefix,
+        const completion = await openai.createChatCompletion({
+            model: "gpt-4",
+            messages: [{ role: "user", content: basePromptPrefix }],
             temperature: 0.7,
-            max_tokens: 1024,
         });
 
-        const finalTweet = completion.data.choices[0].text!.trim();
-        // const finalTweet = completion.data.choices[0].message?.content;
+        // const finalTweet = completion.data.choices[0].text!.trim();
+        const finalTweet = completion.data.choices[0].message?.content;
         console.log(finalTweet);
 
         return res.status(200).json({

@@ -50,10 +50,6 @@ const Chat = ({ selectedTweets, twitterThreadText, setTwitterThreadTextPerTweet 
 
         setMessages((prevMessages: any) => [...prevMessages, { "message": userInput, "type": "userMessage" }]);
 
-        // Send user question and history to API
-
-
-        console.log(selectedTweets);
         const indexes: (string | number)[] = [];
         const tweets: (string | number)[] = [];
         
@@ -74,7 +70,6 @@ const Chat = ({ selectedTweets, twitterThreadText, setTwitterThreadTextPerTweet 
             handleError();
             return;
         } else {
-
             setMessages((prevMessages: any) => [...prevMessages, { "message": "Tweet correctly changed", "type": "apiMessage" }]);
         }
 
@@ -83,21 +78,8 @@ const Chat = ({ selectedTweets, twitterThreadText, setTwitterThreadTextPerTweet 
             newArr[index] = reponseConvert.content;
         });
         setTwitterThreadTextPerTweet(newArr);
-        console.log(reponseConvert);
 
-
-
-
-        // // Reset user input
         setUserInput("");
-        // const data = await response.json();
-
-        // if (data.result.error === "Unauthorized") {
-        //     handleError();
-        //     return;
-        // }
-
-
     };
 
     // Prevent blank submissions and allow for multiline input

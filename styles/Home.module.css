@@ -47,3 +47,19 @@
   height: 100%;
   gap: 12px;
 }
+
+.transcriptSummary{
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+
+}
+
+.texts{
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: start;
+
+}
