@@ -179,9 +179,12 @@ export default function Home() {
   }
 
   async function youtubeToThread(youtubeURLN: string, transB = false) {
+    console.log(transB)
     const subtitles = await getYoutubeSubtitles(youtubeURLN);
     if (subtitles !== "") {
       if (transB) {
+        console.log("transB")
+        console.log(transB)
         setTranscript(subtitles);
       }
       await summarizeTextAndCreateThread(subtitles, youtubeURLN);
@@ -330,7 +333,8 @@ export default function Home() {
                   setYoutubeURL(e.target.value);
                   if (e.target.value !== "") {
                     if (outputSelectedI === 'URL') {
-                      youtubeTransformText(e.target.value);
+                      console.log(wantTranscript)
+                      youtubeTransformText(e.target.value, wantTranscript);
                     } else {
                       // getAudioTranscript(e.target.value);
                     }
@@ -347,7 +351,7 @@ export default function Home() {
                 onChange={(e) => {
                   setInputText(e.target.value)
                   if (e.target.value !== "") {
-                    youtubeTransformText(e.target.value, wantTranscript)
+                    youtubeTransformText(e.target.value)
                   }
                 }}
                 placeholder='Paste your text here'
@@ -356,7 +360,7 @@ export default function Home() {
 
             <div className={styles.transcriptSummary}>
 
-              {transcript !== '' &&
+              {wantTranscript &&
 
                 <div className={styles.texts}>
                   <p>
