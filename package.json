@@ -55,6 +55,7 @@
     "typescript": "^4.9.5",
     "wrap-text": "^1.0.9",
     "youtube-captions-scraper": "^2.0.0",
+    "ytdl-core": "^4.9.1",
     "zlib": "^1.0.5"
   }
 }

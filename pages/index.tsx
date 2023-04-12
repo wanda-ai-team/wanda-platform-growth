@@ -15,7 +15,7 @@ import { postTweet } from '@/utils/api/text/postTweet'
 import { useSession, signOut } from "next-auth/react"
 import Chat from '@/components/text/chat'
 import { getAudioTranscript } from '@/utils/api/audio/getAudioTranscript'
-
+import { Checkbox, CheckboxGroup } from '@chakra-ui/react'
 const outputsWithPlatform = [
   { platform: 'Twitter', outputs: ['Thread'] },
   { platform: 'Instagram', outputs: ['Carousel', 'Post'] },
@@ -31,6 +31,7 @@ export default function Home() {
   const [youtubeURL, setYoutubeURL] = useState('');
   const [twitterThread, setTwitterThread] = useState('');
   const [summary, setSummary] = useState('');
+  const [transcript, setTranscript] = useState('');
   const [inputText, setInputText] = useState('');
   const [apiStep, setApiStep] = useState('');
   const [loadingAPICall, setLoadingAPICall] = useState(false);
@@ -45,9 +46,9 @@ export default function Home() {
   const [outputSelectedO, setOutputSelectedO] = useState("");
   const [outputSelectedI, setOutputSelectedI] = useState(input[0]);
   const [postingThread, setPostingThread] = useState(false);
+  const [wantTranscript, setWantTranscript] = useState(false);
 
   async function convertSummary(summaryN: string) {
-    console.log('convertSummary');
     setLoadingAPICall(true);
     setApiStep('Converting to ' + outputSelected + '\...');
     const reponseConvert = await convertTextToThread(summaryN, outputSelected);
@@ -70,8 +71,6 @@ export default function Home() {
   }
 
   async function convertSummaryS(summaryN: string, text: boolean) {
-    console.log('convertSummary');
-    console.log(text);
     setLoadingAPICall(true);
     setApiStep('Converting to ' + outputSelected + '\...');
     const response = await fetch("/api/llm/gpt3/textToThreadStream", {
@@ -92,7 +91,6 @@ export default function Home() {
 
     const data = response.body;
     if (!data) {
-      console.log("chunkValue");
       return;
     }
     const reader = data.getReader();
@@ -109,7 +107,6 @@ export default function Home() {
       done = doneReading;
       const chunkValue = decoder.decode(value);
 
-      console.log(chunkValue);
       if (chunkValue === '\n') {
         if (newTweet) {
           index++;
@@ -154,20 +151,18 @@ export default function Home() {
     setPostingThread(false);
   }
 
-  async function youtubeTransformText(youtubeURLN: string) {
-    console.log(youtubeURLN)
+  async function youtubeTransformText(youtubeURLN: string, transB = false) {
     if (outputSelectedI !== 'URL') {
-      textToSummary(inputText);
+      textToSummary(youtubeURLN);
     } else {
       if (youtubeURLN === '') return;
       if (youtubeURLN.includes("youtube")) {
-        youtubeToThread(youtubeURLN);
+        youtubeToThread(youtubeURLN, transB);
       } else {
-        if(youtubeURLN.includes("spotify")){    
-          console.log("youtubeURLN")
+        if (youtubeURLN.includes("spotify")) {
           getAudioTranscript("https://open.spotify.com/episode/6KSA3AdTUc3LLUocRCHCJL?si=5vw8HIzYSqKAPP6h6MRpaQ", "");
         }
-        else{
+        else {
           blogToThread(youtubeURLN);
         }
       }
@@ -183,9 +178,12 @@ export default function Home() {
     setApiStep('');
   }
 
-  async function youtubeToThread(youtubeURLN: string) {
+  async function youtubeToThread(youtubeURLN: string, transB = false) {
     const subtitles = await getYoutubeSubtitles(youtubeURLN);
     if (subtitles !== "") {
+      if (transB) {
+        setTranscript(subtitles);
+      }
       await summarizeTextAndCreateThread(subtitles, youtubeURLN);
     }
     else {
@@ -193,6 +191,9 @@ export default function Home() {
       const response = await getAudioFromYoutube(youtubeURLN);
       if (response.success) {
         setApiStep('Converting Audio ...');
+        if (transB) {
+          setTranscript(response.content);
+        }
         const responseWhisper = await speechToText(response.content);
         if (responseWhisper.success) {
           await summarizeTextAndCreateThread(responseWhisper.content, youtubeURLN);
@@ -240,6 +241,7 @@ export default function Home() {
   async function summarizeTextAndCreateThread(data: any, url: string) {
     setApiStep('Formatting Text...');
     const response = await getTextSummary(data, url);
+    setTranscript(data)
     if (response.success) {
       setSummary(response.content);
     } else {
@@ -297,7 +299,6 @@ export default function Home() {
 
   let handleInputSChange = (e: { target: { value: any; }; }) => {
     let inputValue = e.target.value
-    console.log(inputValue)
     setSummary(inputValue)
   }
 
@@ -324,17 +325,19 @@ export default function Home() {
           <div className={styles.links}>
 
             {outputSelectedI !== 'Text' &&
-              <Input placeholder={outputSelectedI === 'URL' ? 'URL (works with Medium and Youtube)' : 'URL (works with spotify)'} value={youtubeURL} className={styles.input} onChange={(e) => {
-                setYoutubeURL(e.target.value);
-                if (e.target.value !== "") {
-                  if(outputSelectedI === 'URL'){
-                    console.log(e.target.value)
-                    youtubeTransformText(e.target.value);
-                  }else{
-                    // getAudioTranscript(e.target.value);
+              <>
+                <Input placeholder={outputSelectedI === 'URL' ? 'URL (works with Medium and Youtube)' : 'URL (works with spotify)'} value={youtubeURL} className={styles.input} onChange={(e) => {
+                  setYoutubeURL(e.target.value);
+                  if (e.target.value !== "") {
+                    if (outputSelectedI === 'URL') {
+                      youtubeTransformText(e.target.value);
+                    } else {
+                      // getAudioTranscript(e.target.value);
+                    }
                   }
-                }
-              }} />
+                }} />
+                <Checkbox isChecked={wantTranscript} onChange={(e) => setWantTranscript(e.target.checked)}>Transcript (for video and audios)</Checkbox>
+              </>
             }
 
             {outputSelectedI === 'Text' &&
@@ -344,28 +347,47 @@ export default function Home() {
                 onChange={(e) => {
                   setInputText(e.target.value)
                   if (e.target.value !== "") {
-                    youtubeTransformText(e.target.value)
+                    youtubeTransformText(e.target.value, wantTranscript)
                   }
                 }}
                 placeholder='Paste your text here'
                 size='lg' />
             }
 
-            {summary !== '' &&
-              <>
-                <p>
-                </p>
-                Summary:
-                <p> </p>
+            <div className={styles.transcriptSummary}>
 
-                <Textarea
-                  style={{ height: '10vh', width: '40vw' }}
-                  value={summary}
-                  onChange={(e) => { handleInputSChange(e); console.log(e) }}
-                  placeholder='Here is a sample placeholder'
-                  size='lg' />
-              </>
-            }
+              {transcript !== '' &&
+
+                <div className={styles.texts}>
+                  <p>
+                  </p>
+                  Transcript:
+                  <p> </p>
+
+                  <Textarea
+                    style={{ height: '10vh', width: '40vw' }}
+                    value={transcript}
+                    onChange={(e) => { setTranscript(e.target.value); }}
+                    placeholder='Here is a sample placeholder'
+                    size='lg' />
+                </div>
+              }
+              {summary !== '' &&
+                <div className={styles.texts}>
+                  <p>
+                  </p>
+                  Summary:
+                  <p> </p>
+
+                  <Textarea
+                    style={{ height: '10vh', width: '40vw' }}
+                    value={summary}
+                    onChange={(e) => { handleInputSChange(e); }}
+                    placeholder='Here is a sample placeholder'
+                    size='lg' />
+                </div>
+              }
+            </div>
           </div>
         </div>
 

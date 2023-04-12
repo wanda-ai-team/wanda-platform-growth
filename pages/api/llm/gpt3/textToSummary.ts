@@ -23,16 +23,17 @@ export default async function handler(
     try {
         const docsT = JSON.parse(req.body).text;
         let url = JSON.parse(req.body).url;
-        url = url.replace("www.", "");
-        url = url.replace("https://", "");
-        const model = new OpenAI({ temperature: 0 });
+        if (url !== "null") {
+            url = url.replace("www.", "");
+            url = url.replace("https://", "");
+        }
         /** Load the summarization chain. */
         let resSummarization;
         try {
-
-
-            const summary = await getDBEntry("summaries", ["url"], ["=="], [url], 1);
-
+            let summary = [];
+            if (url !== "null") {
+                summary = await getDBEntry("summaries", ["url"], ["=="], [url + '4'], 1);
+            }
             if (summary.length > 0) {
                 return res.status(200).json({
                     name: "",

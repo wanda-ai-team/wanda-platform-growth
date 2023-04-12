@@ -8,7 +8,6 @@ async function getTextSummary(data: any, url: string) {
     })
         .then((res) => res.json())
         .then((data) => {
-            console.log(data);
             if (data.success === false) {
                 return { content: "Error", success: false };
             }
