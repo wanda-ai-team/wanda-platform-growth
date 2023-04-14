@@ -1,13 +1,21 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
-import deleteDBEntry from "@/utils/api/db/deleteDBEntry";
-import getDBEntry from "@/utils/api/db/getDBEntry";
+import { ButtonGroup } from "@chakra-ui/react";
 import type { NextApiRequest, NextApiResponse } from "next";
-import fetch, {
-    FormData,
-    File,
-} from 'node-fetch'
-import { type } from "os";
-import Spotify from 'spotifydl-core';
+const getPodcastFromFeed = require("podparse")
+var xml2js = require('xml2js');
+var https = require('https');
+
+const findAllNodes = (node: { children: any[]; }, elName: any) => node.children.filter(({ name }) => elName === name);
+
+const findNode = (node: { children: any[]; }, elName: any) => node.children.find(({ name }) => elName === name);
+
+const findNodeOrThrow = (node: any, elName: any) => {
+    const child = findNode(node, elName);
+    if (!child) {
+        throw new Error(`Missing required <${elName}> element.`);
+    }
+    return child;
+};
 
 export default async function handler(
     req: NextApiRequest,
@@ -15,86 +23,59 @@ export default async function handler(
 ) {
     try {
         let data2 = "";
-        // getVideoCaptions()
 
-        const url = "https://open.spotify.com/episode/6KSA3AdTUc3LLUocRCHCJL?si=5vw8HIzYSqKAPP6h6MRpaQ";
+        var parser = new xml2js.Parser();
 
-        const credentials = {
-            clientId: '3e9ef26e8c5b4c0397267be61de5933a',
-            clientSecret: 'f7133831fdb94d9cb968d199045e7abb'
-        }
-        const spotify = new Spotify(credentials)
+        parser.on('error', function (err: any) { console.log('Parser error', err); });
 
-        console.log("spotify")
+        var data = '';
 
-        const stream1 = await spotify.getID(url)
-        const stream = await spotify.downloadTrack(stream1)
-        let resultB: any[] = [];
-        let resultA: any[] = [];
-        let valueA = 0;
+        var datatest: any[] = []
 
-        // await new Promise<void>((resolve, reject) => {
-        //     stream.on('data', function (chunk: any) {
-        //         valueA += chunk.byteLength;
-        //         if (valueA > 1000000) {
-        //             resultA.push(resultB);
-        //             resultB = [];
-        //             valueA = 0;
+
+        // await new Promise((resolve) => {
+        //     https.get("https://sellersessions.libsyn.com/rss", async function (res: { statusCode: number; on: (arg0: string, arg1: { (data_: any): void; (): void; }) => void; }) {
+        //         if (res.statusCode >= 200 && res.statusCode < 400) {
+        //             res.on('data', (data_:) => { data += data_.toString(); }
+        //             );
+        //             res.on('end', function () {
+        //                 parser.parseString(data, function (err: any, result: any) {
+        //                     data = result.rss.channel[0].item[0].enclosure[0]['$'].url;
+        //                     https.get(data.split('?')[0], async function (res: { statusCode: number; on: (arg0: string, arg1: { (data_: any): void; (): void; }) => void; }) {
+
+
+        //                         res.on('data', (chunk) => {
+        //                             datatest.push(chunk);
+        //                             console.log(chunk);
+        //                         });
+
+        //                         res.on('end', () => {
+        //                             //console.log(data)
+        //                             var buffer = Buffer.concat(datatest);
+        //                             console.log(buffer)
+        //                             resolve("");
+        //                         });
+        //                     });
+        //                 });
+        //             });
         //         }
-        //         result.push(chunk);
-        //     }).on('finish', async () => {
-        //         resolve();
-        //     }).on('error', (err: any) => {
-        //         reject(err);
         //     });
-        // });
-
-        // console.log(resultA);
+        // })
 
 
-        // const httpbin = 'https://api.openai.com/v1/audio/transcriptions'
-        // const formData = new FormData()
-        // const formData1 = new Headers()
+        // const podcast = getPodcastFromFeed("https://sellersessions.libsyn.com/rss.xml")
 
-        // // let buffer = Buffer.from(result);
-        // // const blob = Uint8Array.from(buffer).buffer
+        console.log("data")
+        // "My Podcast"
 
-        // const value = await getDBEntry("youtubeVideos", ["videoId"], ["=="], [result], 1)
-        // let audioValue: any[] = [];
-        // for(let i = 0; i < value.length; i++){
-        //     audioValue.push(value[i].data.audio);
-        // }
-
-        // audioValue = audioValue.flat();
-
-        // await deleteDBEntry("youtubeVideos", ["videoId"], ["=="], [result], 1);
-
-        // const abc = new File(resultA, 'abc.mp3', { type: 'audio/mp3' });
-
-        // formData1.set('Authorization', "Bearer " + process.env.OPENAI_API_KEY);
-        // formData.set('model', 'whisper-1');
-        // formData.set('file', abc);
-
-        // const response = await fetch(httpbin, { method: 'POST', body: formData, headers: formData1 });
-        // const resW = await response.json();
-        // console.log(resW);
-        // data2 = (resW as { text: '' }).text;
-
-        // if(data2 === undefined || data2 === null || data2 === ""){
-        //     return res.status(400).json({
-        //         content: "",
-        //         success: false,
-        //     });
-        // }else{
-
-        //     return res.status(200).json({
-        //         content: data2,
-        //         success: true,
-        //     });
-        // }
+        return res.status(200).json({
+            content: data2,
+            success: true,
+        });
+    }
 
 
-    } catch (e: any) {
+    catch (e: any) {
         console.log(e);
         return res.status(400).json({
             reason: e,
