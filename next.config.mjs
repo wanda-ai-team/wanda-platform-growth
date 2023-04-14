@@ -1,8 +1,8 @@
 /** @type {import('next').NextConfig} */
-const nextConfig = {
-  reactStrictMode: true,
+export const config = {
+  reactStrictMode: true, 
   api: {
-    responseLimit: '8mb',
+    responseLimit: false,
   },
   webpack5: true,
   webpack: (config) => {
@@ -13,5 +13,3 @@ const nextConfig = {
   },
 
 }
-
-module.exports = nextConfig

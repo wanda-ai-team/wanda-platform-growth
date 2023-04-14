@@ -1,6 +1,6 @@
 
 import styles from '@/styles/Home.module.css'
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { Button, Grid, GridItem, Input, Select, Textarea } from '@chakra-ui/react'
 import { ColorRing } from 'react-loader-spinner'
 import TwitterThread from '@/components/text/twitterThread/twitterThread'
@@ -16,6 +16,7 @@ import { useSession, signOut } from "next-auth/react"
 import Chat from '@/components/text/chat'
 import { getAudioTranscript } from '@/utils/api/audio/getAudioTranscript'
 import { Checkbox, CheckboxGroup } from '@chakra-ui/react'
+import { getThread } from '@/utils/api/twitter/getThread'
 const outputsWithPlatform = [
   { platform: 'Twitter', outputs: ['Thread'] },
   { platform: 'Instagram', outputs: ['Carousel', 'Post'] },
@@ -24,7 +25,7 @@ const outputsWithPlatform = [
   // { platform: 'Transcript', outputs: ['Transcript'] }
 ];
 
-const input = ['URL', 'Text'];
+const input = ['URL', 'Text', 'Audio File'];
 
 export default function Home() {
   const [mediumUrl, setMediumUrl] = useState('');
@@ -47,6 +48,7 @@ export default function Home() {
   const [outputSelectedI, setOutputSelectedI] = useState(input[0]);
   const [postingThread, setPostingThread] = useState(false);
   const [wantTranscript, setWantTranscript] = useState(false);
+  const inputFileRef = useRef<HTMLInputElement | null>(null);
 
   async function convertSummary(summaryN: string) {
     setLoadingAPICall(true);
@@ -163,7 +165,12 @@ export default function Home() {
           getAudioTranscript("https://open.spotify.com/episode/6KSA3AdTUc3LLUocRCHCJL?si=5vw8HIzYSqKAPP6h6MRpaQ", "");
         }
         else {
-          blogToThread(youtubeURLN);
+          if (youtubeURLN.includes("twitter")) {
+            console.log("olaaa");
+            twitterThreadToText(youtubeURLN);
+          } else {
+            blogToThread(youtubeURLN);
+          }
         }
       }
     }
@@ -179,12 +186,9 @@ export default function Home() {
   }
 
   async function youtubeToThread(youtubeURLN: string, transB = false) {
-    console.log(transB)
     const subtitles = await getYoutubeSubtitles(youtubeURLN);
     if (subtitles !== "") {
       if (transB) {
-        console.log("transB")
-        console.log(transB)
         setTranscript(subtitles);
       }
       await summarizeTextAndCreateThread(subtitles, youtubeURLN);
@@ -202,6 +206,19 @@ export default function Home() {
           await summarizeTextAndCreateThread(responseWhisper.content, youtubeURLN);
         }
       }
+    }
+    setLoadingAPICall(false);
+    setApiStep('');
+  }
+  async function twitterThreadToText(youtubeURLN: string) {
+    setLoadingAPICall(true);
+    setApiStep('Getting Thread...');
+    const response = await getThread(youtubeURLN);
+    if (response.success) {
+      const thread = response.content.flat().toString();
+      setSummary(thread)
+    } else {
+      setTwitterThread("Error");
     }
     setLoadingAPICall(false);
     setApiStep('');
@@ -252,6 +269,43 @@ export default function Home() {
     }
 
     setLoadingAPICall(false);
+  }
+
+
+
+  async function submitFile(e: React.MouseEvent<HTMLInputElement>) {
+    e.preventDefault();
+    console.log("e.type")
+    let formData = new FormData();
+    if (inputFileRef.current === null) {
+      return;
+    }
+    Object.values((inputFileRef.current.files as any)).forEach(file => {
+      formData.append('file', (file as Blob | string));
+    })
+
+    const res = await fetch("/api/files/uploadFiles", {
+      method: "POST",
+
+      body: formData,
+    });
+
+    const body = await res.json();
+
+    if (body.success) {
+      setWantTranscript(true)
+      setTranscript(body.content)
+      const response = await getTextSummary(body.content, "null");
+      if (response.success) {
+        setSummary(response.content);
+      } else {
+        setTwitterThread("Error");
+      }
+      // Do some stuff on successfully upload
+    } else {
+      // Do some stuff on error
+    }
+
   }
 
   function getTwitterThread() {
@@ -327,9 +381,9 @@ export default function Home() {
         <div className={styles.inputs}>
           <div className={styles.links}>
 
-            {outputSelectedI !== 'Text' &&
+            {outputSelectedI === 'URL' &&
               <>
-                <Input placeholder={outputSelectedI === 'URL' ? 'URL (works with Medium and Youtube)' : 'URL (works with spotify)'} value={youtubeURL} className={styles.input} onChange={(e) => {
+                <Input placeholder={outputSelectedI === 'URL' ? 'URL (works with Medium, Youtube, Twitter tweets)' : 'URL (works with spotify)'} value={youtubeURL} className={styles.input} onChange={(e) => {
                   setYoutubeURL(e.target.value);
                   if (e.target.value !== "") {
                     if (outputSelectedI === 'URL') {
@@ -356,6 +410,13 @@ export default function Home() {
                 }}
                 placeholder='Paste your text here'
                 size='lg' />
+            }
+
+            {outputSelectedI === 'Audio File' &&
+              <>
+                <input type="file" name="myfile" accept=".mp3" ref={inputFileRef} />
+                <input type="submit" value="Upload" onClick={submitFile} />
+              </>
             }
 
             <div className={styles.transcriptSummary}>
