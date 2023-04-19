@@ -8,6 +8,8 @@ export const config = {
   webpack: (config) => {
     config.resolve.fallback = { fs: false };
     config.resolve.fallback = { zlib: false };
+    config.resolve.fallback = { path: false };
+    config.resolve.fallback = { child_process: false };
 
     return config;
   },

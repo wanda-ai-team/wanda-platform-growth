@@ -23,6 +23,7 @@ export interface QueryOptions {
 }
 
 type Tweet = types.components['schemas']['Tweet'];
+
 function getOptions(options?: QueryOptions): QueryOptions {
     if (!options) {
         // New options if non were passed
@@ -49,7 +50,6 @@ export default async function handler(
     res: NextApiResponse
 ) {
     try {
-
         const session = await getServerSession(req, res, authOptions);
 
         let id = JSON.parse(req.body).id;
@@ -77,12 +77,15 @@ export default async function handler(
 
         const completeOptions = getOptions(undefined);
         const tweet = await client.tweets.findTweetById(id, completeOptions);
+        console.log(tweet)
         const userId = tweet.data?.author_id as string;
         const startDate = tweet.data?.created_at as string;
         const conversationId = tweet.data?.conversation_id as string;
         const date = new Date(startDate);
-        date.setDate(date.getDate() + 1);
-        const endDate = date.toISOString();
+        date.setDate(date.getDate() + 10);
+        let endDate = date.toISOString();
+        console.log(date)
+        console.log(endDate)
         const timelineOptions: types.operations['usersIdTimeline']['parameters']['query'] =
         {
             start_time: startDate,
@@ -95,6 +98,7 @@ export default async function handler(
             'user.fields': completeOptions['user.fields'],
             'place.fields': completeOptions['place.fields'],
         };
+
 
         const timeline = client.tweets.usersIdTweets(userId, timelineOptions);
         let tweets: Tweet[] = [];
@@ -125,7 +129,7 @@ export default async function handler(
             });
         } else {
             return res.status(400).json({
-                content: "threadF",
+                content: [""],
                 success: false,
             });
         }

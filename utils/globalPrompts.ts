@@ -10,7 +10,9 @@ Include emojis and hashtags in some of the tweets.
 Try to use unique emojis in some of the tweets.
 The first tweet should have a hook and entice the readers.
 The last tweet should have a small summary of the thread.
-Talk in-depth of the topic on all the tweets
+Talk in-depth of the topic on all the tweets.
+Use double enter special character to distinguish between tweets.
+Each tweet should have a maximum of 280 characters to be twitter publishable.
 Do not repeat yourself.
 Do not self reference.
 Do not explain what you are doing.

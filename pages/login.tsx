@@ -10,15 +10,12 @@ import styles from '@/styles/Login.module.css'
 export default function Login({ providers }: InferGetServerSidePropsType<typeof getServerSideProps>) {
 
   const { data: session, status } = useSession();
-  
-  useEffect(() => {
-    console.log("status");
-    if (session) {
 
-        console.log("status1");   
-        router.push("/");
+  useEffect(() => {
+    if (session) {
+      router.push("/");
     }
-}, [session]);
+  }, [session]);
 
   const router = useRouter()
   const popupCenter = (url: string | URL | undefined, title: string | undefined) => {

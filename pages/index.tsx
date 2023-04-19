@@ -17,6 +17,7 @@ import Chat from '@/components/text/chat'
 import { getAudioTranscript } from '@/utils/api/audio/getAudioTranscript'
 import { Checkbox, CheckboxGroup } from '@chakra-ui/react'
 import { getThread } from '@/utils/api/twitter/getThread'
+import { ServicesRunner } from '@/components/TheHiddenServiceRunner'
 const outputsWithPlatform = [
   { platform: 'Twitter', outputs: ['Thread'] },
   { platform: 'Instagram', outputs: ['Carousel', 'Post'] },
@@ -25,11 +26,16 @@ const outputsWithPlatform = [
   // { platform: 'Transcript', outputs: ['Transcript'] }
 ];
 
-const input = ['URL', 'Text', 'Audio File'];
+
+const input = ['URL', 'Text', 'Podcast (File + URL) Coming soon'];
 
 export default function Home() {
-  const [mediumUrl, setMediumUrl] = useState('');
+  const stopB = useRef(false);
+  const canStopB = useRef(false);
+  const [regenerate, setRegenerate] = useState(false);
+  const [stopRequested, setStopRequested] = useState(false);
   const [youtubeURL, setYoutubeURL] = useState('');
+  const [toneStyle, setToneStyle] = useState('');
   const [twitterThread, setTwitterThread] = useState('');
   const [summary, setSummary] = useState('');
   const [transcript, setTranscript] = useState('');
@@ -72,7 +78,7 @@ export default function Home() {
     setLoadingAPICall(false);
   }
 
-  async function convertSummaryS(summaryN: string, text: boolean) {
+  async function convertSummaryS(summaryN: string, text: boolean, toneStyle: string) {
     setLoadingAPICall(true);
     setApiStep('Converting to ' + outputSelected + '\...');
     const response = await fetch("/api/llm/gpt3/textToThreadStream", {
@@ -85,6 +91,7 @@ export default function Home() {
         output: outputSelected,
         outputO: outputSelectedO,
         isText: text,
+        toneStyle: toneStyle,
       }),
     });
     if (!response.ok) {
@@ -104,7 +111,12 @@ export default function Home() {
 
 
     while (!done) {
-
+      canStopB.current = true;
+      if (stopB.current) {
+        stopB.current = false;
+        canStopB.current = false;
+        break;
+      }
       const { value, done: doneReading } = await reader.read();
       done = doneReading;
       const chunkValue = decoder.decode(value);
@@ -123,6 +135,7 @@ export default function Home() {
         index++;
         setNumberOfTweets(index);
       }
+
       if (outputSelected === 'Twitter') {
         if (!newTweet) {
           if (chunkValue !== '\n') {
@@ -139,6 +152,8 @@ export default function Home() {
         setConvertedText((prev) => prev + chunkValue);
       }
     }
+
+    canStopB.current = false;
     setLoadingAPICall(false);
   }
 
@@ -215,6 +230,8 @@ export default function Home() {
     setApiStep('Getting Thread...');
     const response = await getThread(youtubeURLN);
     if (response.success) {
+      console.log("response.content")
+      console.log(response.content)
       const thread = response.content.flat().toString();
       setSummary(thread)
     } else {
@@ -255,7 +272,6 @@ export default function Home() {
         return "";
       }
     }
-
   }
 
   async function summarizeTextAndCreateThread(data: any, url: string) {
@@ -275,7 +291,6 @@ export default function Home() {
 
   async function submitFile(e: React.MouseEvent<HTMLInputElement>) {
     e.preventDefault();
-    console.log("e.type")
     let formData = new FormData();
     if (inputFileRef.current === null) {
       return;
@@ -362,6 +377,7 @@ export default function Home() {
 
   return (
     <>
+
       {session &&
         <div className={styles.logout}>
           <button onClick={() => signOut()}>Signed in as {session.user.name}</button>
@@ -374,7 +390,7 @@ export default function Home() {
         <div className={styles.options}>
           <Select onChange={(e) => setOutputSelectedI(e.target.value)} value={outputSelectedI} >
             {input.map((value, index) => (
-              <option key={index} value={value}>{value}</option>
+              <option disabled={value.includes('odcast')} key={index} value={value}>{value}</option>
             ))}
           </Select>
         </div>
@@ -387,7 +403,6 @@ export default function Home() {
                   setYoutubeURL(e.target.value);
                   if (e.target.value !== "") {
                     if (outputSelectedI === 'URL') {
-                      console.log(wantTranscript)
                       youtubeTransformText(e.target.value, wantTranscript);
                     } else {
                       // getAudioTranscript(e.target.value);
@@ -418,11 +433,8 @@ export default function Home() {
                 <input type="submit" value="Upload" onClick={submitFile} />
               </>
             }
-
             <div className={styles.transcriptSummary}>
-
-              {wantTranscript &&
-
+              {wantTranscript && transcript !== '' &&
                 <div className={styles.texts}>
                   <p>
                   </p>
@@ -471,62 +483,74 @@ export default function Home() {
             </div>
           }
         </div>
+
         <h2> 2. Convert </h2>
+
         <div>
           <div className={styles.options}>
 
-
-            <Select placeholder='Select Platform' onChange={(e) => setOutputSelected(e.target.value)} value={outputSelected} >
+            <Select placeholder='Select Platform' onChange={(e) => { setOutputSelected(e.target.value); setRegenerate(false); }} value={outputSelected} >
               {outputsWithPlatform.map((output, index) => (
                 <option key={index} value={output.platform}>{output.platform}</option>
               ))}
             </Select>
 
-            <Select placeholder='Select Output' onChange={(e) => setOutputSelectedO(e.target.value)} value={outputSelectedO} >
+            <Select placeholder='Select Output' onChange={(e) => { setOutputSelectedO(e.target.value); setRegenerate(false); }} value={outputSelectedO} >
               {outputsWithPlatform.filter(plat => plat.platform === outputSelected)[0] !== undefined ? outputsWithPlatform.filter(plat => plat.platform === outputSelected)[0].outputs.map((output, index) => (
                 <option key={index} value={output}>{output}</option>
               )) : <></>}
             </Select>
-            <Button isDisabled={(youtubeURL.length <= 0 || outputSelected === "" || outputSelectedO === "")} colorScheme='purple' onClick={() => {
-              if (outputSelected === 'Twitter') {
-                convertSummaryS(summary, false)
-              } else {
-                if (outputSelectedO === 'Text') {
-                  convertSummaryS(inputText, true)
-                } else {
-                  convertSummaryS(summary, false)
-                }
-              }
-            }}>Convert to {outputSelected}</Button>
 
+            <Input style={{ width: '100% !important' }} placeholder="Tone or style of generation" value={toneStyle} className={styles.input} onChange={(e) => {
+              setToneStyle(e.target.value);
+            }} />
+
+            <div className={styles.transcriptSummary}>
+              <Button isDisabled={(youtubeURL.length <= 0 || outputSelected === "" || outputSelectedO === "" || canStopB.current)} colorScheme='purple' onClick={() => {
+                setConvertedText('');
+                setTwitterThreadTextPerTweet(['']);
+                setRegenerate(true);
+                if (outputSelected === 'Twitter') {
+                  convertSummaryS(summary, false, toneStyle);
+                } else {
+                  if (outputSelectedO === 'Text') {
+                    convertSummaryS(inputText, true, toneStyle);
+                  } else {
+                    convertSummaryS(summary, false, toneStyle);
+                  }
+                }
+              }}>
+                Generate to {outputSelected !== '' ? outputSelected : '...'}
+                {/* {regenerate ? 'Regenerate to' : 'Generate to'} {outputSelected !== '' ? outputSelected : '...'} */}
+              </Button>
+              <Button colorScheme='purple' isDisabled={!canStopB.current} onClick={() => stopB.current = true}> Stop Generation </Button>
+            </div>
           </div>
         </div>
 
-        <h2> 3. Edit & Publish Thread </h2>
-        <div>
-          {selectedTweets}
+        <h2> 3. Edit & Publish {outputSelected} </h2>
 
-          <Grid templateColumns='repeat(2, 1fr)' gap={6}>
+        <div>
+          <Grid templateColumns={`repeat(${outputSelected === 'Twitter' ? 2 : 1}, 1fr)`} gap={6}>
             <GridItem w='40vw' style={{ display: 'flex', justifyContent: 'start', flexDirection: 'column', alignItems: 'center' }} >
               {outputSelected === 'Twitter' ?
                 getTwitterThread()
                 :
                 outputSelected !== '' &&
                 <Textarea
-                  style={{ height: '90%' }}
+                  style={{ height: '500px', marginBottom: '20px' }}
                   value={convertedText}
                   onChange={handleInputChange}
                   placeholder='Here is a sample placeholder'
                   size='lg' />
               }
             </GridItem>
-
-            <GridItem w='40vw' >
-              <Chat selectedTweets={selectedTweets} twitterThreadText={twitterThreadTextPerTweet} setTwitterThreadTextPerTweet={setTwitterThreadTextPerTweet} />
-            </GridItem>
-
+            {outputSelected === 'Twitter' &&
+              <GridItem w='40vw' >
+                <Chat selectedTweets={selectedTweets} twitterThreadText={twitterThreadTextPerTweet} setTwitterThreadTextPerTweet={setTwitterThreadTextPerTweet} />
+              </GridItem>
+            }
           </Grid>
-
         </div>
 
       </div>

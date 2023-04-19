@@ -21,7 +21,8 @@ export default async function handler(
     res: NextApiResponse
 ) {
     try {
-        const docsT = JSON.parse(req.body).text;
+        const text = JSON.parse(req.body).text;
+        const newF = JSON.parse(req.body).newF;
         let url = JSON.parse(req.body).url;
         if (url !== "null") {
             url = url.replace("www.", "");
@@ -31,47 +32,36 @@ export default async function handler(
         let resSummarization;
         try {
             let summary = [];
-            if (url !== "null") {
-                summary = await getDBEntry("summaries", ["url"], ["=="], [url + '4'], 1);
-            }
-            if (summary.length > 0) {
-                return res.status(200).json({
-                    name: "",
-                    content: summary[0].data.summary,
-                    success: true,
-                } as { name: string; content: string; format: string; success: boolean });
+            if (newF) {
+
+                if (url !== "null") {
+                    summary = await getDBEntry("summaries", ["url"], ["=="], [url], 1);
+                }
+                if (summary.length > 0) {
+                    return res.status(200).json({
+                        name: "",
+                        content: summary[0].data.summary,
+                        success: true,
+                    } as { name: string; content: string; format: string; success: boolean });
+                }
+                else {
+                    return res.status(200).json({
+                        name: "",
+                        content: "",
+                        success: false,
+                    } as { name: string; content: string; format: string; success: boolean });
+                }
+
             }
             else {
-                /* Split the text into chunks. */
-                const textSplitter = new RecursiveCharacterTextSplitter({ chunkSize: 1000 });
-                const template = `Create a long and in-depth summary, that should touch all the important points about: 
-            {text}
-            SUMMARY: `;
+                console.log(text)
+                updateDBEntry("summaries", { url: url, summary: text })
 
-                const docs = await textSplitter.createDocuments([docsT]);
-                /** Call the summarization chain. */
-
-                const model = new OpenAI({ temperature: 0 });
-
-                const prompt = new PromptTemplate({
-                    inputVariables: ["text"],
-                    template: template,
-                });
-
-                const chainS = loadSummarizationChain(model,
-                    {
-                        prompt: prompt,
-                        type: "map_reduce"
-                    });
-
-
-
-                resSummarization = await chainS.call({
-                    input_documents: docs
-                });
-
-
-                updateDBEntry("summaries", { url: url, summary: resSummarization.text })
+                return res.status(200).json({
+                    name: "",
+                    content: text,
+                    success: true,
+                } as { name: string; content: string; format: string; success: boolean });
             }
 
         } catch (e) {
@@ -80,8 +70,8 @@ export default async function handler(
 
         return res.status(200).json({
             name: "",
-            content: resSummarization !== undefined ? resSummarization.text : "",
-            success: true,
+            content: "",
+            success: false,
         } as { name: string; content: string; format: string; success: boolean });
     } catch (e: any) {
         console.log(e);

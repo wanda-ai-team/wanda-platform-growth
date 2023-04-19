@@ -32,12 +32,16 @@ export default async function handler(
             1
         );
 
+        console.log(user[0].data.oauth_token)
+        console.log(user[0].data.oauth_token_secret)
         const twitterClient = new TwitterApi({
             appKey: process.env.TWITTER_CLIENT_ID as string,
             appSecret: process.env.TWITTER_CLIENT_SECRET as string,
             accessToken: user[0].data.oauth_token,
             accessSecret: user[0].data.oauth_token_secret,
         });
+
+        console.log(twitterClient)
 
         const threadF = await twitterClient.v1.tweetThread(thread);
         if (threadF.length > 0) {
