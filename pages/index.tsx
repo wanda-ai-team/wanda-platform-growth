@@ -531,7 +531,7 @@ export default function Home() {
         <h2> 3. Edit & Publish {outputSelected} </h2>
 
         <div>
-          <Grid templateColumns={`repeat(${outputSelected === 'Twitter' ? 2 : 1}, 1fr)`} gap={6}>
+          <Grid templateColumns={`repeat(${outputSelected === 'Twitter' ? 2 : 2}, 1fr)`} gap={6}>
             <GridItem w='40vw' style={{ display: 'flex', justifyContent: 'start', flexDirection: 'column', alignItems: 'center' }} >
               {outputSelected === 'Twitter' ?
                 getTwitterThread()
