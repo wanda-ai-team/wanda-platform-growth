@@ -538,18 +538,16 @@ export default function Home() {
                 :
                 outputSelected !== '' &&
                 <Textarea
-                  style={{ height: '500px', marginBottom: '20px' }}
+                  style={{ height: '90%' }}
                   value={convertedText}
                   onChange={handleInputChange}
                   placeholder='Here is a sample placeholder'
                   size='lg' />
               }
             </GridItem>
-            {outputSelected === 'Twitter' &&
-              <GridItem w='40vw' >
-                <Chat selectedTweets={selectedTweets} twitterThreadText={twitterThreadTextPerTweet} setTwitterThreadTextPerTweet={setTwitterThreadTextPerTweet} />
-              </GridItem>
-            }
+            <GridItem w='40vw' >
+              <Chat selectedTweets={selectedTweets} twitterThreadText={twitterThreadTextPerTweet} setTwitterThreadTextPerTweet={setTwitterThreadTextPerTweet} />
+            </GridItem>
           </Grid>
         </div>
 
