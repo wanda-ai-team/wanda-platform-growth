@@ -20,11 +20,12 @@ export const config = {
 const openai = new OpenAIApi(configuration);
 
 const handler = async (req: Request): Promise<Response> => {
-    let { text, output, outputO, isText } = (await req.json()) as {
+    let { text, output, outputO, isText, toneStyle } = (await req.json()) as {
         text?: string;
         output?: string;
         outputO?: string;
         isText?: boolean;
+        toneStyle?: string;
     };
     if (!output || !text || !outputO || isText === undefined) {
         return new Response('Bad Request', { status: 400 });
@@ -39,6 +40,7 @@ const handler = async (req: Request): Promise<Response> => {
                 if (outputO === "thread") {
                     basePromptPrefix =
                         textToTwitterThreadPrompt + `
+${toneStyle ? `Use this tone and/or quality toneStyle: ${toneStyle}\n` : ''}
 Summary: ${text}\n
 Twitter Thread:\n`;
                 }
@@ -47,6 +49,7 @@ Twitter Thread:\n`;
                 if (outputO === "post") {
                     basePromptPrefix =
                         textToInstagramCarrouselTextPrompt + `
+${toneStyle ? `Use this tone and/or quality toneStyle: ${toneStyle}\n` : ''}
 Summary: ${text}\n
 Instagram Carousel:\n`;
                 }
@@ -54,6 +57,7 @@ Instagram Carousel:\n`;
                     console.log("linkedin carousel");
                     basePromptPrefix =
                         textToInstagramCarrouselTextPrompt + `
+${toneStyle ? `Use this tone and/or quality toneStyle: ${toneStyle}\n` : ''}
 Summary: ${text}\n
 Instagram Carousel:\n`;
 
@@ -64,6 +68,7 @@ Instagram Carousel:\n`;
                     console.log("linkedin post");
                     basePromptPrefix =
                         textToLinkedInPostPrompt + `
+${toneStyle ? `Use this tone and/or quality toneStyle: ${toneStyle}\n` : ''}
 Summary: ${text}\n
 Linkedin Post:\n`;
                 }
@@ -72,6 +77,7 @@ Linkedin Post:\n`;
                 if (outputO === "post") {
                     basePromptPrefix =
                         textToBlogPostPrompt + `
+${toneStyle ? `Use this tone and/or quality toneStyle: ${toneStyle}\n` : ''}
 Summary: ${text}\n
 Blog Post:\n`;
                 }
@@ -80,6 +86,7 @@ Blog Post:\n`;
                 if (outputO === "article") {
                     basePromptPrefix =
                         textToBlogPostPrompt + `
+${toneStyle ? `Use this tone and/or quality toneStyle: ${toneStyle}\n` : ''}
 Summary: ${text}\n
 Blog Post:\n`;
                 }
@@ -89,7 +96,7 @@ Blog Post:\n`;
         }
 
         const payload = {
-            model: "gpt-3.5-turbo",
+            model: "gpt-4",
             // model: "text-davinci-003",
             // prompt: basePromptPrefix,
             messages: [{ role: "user", content: basePromptPrefix }],

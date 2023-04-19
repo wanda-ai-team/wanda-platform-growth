@@ -9,10 +9,11 @@ const SignInPage = () => {
 
     useEffect(() => {
         console.log("status");
-        if (!(status === "loading") && !session) void signIn("twitter");
+        if (!(status === "loading") && !session) {
+            void signIn("twitter");
+        }
         if (session) {
-
-            console.log("status1");            window.close();
+            window.close();
             router.push("/");
         }
     }, [session, status]);

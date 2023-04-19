@@ -1,30 +1,51 @@
-async function getTextSummary(data: any, url: string) {
-    return await fetch('https://langchain-py.vercel.app/', {
-        // return await fetch('/api/llm/gpt3/textToSummary', {
-        headers: {
-            "Content-Type": "application/json",
-            // 'Content-Type': 'application/x-www-form-urlencoded',
-        },
+async function getTextSummary(dataF: any, url: string) {
+
+    return await fetch('/api/llm/gpt3/textToSummary', {
+
         method: 'POST',
         body: JSON.stringify({
-            docsT: data,
-            url: url
+            text: dataF,
+            url: url,
+            newF: true
         })
     })
         .then((res) => res.json())
-        .then((data) => {
-            if (!data) {
-                return { content: "Error", success: false };
+        .then(async (data) => {
+
+            if (data.success === false) {
+                return await fetch('https://langchain-py.vercel.app/', {
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    method: 'POST',
+                    body: JSON.stringify({
+                        docsT: dataF,
+                        url: url
+                    })
+                })
+                    .then((res) => res.json())
+                    .then(async (data) => {
+                        if (!data) {
+                            return { content: "Error", success: false };
+                        }
+                        else {
+                            await fetch('/api/llm/gpt3/textToSummary', {
+                                method: 'POST',
+                                body: JSON.stringify({
+                                    text:  data.response.trim(),
+                                    url: url,
+                                    newF: false
+                                })
+                            })
+                            return { content: data.response.trim(), success: true };
+                        }
+                    }).catch((err) => {
+                        return { content: "Error", success: false };
+                    });
             }
             else {
-                return { content: data.response, success: true };
+                return { content: data.content, success: true };
             }
-            // if (data.success === false) {
-            //     return { content: "Error", success: false };
-            // }
-            // else {
-            //     return { content: data.content, success: true };
-            // }
         }).catch((err) => {
             return { content: "Error", success: false };
         });

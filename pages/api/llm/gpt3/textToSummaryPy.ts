@@ -28,6 +28,7 @@ export default async function handler(
             url = url.replace("www.", "");
             url = url.replace("https://", "");
         }
+        console.log("olaaaaaaaa")
         const model = new OpenAI({ temperature: 0 });
         /** Load the summarization chain. */
         let resSummarization;
