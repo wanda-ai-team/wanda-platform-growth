@@ -17,7 +17,6 @@ import Chat from '@/components/text/chat'
 import { getAudioTranscript } from '@/utils/api/audio/getAudioTranscript'
 import { Checkbox, CheckboxGroup } from '@chakra-ui/react'
 import { getThread } from '@/utils/api/twitter/getThread'
-import { ServicesRunner } from '@/components/TheHiddenServiceRunner'
 const outputsWithPlatform = [
   { platform: 'Twitter', outputs: ['Thread'] },
   { platform: 'Instagram', outputs: ['Carousel', 'Post'] },
@@ -30,6 +29,7 @@ const outputsWithPlatform = [
 const input = ['URL', 'Text', 'Podcast (File + URL) Coming soon'];
 
 export default function Home() {
+
   const stopB = useRef(false);
   const canStopB = useRef(false);
   const [regenerate, setRegenerate] = useState(false);
@@ -255,6 +255,10 @@ export default function Home() {
     setApiStep('');
   }
 
+  const startScript: () => Promise<void> = async () => {
+    await fetch("/api/start");
+  };
+
   async function getYoutubeSubtitles(youtubeURLN: string) {
     setApiStep('Getting Subtitles from Video...');
     setLoadingAPICall(true);
@@ -383,6 +387,8 @@ export default function Home() {
           <button onClick={() => signOut()}>Signed in as {session.user.name}</button>
         </div>
       }
+
+      <button onClick={startScript}> ola </button>
 
 
       <div className={styles.main}>
