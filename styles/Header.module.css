@@ -1,0 +1,11 @@
+.navbar__container {
+  display: flex;
+  justify-content: space-between;
+  padding: 20px;
+}
+
+.dropdown__trigger {
+  align-items: center;
+  display: flex;
+  gap: 8px;
+}
