@@ -1,11 +1,18 @@
 .main {
   display: flex;
-  flex-direction: column;
-  justify-content: space-around;
+  flex-direction: row;
   justify-content: flex-start;
   gap: 12px;
   align-items: center;
   min-height: 100vh;
+}
+
+.main2 {
+  display: flex;
+  width: 50vw;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .inputs {
@@ -28,11 +35,10 @@
 }
 
 .logout {
-  width: 100vw;
+  width: 95vw;
   display: flex;
   justify-content: flex-end;
   margin-right: -25px;
-  margin-top: 25px;
 }
 
 .input {

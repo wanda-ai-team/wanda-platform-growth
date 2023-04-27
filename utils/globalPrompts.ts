@@ -13,7 +13,7 @@ function getTextToTwitterThreadPrompt(tone: string, writing: string) {
     The first tweet should have a hook and entice the readers.
     The last tweet should have a small summary of the thread.
     Talk in-depth of the topic on all the tweets.
-    Please separate the tweets with a double paragraph.
+    Please separate the tweets with a double break line.
     Do not repeat yourself.
     Do not self reference.
     Do not explain what you are doing.
@@ -54,6 +54,7 @@ function getTextToInstagramCarrouselTextPrompt(tone: string, writing: string) {
     Include emojis and the Instagram hashtags in the description.
     Try to use unique emojis in the content.
     The description should have a hook and entice the readers.
+    Please separate the slides with a break line.
     Do not repeat yourself. Do not self reference.
     Do not explain what you are doing.
     Do not explain what you are going to do.`
@@ -89,6 +90,7 @@ function getTextToBlogPostPrompt(tone: string, writing: string) {
     Talk in-depth of the topic on the post.
     End with a small summary of the post.
     Format the text with headings, subheadings, and paragraphs.
+    Please separate the paragraphs with a break line.
     Do not repeat yourself.
     Do not self reference.
     Do not explain what you are doing.
@@ -120,6 +122,7 @@ function getTextToLinkedInPostPrompt(tone: string, writing: string) {
     Start the post with a hook and entice the readers.
     Talk in-depth of the topic on the post.
     End with a small summary of the post.
+    Please separate the paragraphs with a break line.
     Do not repeat yourself.
     Do not self reference.
     Do not explain what you are doing.
