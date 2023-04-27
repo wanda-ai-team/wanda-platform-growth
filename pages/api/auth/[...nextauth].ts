@@ -1,6 +1,7 @@
 import NextAuth, { NextAuthOptions } from "next-auth";
 import TwitterProvider from "next-auth/providers/twitter";
 import { FirestoreAdapter } from "@next-auth/firebase-adapter";
+import updateDBEntry from "@/utils/api/db/updateDBEntry";
 
 export const authOptions: NextAuthOptions = {
   pages: {
@@ -58,8 +59,18 @@ export const authOptions: NextAuthOptions = {
       return token;
     },
   },
+  events: {
+    signIn: async (message) => {
+      if (message.account !== null) {
+        updateDBEntry("accounts", message.account, ['providerAccountId'], ['=='], [message.account.providerAccountId], 1);
+      }
+    },
+  },
+
   session: {
     strategy: 'jwt',
+    updateAge: 12 * 60 * 60, // 24 hours
+    maxAge: 1 * 12 * 60 * 60, // 30 days
   },
 }
 export default NextAuth(authOptions)

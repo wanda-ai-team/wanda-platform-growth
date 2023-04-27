@@ -77,6 +77,7 @@ export default async function handler(
 
         const completeOptions = getOptions(undefined);
         const tweet = await client.tweets.findTweetById(id, completeOptions);
+        
         console.log(tweet)
         const userId = tweet.data?.author_id as string;
         const startDate = tweet.data?.created_at as string;

@@ -37,7 +37,7 @@ const TwitterThread = ({ setNumberOfTweets, numberOfTweets, twitterThreadText, s
                 <div key={index} className={styles.threadBoxButtons}>
                     <Button onClick={() => changeNumberOfTweets(true, index, i)}> Add new tweet </Button>
                     <Button onClick={() => changeNumberOfTweets(false, index, i)}> Remove tweet </Button>
-                    <Checkbox checked={selectedTweets[i]} onChange={(e) => changeSelected(index, e.target.checked)}> Select tweet </Checkbox>
+                    {/* <Checkbox checked={selectedTweets[i]} onChange={(e) => changeSelected(index, e.target.checked)}> Select tweet </Checkbox> */}
                 </div>
             </div>
         ))
