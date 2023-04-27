@@ -1,6 +1,6 @@
 
 import styles from '@/styles/Home.module.css'
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Button, Grid, GridItem, Input, Select, Textarea } from '@chakra-ui/react'
 import { ColorRing } from 'react-loader-spinner'
 import TwitterThread from '@/components/text/twitterThread/twitterThread'
@@ -18,11 +18,17 @@ import { getAudioTranscript } from '@/utils/api/audio/getAudioTranscript'
 import { Checkbox, CheckboxGroup } from '@chakra-ui/react'
 import { getThread } from '@/utils/api/twitter/getThread'
 import { outputsWithPlatform, toneList, writingStyles } from '@/utils/globalVariables'
+import dynamic from 'next/dynamic'
+import EditorJsRenderer from '@/components/editor/EditorJsRenderer'
+import { OutputData } from '@editorjs/editorjs'
+
+const CustomEditor = dynamic(() => import("@/components/editor/Editor"), {
+  ssr: false,
+});
 
 const input = ['URL', 'Text', 'Podcast (File + URL) Coming soon'];
 
 export default function Home() {
-
   const stopB = useRef(false);
   const canStopB = useRef(false);
   const [regenerate, setRegenerate] = useState(false);
@@ -52,27 +58,9 @@ export default function Home() {
   const [wantTranscript, setWantTranscript] = useState(false);
   const inputFileRef = useRef<HTMLInputElement | null>(null);
 
-  async function convertSummary(summaryN: string) {
-    setLoadingAPICall(true);
-    setApiStep('Converting to ' + outputSelected + '\...');
-    const reponseConvert = await convertTextToThread(summaryN, outputSelected);
-    if (reponseConvert.success) {
-      if (outputSelected === 'Twitter') {
-        setNumberOfTweets(reponseConvert.content.split("\n\n").length);
-        setTwitterThreadText(reponseConvert.content);
-        setTwitterThreadTextPerTweet(reponseConvert.content.split("\n\n"));
-        const tweets = new Array(reponseConvert.content.split("\n\n").length).fill(false);
-        setSelectedTweets(tweets);
-      } else {
-        setConvertedText(reponseConvert.content)
-      }
-    }
-    else {
-      setTwitterThread("Error");
-    }
-    setApiStep('');
-    setLoadingAPICall(false);
-  }
+
+  useEffect(() => {
+  }, []);
 
   async function convertSummaryS(summaryN: string, text: boolean, toneStyle: string, writingStyle: string) {
     setLoadingAPICall(true);
@@ -149,6 +137,7 @@ export default function Home() {
         setConvertedText((prev) => prev + chunkValue);
       }
     }
+
 
     canStopB.current = false;
     setLoadingAPICall(false);
@@ -374,18 +363,30 @@ export default function Home() {
   }
 
   function getTextArea(valueChosen: any) {
+    console.log(valueChosen)
     if (outputSelected === 'Twitter') {
       return getTwitterThread();
     }
 
     if (outputSelected !== '') {
       return (
-        <Textarea
+        <>
+          {/* <div className="container max-w-4xl">
+            {CustomEditor && <CustomEditor data={valueChosen} onChange={null} holder="editorjs-container" />}
+          </div>
+          <div className="col-span-1 ">
+            <h1>Preview</h1>
+            <div className="border rounded-md">
+              <div className="p-16">{valueChosen && valueChosen !== '' && <EditorJsRenderer data={valueChosen} />}</div>
+            </div>
+          </div> */}
+          <Textarea
           style={{ height: '500px' }}
           value={valueChosen}
           onChange={handleInputChange}
           placeholder='Here is a sample placeholder'
           size='lg' />
+        </>
       )
     }
   }
@@ -402,54 +403,55 @@ export default function Home() {
 
 
       <div className={styles.main}>
-        <h2> 1. Post Content </h2>
-        <div className={styles.options}>
-          <Select onChange={(e) => setOutputSelectedI(e.target.value)} value={outputSelectedI} >
-            {input.map((value, index) => (
-              <option disabled={value.includes('odcast')} key={index} value={value}>{value}</option>
-            ))}
-          </Select>
-        </div>
-        <div className={styles.inputs}>
-          <div className={styles.links}>
+        <div className={styles.main2}>
+          <h2> 1. Post Content </h2>
+          <div className={styles.options}>
+            <Select onChange={(e) => setOutputSelectedI(e.target.value)} value={outputSelectedI} >
+              {input.map((value, index) => (
+                <option disabled={value.includes('odcast')} key={index} value={value}>{value}</option>
+              ))}
+            </Select>
+          </div>
+          <div className={styles.inputs}>
+            <div className={styles.links}>
 
-            {outputSelectedI === 'URL' &&
-              <>
-                <Input placeholder={outputSelectedI === 'URL' ? 'URL (works with Medium, Youtube, Twitter tweets)' : 'URL (works with spotify)'} value={youtubeURL} className={styles.input} onChange={(e) => {
-                  setYoutubeURL(e.target.value);
-                  if (e.target.value !== "") {
-                    if (outputSelectedI === 'URL') {
-                      youtubeTransformText(e.target.value, wantTranscript);
-                    } else {
-                      // getAudioTranscript(e.target.value);
+              {outputSelectedI === 'URL' &&
+                <>
+                  <Input placeholder={outputSelectedI === 'URL' ? 'URL (works with Medium, Youtube, Twitter tweets)' : 'URL (works with spotify)'} value={youtubeURL} className={styles.input} onChange={(e) => {
+                    setYoutubeURL(e.target.value);
+                    if (e.target.value !== "") {
+                      if (outputSelectedI === 'URL') {
+                        youtubeTransformText(e.target.value, wantTranscript);
+                      } else {
+                        // getAudioTranscript(e.target.value);
+                      }
                     }
-                  }
-                }} />
-                {/* <Checkbox isChecked={wantTranscript} onChange={(e) => setWantTranscript(e.target.checked)}>Transcript (for video and audios)</Checkbox> */}
-              </>
-            }
+                  }} />
+                  {/* <Checkbox isChecked={wantTranscript} onChange={(e) => setWantTranscript(e.target.checked)}>Transcript (for video and audios)</Checkbox> */}
+                </>
+              }
 
-            {outputSelectedI === 'Text' &&
-              <Textarea
-                style={{ height: '10vh', width: '40vw' }}
-                value={inputText}
-                onChange={(e) => {
-                  setInputText(e.target.value)
-                  if (e.target.value !== "") {
-                    youtubeTransformText(e.target.value)
-                  }
-                }}
-                placeholder='Paste your text here'
-                size='lg' />
-            }
+              {outputSelectedI === 'Text' &&
+                <Textarea
+                  style={{ height: '10vh', width: '40vw' }}
+                  value={inputText}
+                  onChange={(e) => {
+                    setInputText(e.target.value)
+                    if (e.target.value !== "") {
+                      youtubeTransformText(e.target.value)
+                    }
+                  }}
+                  placeholder='Paste your text here'
+                  size='lg' />
+              }
 
-            {outputSelectedI === 'Audio File' &&
-              <>
-                <input type="file" name="myfile" accept=".mp3" ref={inputFileRef} />
-                <input type="submit" value="Upload" onClick={submitFile} />
-              </>
-            }
-            {/* <div className={styles.transcriptSummary}>
+              {outputSelectedI === 'Audio File' &&
+                <>
+                  <input type="file" name="myfile" accept=".mp3" ref={inputFileRef} />
+                  <input type="submit" value="Upload" onClick={submitFile} />
+                </>
+              }
+              {/* <div className={styles.transcriptSummary}>
               {wantTranscript && transcript !== '' &&
                 <div className={styles.texts}>
                   <p>
@@ -481,98 +483,99 @@ export default function Home() {
                 </div>
               }
             </div> */}
-          </div>
-        </div>
-
-        <div>
-          {loadingAPICall &&
-            <div className={styles.loadingIcon}>
-              <p>{apiStep}</p>
-              <ColorRing
-                visible={true}
-                height="80"
-                width="80"
-                ariaLabel="blocks-loading"
-                wrapperStyle={{}}
-                wrapperClass="blocks-wrapper"
-                colors={['#e15b64', '#f47e60', '#f8b26a', '#abbd81', '#849b87']} />
             </div>
-          }
-        </div>
+          </div>
 
-        <h2> 2. Convert </h2>
-
-        <div>
-          <div className={styles.options}>
-
-            <span> Platform: </span>
-            <Select onChange={(e) => { setOutputSelected(e.target.value); setOutputSelectedO(outputsWithPlatform.filter(v => v.platform === e.target.value)[0].outputs[0]); setRegenerate(false); }} value={outputSelected} >
-              {outputsWithPlatform.map((output, index) => (
-                <option key={index} value={output.platform}>{output.platform}</option>
-              ))}
-            </Select>
-
-            {outputSelected !== 'Transcript' && outputSelected !== 'Summary' &&
-              <>
-                <span> Output: </span>
-                <Select onChange={(e) => { setOutputSelectedO(e.target.value); setRegenerate(false); }} value={outputSelectedO} >
-                  {outputsWithPlatform.filter(plat => plat.platform === outputSelected)[0] !== undefined ? outputsWithPlatform.filter(plat => plat.platform === outputSelected)[0].outputs.map((output, index) => (
-                    <option key={index} value={output}>{output}</option>
-                  )) : <></>}
-                </Select>
-
-                <span> Tone Style: </span>
-                <Select onChange={(e) => { setOutputSelectedT(e.target.value); setRegenerate(false); }} value={outputSelectedT} >
-                  {toneList.map((output, index) => (
-                    <option key={index} value={output}>{output}</option>
-                  ))}
-                </Select>
-
-                <span> Writing Style: </span>
-                <Select onChange={(e) => { setOutputSelectedW(e.target.value); setRegenerate(false); }} value={outputSelectedW} >
-                  {writingStyles.map((output, index) => (
-                    <option key={index} value={output}>{output}</option>
-                  ))}
-                </Select>
-
-                <div className={styles.transcriptSummary}>
-                  <Button isDisabled={(youtubeURL.length <= 0 || outputSelected === "" || outputSelectedO === "" || canStopB.current)} colorScheme='purple' onClick={() => {
-                    setConvertedText('');
-                    setTwitterThreadTextPerTweet(['']);
-                    setRegenerate(true);
-                    if (outputSelected === "Twitter") {
-                      convertSummaryS(summary, false, outputSelectedT, outputSelectedW);
-                    } else {
-                      if (outputSelectedO === 'Text') {
-                        convertSummaryS(inputText, true, outputSelectedT, outputSelectedW);
-                      } else {
-                        convertSummaryS(summary, false, outputSelectedT, outputSelectedW);
-                      }
-                    }
-                  }}>
-                    Generate to {outputSelected !== '' ? outputSelected : '...'}
-                    {/* {regenerate ? 'Regenerate to' : 'Generate to'} {outputSelected !== '' ? outputSelected : '...'} */}
-                  </Button>
-                  <Button colorScheme='purple' isDisabled={!canStopB.current} onClick={() => stopB.current = true}> Stop Generation </Button>
-                </div>
-              </>
+          <div>
+            {loadingAPICall &&
+              <div className={styles.loadingIcon}>
+                <p>{apiStep}</p>
+                <ColorRing
+                  visible={true}
+                  height="80"
+                  width="80"
+                  ariaLabel="blocks-loading"
+                  wrapperStyle={{}}
+                  wrapperClass="blocks-wrapper"
+                  colors={['#e15b64', '#f47e60', '#f8b26a', '#abbd81', '#849b87']} />
+              </div>
             }
           </div>
+
+          <h2> 2. Convert </h2>
+
+          <div className={styles.main2}>
+            <div className={styles.options}>
+
+              <span> Platform: </span>
+              <Select onChange={(e) => { setOutputSelected(e.target.value); setOutputSelectedO(outputsWithPlatform.filter(v => v.platform === e.target.value)[0].outputs[0]); setRegenerate(false); }} value={outputSelected} >
+                {outputsWithPlatform.map((output, index) => (
+                  <option key={index} value={output.platform}>{output.platform}</option>
+                ))}
+              </Select>
+
+              {outputSelected !== 'Transcript' && outputSelected !== 'Summary' &&
+                <>
+                  <span> Output: </span>
+                  <Select onChange={(e) => { setOutputSelectedO(e.target.value); setRegenerate(false); }} value={outputSelectedO} >
+                    {outputsWithPlatform.filter(plat => plat.platform === outputSelected)[0] !== undefined ? outputsWithPlatform.filter(plat => plat.platform === outputSelected)[0].outputs.map((output, index) => (
+                      <option key={index} value={output}>{output}</option>
+                    )) : <></>}
+                  </Select>
+
+                  <span> Tone Style: </span>
+                  <Select onChange={(e) => { setOutputSelectedT(e.target.value); setRegenerate(false); }} value={outputSelectedT} >
+                    {toneList.map((output, index) => (
+                      <option key={index} value={output}>{output}</option>
+                    ))}
+                  </Select>
+
+                  <span> Writing Style: </span>
+                  <Select onChange={(e) => { setOutputSelectedW(e.target.value); setRegenerate(false); }} value={outputSelectedW} >
+                    {writingStyles.map((output, index) => (
+                      <option key={index} value={output}>{output}</option>
+                    ))}
+                  </Select>
+
+                  <div className={styles.transcriptSummary}>
+                    <Button isDisabled={(youtubeURL.length <= 0 || outputSelected === "" || outputSelectedO === "" || canStopB.current)} colorScheme='purple' onClick={() => {
+                      setConvertedText('');
+                      setTwitterThreadTextPerTweet(['']);
+                      setRegenerate(true);
+                      if (outputSelected === "Twitter") {
+                        convertSummaryS(summary, false, outputSelectedT, outputSelectedW);
+                      } else {
+                        if (outputSelectedO === 'Text') {
+                          convertSummaryS(inputText, true, outputSelectedT, outputSelectedW);
+                        } else {
+                          convertSummaryS(summary, false, outputSelectedT, outputSelectedW);
+                        }
+                      }
+                    }}>
+                      Generate to {outputSelected !== '' ? outputSelected : '...'}
+                      {/* {regenerate ? 'Regenerate to' : 'Generate to'} {outputSelected !== '' ? outputSelected : '...'} */}
+                    </Button>
+                    <Button colorScheme='purple' isDisabled={!canStopB.current} onClick={() => stopB.current = true}> Stop Generation </Button>
+                  </div>
+                </>
+              }
+            </div>
+          </div>
         </div>
-
-        <h2> 3. Edit & Publish {outputSelected} </h2>
-
         <div>
-          <Grid templateColumns={`repeat(${outputSelected === 'Twitter' ? 1 : 1}, 1fr)`} gap={6}>
-            <GridItem w='40vw' style={{ display: 'flex', justifyContent: 'start', flexDirection: 'column', alignItems: 'center' }} >
-              {getTextArea(outputSelected === 'Summary' ? summary : outputSelected === 'Transcript' ? transcript : convertedText)}
-            </GridItem>
-            {/* <GridItem w='40vw' >
+          <h2> 3. Edit & Publish {outputSelected} </h2>
+
+          <div>
+            <Grid templateColumns={`repeat(${outputSelected === 'Twitter' ? 1 : 1}, 1fr)`} gap={6}>
+              <GridItem w='40vw' style={{ display: 'flex', justifyContent: 'start', flexDirection: 'column', alignItems: 'center' }} >
+                {getTextArea(outputSelected === 'Summary' ? summary : outputSelected === 'Transcript' ? transcript : convertedText)}
+              </GridItem>
+              {/* <GridItem w='40vw' >
               <Chat selectedTweets={selectedTweets} twitterThreadText={twitterThreadTextPerTweet} setTwitterThreadTextPerTweet={setTwitterThreadTextPerTweet} />
             </GridItem> */}
-          </Grid>
+            </Grid>
+          </div>
         </div>
-
       </div>
     </>
   )
