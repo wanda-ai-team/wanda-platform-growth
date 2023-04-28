@@ -11,6 +11,7 @@ export const authOptions: NextAuthOptions = {
     TwitterProvider({
       clientId: process.env.TWITTER_CLIENT_ID as string,
       clientSecret: process.env.TWITTER_CLIENT_SECRET as string,
+      allowDangerousEmailAccountLinking: true,
       authorization: {
         params: {
           scope: "users.read tweet.read tweet.write offline.access like.read list.read",
@@ -69,8 +70,8 @@ export const authOptions: NextAuthOptions = {
 
   session: {
     strategy: 'jwt',
-    // updateAge: 12 * 60 * 60, // 24 hours
-    // maxAge: 1 * 12 * 60 * 60, // 30 days
+    updateAge: 12 * 60 * 60, // 24 hours
+    maxAge: 1 * 12 * 60 * 60, // 30 days
   },
 }
 export default NextAuth(authOptions)
