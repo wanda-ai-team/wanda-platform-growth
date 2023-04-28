@@ -1,6 +1,7 @@
 import IAnswer from "./redux/types/data/IAnswer";
 import IInitData from "./redux/types/data/IInitData";
 import ErrorService from "./services/ErrorService";
+import { getServerSession } from "next-auth/next";
 
 const startScript: () => Promise<void> = async () => {
 	await fetch("http://localhost:3001/autogpt/start");
@@ -16,6 +17,8 @@ const fetchData: () => Promise<IAnswer[]> = async () => {
 	if (data === "") {
 		return [];
 	}
+	console.log("data")
+	console.log(data)
 	// remove last char from data data is a string
 	// remove \n
 	data = data.output.replaceAll("\n", "");
@@ -29,13 +32,14 @@ const fetchData: () => Promise<IAnswer[]> = async () => {
 		.split("")
 		.reverse()
 		.join("");
-	let json = [];
+	let json: IAnswer[] = [];
 	try {
 		console.log("data");
 		console.log(typeof data);
-		console.log(data);
-		json = JSON.parse(`[${data}]`);
-		// json = data;
+		console.log(data + '\n');
+		// json = JSON.parse(`[${data}]`);
+		// json.push({ content: data + '\n' })
+		json = data;
 	} catch (e) {
 		console.log(e)
 		console.log(data);
@@ -65,26 +69,33 @@ const downloadFile: (filename: string) => Promise<void> = async (
 };
 
 const createInitData = async (data: IInitData) => {
-	const res = await fetch("http://localhost:3001/autogpt/init", {
-		method: "POST",
-		headers: {
-			"Content-Type": "application/json",
-		},
-		body: JSON.stringify(data),
-	});
-	return res;
+	return await fetch('/api/autogpt/createInitData',
+		{
+			method: 'POST',
+			body: JSON.stringify({
+				data: data
+			})
+		})
+		.then((res) => res.json())
+		.then((data) => {
+			if (data.suceess === false) {
+				return { content: "Error", success: false };
+			}
+			else {
+				return { content: data.content, success: true };
+			}
+		}).catch((err) => {
+			return { content: "Error", success: false };
+		});
 };
 
 const sendData = async (data: string) => {
-	console.log("sendData")
-	console.log(data)
-	console.log(data)
 	const res = await fetch("http://localhost:3001/autogpt/sendData", {
 		method: "POST",
 		headers: {
 			"Content-Type": "application/json",
 		},
-		body: JSON.stringify({data: data}),
+		body: JSON.stringify({ data: data }),
 	});
 	return res;
 };
