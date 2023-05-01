@@ -9,7 +9,7 @@ export default async function handler(
 ) {
 
 	const session = await getServerSession(req, res, authOptions);
-
+    console.log(session)
     const data = JSON.parse(req.body).data;
     if (
         session === null ||
@@ -21,7 +21,6 @@ export default async function handler(
         res.status(400).end();
         return;
     }
-
 
 	data.id = session.user.id;
 

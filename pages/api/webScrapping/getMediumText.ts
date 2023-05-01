@@ -38,16 +38,29 @@ export default async function handler(
     console.log('url', url)
     const { data } = await axios.get(url)
     const $ = cheerio.load(data)
-    const section = $('section').text()
+    let section = $('section').text()
     let responseText
     if(section.length > 0) {
         responseText = section
     } else {
-        responseText = $('main').text()
+        
+        section = $('main').text()
+
         if(section.length > 0) {
             responseText = section
         } else {
-            responseText = $('tbody').text()
+
+            section = $('tbody').text()
+
+            if(section.length > 0) {
+                responseText = section
+            } else {
+                
+                section = $('#content').text()
+                if(section.length > 0) {
+                    responseText = section
+                }
+            }
         }
     }
     

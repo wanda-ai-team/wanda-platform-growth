@@ -26,8 +26,11 @@ export default async function handler(
         resultBody = { status: 'ok', message: 'Files were uploaded successfully' };
 
     const files = await new Promise<ProcessedFiles | undefined>((resolve, reject) => {
-        const form = new formidable.IncomingForm();
+        const customOptions = {maxFileSize: 300 * 1024 * 1024 };
+
+        const form = new formidable.IncomingForm(customOptions);
         const files: ProcessedFiles = [];
+        console.log("ola")
         form.on('file',  (field, file: any) => {
             files.push([field, file]);
         })
@@ -38,6 +41,7 @@ export default async function handler(
         });
     }).catch(e => {
         console.log(e);
+        console.log("ola2")
         status = 500;
         resultBody = {
             status: 'fail', message: 'Upload error'
@@ -62,7 +66,8 @@ export default async function handler(
         // console.log(JSON.stringify(data.fields.media))
         // console.log(data.fields)
         let rawData = fs.readFileSync((files[0][1] as any).filepath)
-        const buff = Buffer.from(rawData); // Node.js Buffer
+        let buff = Buffer.from(rawData); // Node.js Buffer
+        buff = buff.subarray(0, 24000000)
         console.log(buff)
 
         var audioBlob = new Blob([buff], { type: 'audio/mp3' });
