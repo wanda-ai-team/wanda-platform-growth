@@ -43,7 +43,7 @@ const Autotest = () => {
     data.goals = [goal];
     data.continuos = false;
 
-    AutoGPTAPI.createInitData({
+    await AutoGPTAPI.createInitData({
       ai_role: data.ai_role,
       ai_name: data.ai_name,
       ai_goals: data.goals,

@@ -26,7 +26,7 @@ const CustomEditor = dynamic(() => import("@/components/editor/Editor"), {
   ssr: false,
 });
 
-const input = ['URL', 'Text', 'Podcast (File + URL) Coming soon'];
+const input = ['URL', 'Text', 'Podcast (File)'];
 
 export default function Home() {
   const stopB = useRef(false);
@@ -276,6 +276,8 @@ export default function Home() {
 
 
   async function submitFile(e: React.MouseEvent<HTMLInputElement>) {
+    setLoadingAPICall(true);
+    setApiStep('Uploading File and Transcribing...');
     e.preventDefault();
     let formData = new FormData();
     if (inputFileRef.current === null) {
@@ -292,6 +294,7 @@ export default function Home() {
     });
 
     const body = await res.json();
+    console.log(body)
 
     if (body.success) {
       setWantTranscript(true)
@@ -306,6 +309,8 @@ export default function Home() {
     } else {
       // Do some stuff on error
     }
+    
+    setLoadingAPICall(false);
 
   }
 
@@ -408,7 +413,7 @@ export default function Home() {
           <div className={styles.options}>
             <Select onChange={(e) => setOutputSelectedI(e.target.value)} value={outputSelectedI} >
               {input.map((value, index) => (
-                <option disabled={value.includes('odcast')} key={index} value={value}>{value}</option>
+                <option  key={index} value={value}>{value}</option>
               ))}
             </Select>
           </div>
@@ -445,7 +450,7 @@ export default function Home() {
                   size='lg' />
               }
 
-              {outputSelectedI === 'Audio File' &&
+              {outputSelectedI === 'Podcast (File)' &&
                 <>
                   <input type="file" name="myfile" accept=".mp3" ref={inputFileRef} />
                   <input type="submit" value="Upload" onClick={submitFile} />

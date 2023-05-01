@@ -69,6 +69,7 @@ const downloadFile: (filename: string) => Promise<void> = async (
 };
 
 const createInitData = async (data: IInitData) => {
+	console.log("data")
 	return await fetch('/api/autogpt/createInitData',
 		{
 			method: 'POST',
