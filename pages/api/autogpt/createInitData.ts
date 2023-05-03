@@ -33,8 +33,6 @@ export default async function handler(
 		body: JSON.stringify(data),
 	});
 
-    console.log("olaaaaaaa")
-
     return res.status(200).json({
         content: resL,
         success: true,
