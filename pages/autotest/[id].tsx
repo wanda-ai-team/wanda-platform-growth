@@ -66,8 +66,9 @@ const Autotest = () => {
 
     console.log('ola')
     currentAi = aiHistory[id as string]
+    await AutoGPTAPI.startScript();
+    
     setPlaying(true);
-    AutoGPTAPI.startScript();
   };
 
   const sendScript: () => Promise<void> = async () => {
