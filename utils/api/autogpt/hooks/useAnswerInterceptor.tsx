@@ -4,6 +4,7 @@ import IAgent from "../redux/types/data/IAgent"
 import useAgents from "./data/useAgents"
 import IAnswer, { InternalType } from "../redux/types/data/IAnswer"
 import { useParams } from "react-router"
+import { useRouter } from "next/router"
 
 
 const AGENT_CREATED = "COMMAND = start_agent ARGUMENTS = "
@@ -16,7 +17,8 @@ const GOOGLE_RETURN = "Command google returned: "
 const APPEND_FILE = "COMMAND = append_to_file ARGUMENTS = "
 const useAnswerInterceptor = () => {
   const dispatch = useDispatch()
-  const { id } = useParams<{ id: string }>()
+	const router = useRouter();  // -> Access Next.js Router here
+	const { id } = router.query;
   const { agents, agentsArray } = useAgents()
 
   const interceptAnswer = (data: IAnswer[]) => {
@@ -50,7 +52,7 @@ const useAnswerInterceptor = () => {
 
         if (agentsArray.find((agent) => agent.name === jsonAgent.name))
           return newData.push(answer)
-        dispatch(addAgent({ agent: jsonAgent, aiId: id }))
+        dispatch(addAgent({ agent: jsonAgent, aiId: id.toString() }))
         newData.push(answer)
         return
       }

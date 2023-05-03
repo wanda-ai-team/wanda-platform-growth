@@ -64,7 +64,7 @@ const Autotest = () => {
       }),
     )
 
-
+    console.log('ola')
     currentAi = aiHistory[id as string]
     setPlaying(true);
     AutoGPTAPI.startScript();
@@ -92,7 +92,7 @@ const Autotest = () => {
           // <Answers answers={currentAi.answers} playing={playing} />
           currentAi.answers.map((answer: any, index: any) => (
             <span key={index}>
-              {answer}
+              {answer.content}
             </span>
           ))
         }

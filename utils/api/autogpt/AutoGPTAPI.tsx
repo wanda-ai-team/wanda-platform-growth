@@ -4,21 +4,20 @@ import ErrorService from "./services/ErrorService";
 import { getServerSession } from "next-auth/next";
 
 const startScript: () => Promise<void> = async () => {
-	await fetch("http://localhost:3001/autogpt/start");
+	await fetch(process.env.NEXT_PUBLIC_AUTO_SERVER_URL + "/autogpt/start");
 };
 
 const killScript: () => Promise<void> = async () => {
-	await fetch("http://localhost:3001/autogpt/stop");
+	await fetch(process.env.NEXT_PUBLIC_AUTO_SERVER_URL + "/autogpt/stop");
 };
 
 const fetchData: () => Promise<IAnswer[]> = async () => {
-	const res = await fetch("http://localhost:3001/autogpt/data");
+	console.log(process.env.NEXT_PUBLIC_AUTO_SERVER_URL)
+	const res = await fetch(process.env.NEXT_PUBLIC_AUTO_SERVER_URL + "/autogpt/data");
 	let data = await res.json();
 	if (data === "") {
 		return [];
 	}
-	console.log("data")
-	console.log(data)
 	// remove last char from data data is a string
 	// remove \n
 	data = data.output.replaceAll("\n", "");
@@ -36,10 +35,20 @@ const fetchData: () => Promise<IAnswer[]> = async () => {
 	try {
 		console.log("data");
 		console.log(typeof data);
-		console.log(data + '\n');
+		console.log(`[${data}]`);
 		// json = JSON.parse(`[${data}]`);
 		// json.push({ content: data + '\n' })
-		json = data;
+		// json = JSON.parse(data);
+		if (data.toLowerCase().includes('thinking')) {
+			json = [{ content: data + '\n', title: 'Thinking' }]
+		} else {
+			if (data.toLowerCase().includes('plan')) {
+				json = [{ content: data + '\n', title: 'PLAN' }]
+			}
+			else {
+				json = [{ content: data + '\n', title: 'Text' }]
+			}
+		}
 	} catch (e) {
 		console.log(e)
 		console.log(data);
@@ -51,7 +60,7 @@ const fetchData: () => Promise<IAnswer[]> = async () => {
 const downloadFile: (filename: string) => Promise<void> = async (
 	filename: string,
 ) => {
-	const res = await fetch("http://localhost:3001/autogpt/download", {
+	const res = await fetch(process.env.NEXT_PUBLIC_AUTO_SERVER_URL + "/autogpt/download", {
 		method: "POST",
 		headers: {
 			"Content-Type": "application/json",
@@ -91,7 +100,7 @@ const createInitData = async (data: IInitData) => {
 };
 
 const sendData = async (data: string) => {
-	const res = await fetch("http://localhost:3001/autogpt/sendData", {
+	const res = await fetch(process.env.NEXT_PUBLIC_AUTO_SERVER_URL + "/autogpt/sendData", {
 		method: "POST",
 		headers: {
 			"Content-Type": "application/json",

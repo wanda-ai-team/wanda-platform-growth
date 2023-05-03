@@ -411,7 +411,11 @@ export default function Home() {
         <div className={styles.main2}>
           <h2> 1. Post Content </h2>
           <div className={styles.options}>
-            <Select onChange={(e) => setOutputSelectedI(e.target.value)} value={outputSelectedI} >
+            <Select onChange={(e) => {
+              setOutputSelectedI(e.target.value)
+              setYoutubeURL('')
+              setInputText('')
+            }} value={outputSelectedI} >
               {input.map((value, index) => (
                 <option  key={index} value={value}>{value}</option>
               ))}
@@ -543,7 +547,7 @@ export default function Home() {
                   </Select>
 
                   <div className={styles.transcriptSummary}>
-                    <Button isDisabled={(youtubeURL.length <= 0 || outputSelected === "" || outputSelectedO === "" || canStopB.current)} colorScheme='purple' onClick={() => {
+                    <Button isDisabled={( (summary === "")  || canStopB.current)} colorScheme='purple' onClick={() => {
                       setConvertedText('');
                       setTwitterThreadTextPerTweet(['']);
                       setRegenerate(true);
