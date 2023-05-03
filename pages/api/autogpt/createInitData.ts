@@ -10,6 +10,7 @@ export default async function handler(
 
 	const session = await getServerSession(req, res, authOptions);
     console.log(session)
+    console.log("olaaaaaaa1")
     const data = JSON.parse(req.body).data;
     if (
         session === null ||
@@ -24,13 +25,15 @@ export default async function handler(
 
 	data.id = session.user.id;
 
-	const resL = await fetch("http://localhost:3001/autogpt/init", {
+	const resL = await fetch(process.env.NEXT_PUBLIC_AUTO_SERVER_URL + "/autogpt/init", {
 		method: "POST",
 		headers: {
 			"Content-Type": "application/json",
 		},
 		body: JSON.stringify(data),
 	});
+
+    console.log("olaaaaaaa")
 
     return res.status(200).json({
         content: resL,

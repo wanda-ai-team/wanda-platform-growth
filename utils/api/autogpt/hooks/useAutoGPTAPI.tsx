@@ -16,9 +16,7 @@ const useAutoGPTAPI = () => {
 		if (!id) return
 		let data = (await AutoGPTAPI.fetchData()) as Array<IAnswer>
 		if (data.length === 0) return
-		data = interceptAnswer(data)
-		console.log("data")
-		console.log(data)
+		data = await interceptAnswer(data)
 		dispatch(
 			addAnswersToAi({
 				aiId: id as string,
