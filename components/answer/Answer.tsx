@@ -24,6 +24,7 @@ const ThinkingContainer = styled.div`
   margin-bottom: 1rem;
 `
 export const AnswerContainer = styled.div`
+	white-space: break-spaces;
   color: var(--grey100);
   padding: 1rem 2rem;
   border: 1px solid #999;
@@ -70,10 +71,6 @@ const Answer = ({
 				<>
 					<LineSeparatorWithTitle title={answer.title} />
 					<Flex gap={1}>
-						<SAvatar
-							src="/images/autoctopus.png"
-							sx={{ width: 42, height: 42 }}
-						/>
 						<AnswerContainer>
 							<Flex direction="column" gap={0.5}>
 								{answer.content.split("-").map((item, index) => (
@@ -90,10 +87,6 @@ const Answer = ({
 				<>
 					<LineSeparatorWithTitle title={answer.title} />
 					<Flex gap={1}>
-						<SAvatar
-							src="/images/autoctopus.png"
-							sx={{ width: 42, height: 42 }}
-						/>
 						<AnswerContainer>{answer.content ?? answer.title}</AnswerContainer>
 					</Flex>
 				</>
