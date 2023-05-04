@@ -2,7 +2,7 @@
   align-items: start;
   display: grid;
   grid-template-columns: 1fr 1fr;
-  min-height: calc(100vh - 72px);
+  min-height: calc(100vh - 152px);
 }
 
 .form__container {
