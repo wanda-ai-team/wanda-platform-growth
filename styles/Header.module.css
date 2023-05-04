@@ -1,5 +1,7 @@
 .navbar__container {
+  border-bottom: 1px solid #e3dfe9;
   display: flex;
+  height: 72px;
   justify-content: space-between;
   padding: 20px;
 }
