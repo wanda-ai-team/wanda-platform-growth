@@ -18,13 +18,6 @@ import { getAudioTranscript } from '@/utils/api/audio/getAudioTranscript'
 import { Checkbox, CheckboxGroup } from '@chakra-ui/react'
 import { getThread } from '@/utils/api/twitter/getThread'
 import { outputsWithPlatform, toneList, writingStyles } from '@/utils/globalVariables'
-import dynamic from 'next/dynamic'
-import EditorJsRenderer from '@/components/editor/EditorJsRenderer'
-import { OutputData } from '@editorjs/editorjs'
-
-const CustomEditor = dynamic(() => import("@/components/editor/Editor"), {
-  ssr: false,
-});
 
 const input = ['URL', 'Text', 'Podcast (File)'];
 

@@ -1,0 +1,13 @@
+.navbar__container {
+  border-bottom: 1px solid #e3dfe9;
+  display: flex;
+  height: 72px;
+  justify-content: space-between;
+  padding: 20px;
+}
+
+.dropdown__trigger {
+  align-items: center;
+  display: flex;
+  gap: 8px;
+}

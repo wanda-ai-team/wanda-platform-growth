@@ -1,4 +1,3 @@
-
 function getTextToTwitterThreadPrompt(tone: string, writing: string) {
     return `
     Please ignore all previous instructions. 
@@ -36,7 +35,7 @@ Talk in-depth of the topic on all the tweets
 Do not repeat yourself.
 Do not self reference.
 Do not explain what you are doing.
-Do not explain what you are going to do.`
+Do not explain what you are going to do.`;
 
 function getTextToInstagramCarrouselTextPrompt(tone: string, writing: string) {
     return `
@@ -64,6 +63,7 @@ const textToInstagramCarrouselTextPrompt = `
 Please ignore all previous instructions.
 Please respond only in the english language.
 You are an Instagrammer with a large fan following.
+You have a Casual tone of voice.
 You have a  tone of voice.
 You have a Analytical writing style.
 Create an Instagram carousel based on the given summary.
@@ -77,7 +77,7 @@ Try to use unique emojis in the content.
 The description should have a hook and entice the readers.
 Do not repeat yourself. Do not self reference.
 Do not explain what you are doing.
-Do not explain what you are going to do.`
+Do not explain what you are going to do.`;
 
 function getTextToBlogPostPrompt(tone: string, writing: string) {
     return `
@@ -109,7 +109,7 @@ End with a small summary of the post.
 Do not repeat yourself.
 Do not self reference.
 Do not explain what you are doing.
-Do not explain what you are going to do.`
+Do not explain what you are going to do.`;
 
 function getTextToLinkedInPostPrompt(tone: string, writing: string) {
     return `
@@ -142,7 +142,8 @@ End with a small summary of the post.
 Do not repeat yourself.
 Do not self reference.
 Do not explain what you are doing.
-Do not explain what you are going to do.`
+Do not explain what you are going to do.`;
+
 
 export {
     textToInstagramCarrouselTextPrompt,
