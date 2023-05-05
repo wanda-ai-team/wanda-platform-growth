@@ -1,6 +1,6 @@
 import db from "./index.js";
 
-async function updateDBEntry(
+async function createDBEntry(
   collection: any,
   bodyN: any,
 ) {
@@ -11,4 +11,4 @@ async function updateDBEntry(
   return success;
 }
 
-export default updateDBEntry;
+export default createDBEntry;

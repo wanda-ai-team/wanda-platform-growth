@@ -7,8 +7,8 @@ import { OpenAI } from "langchain/llms";
 import { loadSummarizationChain } from "langchain/chains";
 import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
 import { PromptTemplate } from "langchain/prompts";
-import updateDBEntry from "@/utils/api/db/createDBEntry";
 import getDBEntry from "@/utils/api/db/getDBEntry";
+import createDBEntry from "@/utils/api/db/createDBEntry";
 
 const configuration = new Configuration({
     apiKey: process.env.OPENAI_API_KEY,
@@ -55,7 +55,7 @@ export default async function handler(
             }
             else {
                 console.log(text)
-                updateDBEntry("summaries", { url: url, summary: text })
+                createDBEntry("summaries", { url: url, summary: text })
 
                 return res.status(200).json({
                     name: "",

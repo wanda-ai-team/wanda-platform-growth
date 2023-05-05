@@ -44,6 +44,8 @@ export default async function handler(
         console.log(twitterClient)
 
         const threadF = await twitterClient.v1.tweetThread(thread);
+
+        
         if (threadF.length > 0) {
             return res.status(200).json({
                 content: "https://twitter.com/" + threadF[0].user.screen_name + "/status/" + threadF[0].id_str,

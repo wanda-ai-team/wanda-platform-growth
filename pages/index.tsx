@@ -19,7 +19,6 @@ import { Checkbox, CheckboxGroup } from '@chakra-ui/react'
 import { getThread } from '@/utils/api/twitter/getThread'
 import { outputsWithPlatform, toneList, writingStyles } from '@/utils/globalVariables'
 
-
 const input = ['URL', 'Text', 'Podcast (File)'];
 
 export default function Home() {

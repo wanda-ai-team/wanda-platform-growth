@@ -1,11 +1,11 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
-import { textToBlogPostPrompt, textToInstagramCarrouselTextPrompt, textToLinkedInPostPrompt, textToTwitterThreadPrompt } from "@/utils/globalPrompts";
 import type { NextApiRequest, NextApiResponse } from "next";
 import {
     Configuration,
     OpenAIApi,
 } from "openai";
 import { OpenAIStream } from "./openAIStream";
+import { getTextToBlogPostPrompt, getTextToInstagramCarrouselTextPrompt, getTextToLinkedInPostPrompt, getTextToTwitterThreadPrompt, textToTwitterThreadPrompt } from "@/utils/globalPrompts";
 
 const configuration = new Configuration({
     apiKey: process.env.OPENAI_API_KEY,
@@ -20,27 +20,29 @@ export const config = {
 const openai = new OpenAIApi(configuration);
 
 const handler = async (req: Request): Promise<Response> => {
-    let { text, output, outputO, isText, toneStyle } = (await req.json()) as {
+    let { text, output, outputO, isText, toneStyle, writingStyle } = (await req.json()) as {
         text?: string;
         output?: string;
         outputO?: string;
         isText?: boolean;
         toneStyle?: string;
+        writingStyle?: string;
     };
-    if (!output || !text || !outputO || isText === undefined) {
+    if (!output || !text || !outputO || isText === undefined || toneStyle === undefined || writingStyle === undefined) {
         return new Response('Bad Request', { status: 400 });
     }
     try {
         output = output.toLowerCase();
         outputO = outputO.toLowerCase();
         let basePromptPrefix = "";
-
+        console.log(text)
+        console.log(output)
+        console.log(outputO)
         switch (output) {
             case "twitter":
                 if (outputO === "thread") {
                     basePromptPrefix =
-                        textToTwitterThreadPrompt + `
-${toneStyle ? `Use this tone and/or quality toneStyle: ${toneStyle}\n` : ''}
+                        getTextToTwitterThreadPrompt(toneStyle, writingStyle) + `
 Summary: ${text}\n
 Twitter Thread:\n`;
                 }
@@ -48,16 +50,13 @@ Twitter Thread:\n`;
             case "instagram":
                 if (outputO === "post") {
                     basePromptPrefix =
-                        textToInstagramCarrouselTextPrompt + `
-${toneStyle ? `Use this tone and/or quality toneStyle: ${toneStyle}\n` : ''}
+                        getTextToInstagramCarrouselTextPrompt(toneStyle, writingStyle) + `
 Summary: ${text}\n
 Instagram Carousel:\n`;
                 }
                 if (outputO === "carousel") {
-                    console.log("linkedin carousel");
                     basePromptPrefix =
-                        textToInstagramCarrouselTextPrompt + `
-${toneStyle ? `Use this tone and/or quality toneStyle: ${toneStyle}\n` : ''}
+                        getTextToInstagramCarrouselTextPrompt(toneStyle, writingStyle) + `
 Summary: ${text}\n
 Instagram Carousel:\n`;
 
@@ -67,8 +66,7 @@ Instagram Carousel:\n`;
                 if (outputO === "post") {
                     console.log("linkedin post");
                     basePromptPrefix =
-                        textToLinkedInPostPrompt + `
-${toneStyle ? `Use this tone and/or quality toneStyle: ${toneStyle}\n` : ''}
+                        getTextToLinkedInPostPrompt(toneStyle, writingStyle) + `
 Summary: ${text}\n
 Linkedin Post:\n`;
                 }
@@ -76,17 +74,13 @@ Linkedin Post:\n`;
             case "blog":
                 if (outputO === "post") {
                     basePromptPrefix =
-                        textToBlogPostPrompt + `
-${toneStyle ? `Use this tone and/or quality toneStyle: ${toneStyle}\n` : ''}
+                        getTextToBlogPostPrompt(toneStyle, writingStyle) + `
 Summary: ${text}\n
 Blog Post:\n`;
                 }
-                break;
-            case "blog":
                 if (outputO === "article") {
                     basePromptPrefix =
-                        textToBlogPostPrompt + `
-${toneStyle ? `Use this tone and/or quality toneStyle: ${toneStyle}\n` : ''}
+                        getTextToBlogPostPrompt(toneStyle, writingStyle) + `
 Summary: ${text}\n
 Blog Post:\n`;
                 }

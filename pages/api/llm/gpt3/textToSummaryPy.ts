@@ -7,8 +7,8 @@ import { OpenAI } from "langchain/llms";
 import { LLMChain, loadSummarizationChain } from "langchain/chains";
 import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
 import { PromptTemplate } from "langchain/prompts";
-import updateDBEntry from "@/utils/api/db/createDBEntry";
 import getDBEntry from "@/utils/api/db/getDBEntry";
+import createDBEntry from "@/utils/api/db/createDBEntry";
 
 const { spawn } = require('child_process');
 const configuration = new Configuration({
@@ -89,7 +89,7 @@ export default async function handler(
                 });
 
 
-                updateDBEntry("summaries", { url: url, summary: resSummarization.text })
+                createDBEntry("summaries", { url: url, summary: resSummarization.text })
             }
 
         } catch (e) {

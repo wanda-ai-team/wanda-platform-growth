@@ -1,6 +1,7 @@
 import NextAuth, { NextAuthOptions } from "next-auth";
 import TwitterProvider from "next-auth/providers/twitter";
 import { FirestoreAdapter } from "@next-auth/firebase-adapter";
+import updateDBEntry from "@/utils/api/db/updateDBEntry";
 
 export const authOptions: NextAuthOptions = {
   pages: {
@@ -10,6 +11,7 @@ export const authOptions: NextAuthOptions = {
     TwitterProvider({
       clientId: process.env.TWITTER_CLIENT_ID as string,
       clientSecret: process.env.TWITTER_CLIENT_SECRET as string,
+      allowDangerousEmailAccountLinking: true,
       authorization: {
         params: {
           scope: "users.read tweet.read tweet.write offline.access like.read list.read",
@@ -58,8 +60,18 @@ export const authOptions: NextAuthOptions = {
       return token;
     },
   },
+  events: {
+    signIn: async (message) => {
+      if (message.account !== null) {
+        updateDBEntry("accounts", message.account, ['providerAccountId'], ['=='], [message.account.providerAccountId], 1);
+      }
+    },
+  },
+
   session: {
     strategy: 'jwt',
+    updateAge: 12 * 60 * 60, // 24 hours
+    maxAge: 1 * 12 * 60 * 60, // 30 days
   },
 }
 export default NextAuth(authOptions)
