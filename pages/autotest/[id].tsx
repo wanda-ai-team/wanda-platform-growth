@@ -6,15 +6,17 @@ import { addAiHistory } from "@/utils/api/autogpt/redux/data/dataReducer";
 import { useRouter } from "next/router";
 import { useState, useEffect, JSXElementConstructor, ReactElement, ReactFragment, ReactPortal } from "react";
 import { useDispatch } from "react-redux";
+import { v4 as uuidv4 } from 'uuid';
 
 
 const Autotest = () => {
   const dispatch = useDispatch()
   const { aiHistoryArray, aiHistory } = useAiHistory()
   const router = useRouter();  // -> Access Next.js Router here
-  const { id } = router.query;
+  let { id } = router.query;
   const { fetchData } = useAutoGPTAPI()
   const [playing, setPlaying] = useState(false)
+  const [loading, setLoading] = useState(false)
   const [goal, setGoal] = useState('')
   const [answer, setAnswer] = useState('')
   let currentAi = aiHistory[id as string]
@@ -64,10 +66,9 @@ const Autotest = () => {
       }),
     )
 
-    console.log('ola')
     currentAi = aiHistory[id as string]
     await AutoGPTAPI.startScript();
-    
+
     setPlaying(true);
   };
 
@@ -88,16 +89,10 @@ const Autotest = () => {
       <p></p>
       <button onClick={startScript}> Start </button>
       <p></p>
-      <span>
-        {currentAi &&
-          // <Answers answers={currentAi.answers} playing={playing} />
-          currentAi.answers.map((answer: any, index: any) => (
-            <span key={index}>
-              {answer.content}
-            </span>
-          ))
-        }
-      </span>
+
+      {currentAi &&
+        <Answers answers={currentAi.answers} playing={playing} />
+      }
       <p></p>
 
       <input style={{ borderWidth: '2px' }} value={answer} onChange={(e) => setAnswer(e.target.value)}></input>

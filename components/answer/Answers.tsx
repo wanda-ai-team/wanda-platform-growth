@@ -1,7 +1,7 @@
 
+import IAnswer from "@/utils/api/autogpt/redux/types/data/IAnswer"
 import styled from "styled-components"
 import Answer from "./Answer"
-import IAnswer from "@/utils/api/autogpt/redux/types/data/IAnswer"
 
 export const AnswerContainer = styled.div`
   display: flex;
@@ -19,12 +19,9 @@ const Answers = ({
 }) => {
 	if (!answers) return null
 	if (!Array.isArray(answers)) return null
-	console.log("answers")
-	console.log(answers)
 	return (
 		<AnswerContainer>
 			{answers.map((answer, index) => (
-				answer !== null && answer.content !== '' &&
 				<Answer
 					answer={answer}
 					key={answer.title}

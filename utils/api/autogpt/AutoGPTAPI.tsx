@@ -20,22 +20,21 @@ const fetchData: () => Promise<IAnswer[]> = async () => {
 	}
 	// remove last char from data data is a string
 	// remove \n
-	data = data.output.replaceAll("\n", "");
-	data = data.replaceAll("\u001b", "");
+	data = data.output.replaceAll("\u001b", "");
+	data = data.replaceAll("\r", "");
+	data = data.replaceAll("\[.*?m", "");
+	data = data.replaceAll("\[0m", "");
+	if(data.includes('Welcome')){
+		data = data.split('Welcome')[1]
+		data = 'Welcome' + data
+	}
 	// remove last comma
-	data = data
-		.split("")
-		.reverse()
-		.join("")
-		.replace(",", "")
-		.split("")
-		.reverse()
-		.join("");
 	let json: IAnswer[] = [];
 	try {
 		console.log("data");
 		console.log(typeof data);
 		console.log(`[${data}]`);
+		
 		// json = JSON.parse(`[${data}]`);
 		// json.push({ content: data + '\n' })
 		// json = JSON.parse(data);
@@ -46,7 +45,9 @@ const fetchData: () => Promise<IAnswer[]> = async () => {
 				json = [{ content: data + '\n', title: 'PLAN' }]
 			}
 			else {
-				json = [{ content: data + '\n', title: 'Text' }]
+				if(data.length > 0 && data !== ''){
+					json = [{ content: data + '\n', title: 'Text' }]
+				}
 			}
 		}
 	} catch (e) {
