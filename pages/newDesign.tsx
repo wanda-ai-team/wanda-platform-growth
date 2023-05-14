@@ -106,7 +106,8 @@ export default function Home() {
         output: outputSelected,
         outputO: outputSelectedO,
         isText: text,
-        toneStyle: toneStyle,
+        toneStyle: outputSelectedT,
+        writingStyle: outputSelectedW
       }),
     });
     if (!response.ok) {
@@ -666,12 +667,7 @@ export default function Home() {
       <footer className={styles.generate__footer}>
 
         <Button
-          isDisabled={
-            youtubeURL.length <= 0 ||
-            outputSelected === "" ||
-            outputSelectedO === "" ||
-            canStopB.current
-          }
+          isDisabled={((summary === "") || canStopB.current)} 
           colorScheme="purple"
           onClick={handleConvert}
         >
