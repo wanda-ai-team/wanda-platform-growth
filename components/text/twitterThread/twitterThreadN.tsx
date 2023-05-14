@@ -43,11 +43,11 @@ const TwitterThread = ({
 
   return twitterThreadText.map((i: any, index: number) => (
     <div key={index} className={styles.threadBox}>
-      <Checkbox
+      {/* <Checkbox
         checked={selectedTweets[i]}
         colorScheme="purple"
         onChange={(e) => changeSelected(index, e.target.checked)}
-      />
+      /> */}
       <div className={styles.tweet__editor}>
         <TwitterThreadEditor
           setTwitterThreadText={setTwitterThreadText}

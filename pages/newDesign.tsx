@@ -25,34 +25,27 @@ import { getThread } from "@/utils/api/twitter/getThread";
 import Header from "@/components/header";
 import RadioTag from "@/components/radio-tag";
 import Head from "next/head";
+import { outputsWithPlatform, toneList, writingStyles } from "@/utils/globalVariables";
 
 type Contents = "url" | "text" | "podcast";
-
-const outputsWithPlatform = [
-  { platform: "Twitter", outputs: ["Thread"] },
-  { platform: "Instagram", outputs: ["Carousel", "Post"] },
-  { platform: "Linkedin", outputs: ["Post"] },
-  { platform: "Blog", outputs: ["Post", "Article"] },
-  // { platform: 'Transcript', outputs: ['Transcript'] }
-];
 
 const inputList: {
   key: Contents;
   value: string;
 }[] = [
-  {
-    key: "url",
-    value: "URL",
-  },
-  {
-    key: "text",
-    value: "Text",
-  },
-  {
-    key: "podcast",
-    value: "Podcast (Coming Soon)",
-  },
-];
+    {
+      key: "url",
+      value: "URL",
+    },
+    {
+      key: "text",
+      value: "Text",
+    },
+    {
+      key: "podcast",
+      value: "Podcast (File)",
+    },
+  ];
 
 export default function Home() {
   const stopB = useRef(false);
@@ -72,11 +65,16 @@ export default function Home() {
   const [selectedTweets, setSelectedTweets] = useState<any>([]);
   const [numberOfTweets, setNumberOfTweets] = useState(1);
   const [threadPostResult, setThreadPostResult] = useState("");
-  const [outputSelected, setOutputSelected] = useState("");
-  const [outputSelectedO, setOutputSelectedO] = useState("");
   const [outputSelectedI, setOutputSelectedI] = useState<Contents>(
     inputList[0].key
   );
+
+  const [outputSelected, setOutputSelected] = useState(outputsWithPlatform[0].platform);
+  const [outputSelectedO, setOutputSelectedO] = useState(outputsWithPlatform[0].outputs[0]);
+
+  const [outputSelectedW, setOutputSelectedW] = useState(toneList[0]);
+  const [outputSelectedT, setOutputSelectedT] = useState(writingStyles[0]);
+
   const [postingThread, setPostingThread] = useState(false);
   const [wantTranscript, setWantTranscript] = useState(false);
   const [currentStep, setCurrentStep] = useState<"settings" | "result">(
@@ -277,15 +275,16 @@ export default function Home() {
     setLoadingAPICall(false);
   }
 
-  async function submitFile(e: React.MouseEvent<HTMLInputElement>) {
+  async function submitFile(e: React.MouseEvent<HTMLButtonElement, MouseEvent>) {
+    setLoadingAPICall(true);
     e.preventDefault();
     let formData = new FormData();
     if (inputFileRef.current === null) {
       return;
     }
-    Object.values(inputFileRef.current.files as any).forEach((file) => {
-      formData.append("file", file as Blob | string);
-    });
+    Object.values((inputFileRef.current.files as any)).forEach(file => {
+      formData.append('file', (file as Blob | string));
+    })
 
     const res = await fetch("/api/files/uploadFiles", {
       method: "POST",
@@ -294,18 +293,23 @@ export default function Home() {
     });
 
     const body = await res.json();
+    console.log(body)
 
     if (body.success) {
-      setWantTranscript(true);
-      setTranscript(body.content);
+      setWantTranscript(true)
+      setTranscript(body.content)
       const response = await getTextSummary(body.content, "null");
       if (response.success) {
         setSummary(response.content);
+      } else {
       }
       // Do some stuff on successfully upload
     } else {
       // Do some stuff on error
     }
+
+    setLoadingAPICall(false);
+
   }
 
   function getTwitterThread() {
@@ -358,6 +362,26 @@ export default function Home() {
     // setCurrentStep("result");
   };
 
+  function getTextArea(valueChosen: any) {
+    console.log(valueChosen)
+    if (outputSelected === 'Twitter') {
+      return getTwitterThread();
+    }
+
+    if (outputSelected !== '') {
+      return (
+        <>
+          <Textarea
+            style={{ height: '500px' }}
+            value={valueChosen}
+            onChange={handleInputChange}
+            placeholder='Here is a sample placeholder'
+            size='lg' />
+        </>
+      )
+    }
+  }
+
   return (
     <>
       <Head>
@@ -386,7 +410,6 @@ export default function Home() {
                     return (
                       <RadioTag
                         key={key}
-                        isDisabled={key === "podcast"}
                         {...radio}
                       >
                         {value}
@@ -428,13 +451,13 @@ export default function Home() {
                           </InputRightElement>
                         )}
                       </InputGroup>
-                      <Checkbox
+                      {/* <Checkbox
                         colorScheme="purple"
                         isChecked={wantTranscript}
                         onChange={(e) => setWantTranscript(e.target.checked)}
                       >
                         Transcript (for video and audios)
-                      </Checkbox>
+                      </Checkbox> */}
                     </>
                   )}
 
@@ -455,17 +478,23 @@ export default function Home() {
 
                   {outputSelectedI === "podcast" && (
                     <>
-                      <input
-                        type="file"
-                        name="myfile"
-                        accept=".mp3"
-                        ref={inputFileRef}
-                      />
-                      <input
-                        type="submit"
-                        value="Upload"
-                        onClick={submitFile}
-                      />
+
+                      <InputGroup>
+                        <input
+                          type="file"
+                          name="myfile"
+                          accept=".mp3"
+                          ref={inputFileRef}
+                        />
+                        <Button colorScheme="purple" onClick={(e) => submitFile(e)}>
+                          Upload
+                        </Button>
+                        {loadingAPICall && (
+                          <InputRightElement>
+                            <Spinner color="#8F50E2" />
+                          </InputRightElement>
+                        )}
+                      </InputGroup>
                     </>
                   )}
                 </div>
@@ -490,12 +519,11 @@ export default function Home() {
                     ))}
                   </Select>
 
-                  {outputSelected && (
+                  {outputSelected && (outputSelected !== 'Transcript' && outputSelected !== 'Summary') && (
                     <>
                       {" "}
                       <Select
                         sx={{ backgroundColor: "white" }}
-                        placeholder="Select Output"
                         onChange={(e) => {
                           setOutputSelectedO(e.target.value);
                         }}
@@ -517,15 +545,25 @@ export default function Home() {
                           <></>
                         )}
                       </Select>
-                      <Input
-                        style={{ backgroundColor: "white" }}
-                        placeholder="Tone or style of generation"
-                        value={toneStyle}
-                        className={styles.input}
-                        onChange={(e) => {
-                          setToneStyle(e.target.value);
-                        }}
-                      />
+
+                      <Text fontWeight="semibold">Tone Style:</Text>
+                      <Select
+                        sx={{ backgroundColor: "white" }}
+                        onChange={(e) => { setOutputSelectedT(e.target.value); }} value={outputSelectedT} >
+                        {toneList.map((output, index) => (
+                          <option key={index} value={output}>{output}</option>
+                        ))}
+                      </Select>
+
+
+                      <Text fontWeight="semibold">Writing Style:</Text>
+                      <Select
+                        sx={{ backgroundColor: "white" }}
+                        onChange={(e) => { setOutputSelectedW(e.target.value); }} value={outputSelectedW} >
+                        {writingStyles.map((output, index) => (
+                          <option key={index} value={output}>{output}</option>
+                        ))}
+                      </Select>
                     </>
                   )}
                 </div>
@@ -539,17 +577,11 @@ export default function Home() {
                 </span>
               </div>
 
+
               <hr className={styles.divider} />
+              {getTextArea(outputSelected === 'Summary' ? summary : outputSelected === 'Transcript' ? transcript : convertedText)}
+
               <div className={styles.texts}>
-                {outputSelected === "Twitter"
-                  ? getTwitterThread()
-                  : outputSelected !== "" && (
-                      <Textarea
-                        value={convertedText}
-                        onChange={handleInputChange}
-                        size="lg"
-                      />
-                    )}
               </div>
             </div>
 
@@ -619,12 +651,12 @@ export default function Home() {
                 {outputSelected === "Twitter"
                   ? getTwitterThread()
                   : outputSelected !== "" && (
-                      <Textarea
-                        value={convertedText}
-                        onChange={handleInputChange}
-                        size="lg"
-                      />
-                    )}
+                    <Textarea
+                      value={convertedText}
+                      onChange={handleInputChange}
+                      size="lg"
+                    />
+                  )}
               </div>
             </div>
           </>
@@ -632,24 +664,21 @@ export default function Home() {
       </main>
 
       <footer className={styles.generate__footer}>
-        {loadingConversion ? (
-          <Button colorScheme="purple" onClick={handleStopGeneration}>
-            Stop generating
-          </Button>
-        ) : currentStep === "settings" ? (
-          <Button
-            isDisabled={
-              youtubeURL.length <= 0 ||
-              outputSelected === "" ||
-              outputSelectedO === "" ||
-              canStopB.current
-            }
-            colorScheme="purple"
-            onClick={handleConvert}
-          >
-            Convert to AI Post
-          </Button>
-        ) : (
+
+        <Button
+          isDisabled={
+            youtubeURL.length <= 0 ||
+            outputSelected === "" ||
+            outputSelectedO === "" ||
+            canStopB.current
+          }
+          colorScheme="purple"
+          onClick={handleConvert}
+        >
+          Convert to AI Post
+        </Button>
+        <Button colorScheme='purple' isDisabled={!canStopB.current} onClick={() => stopB.current = true}> Stop Generation </Button>
+        {outputSelected === "Twitter" && (
           <Button
             colorScheme="purple"
             isDisabled={twitterThreadTextPerTweet.length <= 1}
@@ -658,6 +687,7 @@ export default function Home() {
             {postingThread ? <Spinner /> : `Publish on ${outputSelected}`}
           </Button>
         )}
+
       </footer>
     </>
   );

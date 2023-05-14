@@ -51,7 +51,7 @@
     "firebase-admin": "^11.4.1",
     "formidable": "^2.1.1",
     "fs": "^0.0.1-security",
-    "langchain": "^0.0.36",
+    "langchain": "^0.0.72",
     "next": "13.2.4",
     "next-auth": "^4.20.1",
     "node-fetch": "^3.3.1",

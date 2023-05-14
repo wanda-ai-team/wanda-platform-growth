@@ -67,7 +67,7 @@ export default async function handler(
         // console.log(data.fields)
         let rawData = fs.readFileSync((files[0][1] as any).filepath)
         let buff = Buffer.from(rawData); // Node.js Buffer
-        buff = buff.subarray(0, 24000000)
+        buff = buff.subarray(0, 240000)
         console.log(buff)
 
         var audioBlob = new Blob([buff], { type: 'audio/mp3' });

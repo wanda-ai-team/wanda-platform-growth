@@ -32,20 +32,25 @@ export default async function handler(
             1
         );
 
-        console.log(user[0].data.oauth_token)
-        console.log(user[0].data.oauth_token_secret)
         const twitterClient = new TwitterApi({
             appKey: process.env.TWITTER_CLIENT_ID as string,
             appSecret: process.env.TWITTER_CLIENT_SECRET as string,
             accessToken: user[0].data.oauth_token,
             accessSecret: user[0].data.oauth_token_secret,
         });
+        let threadF: string | any[] = [];
+        try {
+            threadF = await twitterClient.v1.tweetThread(thread);
+        } catch (e: any) {
+            console.log(e);
+            if (e.errors[0].code === 170) {
+                threadF = await twitterClient.v1.tweetThread(thread);
+            }
+        }
 
-        console.log(twitterClient)
+        console.log(threadF)
 
-        const threadF = await twitterClient.v1.tweetThread(thread);
 
-        
         if (threadF.length > 0) {
             return res.status(200).json({
                 content: "https://twitter.com/" + threadF[0].user.screen_name + "/status/" + threadF[0].id_str,
@@ -60,6 +65,7 @@ export default async function handler(
 
 
     } catch (e: any) {
+        console.log("e");
         console.log(e);
         return res.status(400).json({
             content: e.data.errors[0].message !== undefined ? e.data.errors[0].message : "error",

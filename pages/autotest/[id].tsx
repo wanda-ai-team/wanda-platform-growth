@@ -38,6 +38,11 @@ const Autotest = () => {
   }
 
 
+  const startScriptLang: (textI: string) => Promise<void> = async (textI: string) => {
+    console.log("textI", textI)
+    const res = await fetch("/api/agents/agentZapierNLA?  textI=" + textI);
+  };
+
   const startScript: () => Promise<void> = async () => {
     const data: any = {};
     data.ai_name = "Wanda Assistant";
@@ -88,6 +93,8 @@ const Autotest = () => {
       <input style={{ borderWidth: '2px' }} value={goal} onChange={(e) => setGoal(e.target.value)}></input>
       <p></p>
       <button onClick={startScript}> Start </button>
+      <p></p>
+      <button onClick={() => startScriptLang(goal)}> Start bu langchain </button>
       <p></p>
 
       {currentAi &&

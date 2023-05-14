@@ -279,30 +279,34 @@ export default function Home() {
     Object.values((inputFileRef.current.files as any)).forEach(file => {
       formData.append('file', (file as Blob | string));
     })
+    try {
 
-    const res = await fetch("/api/files/uploadFiles", {
-      method: "POST",
+      const res = await fetch("/api/files/uploadFiles", {
+        method: "POST",
 
-      body: formData,
-    });
+        body: formData,
+      });
 
-    const body = await res.json();
-    console.log(body)
+      const body = await res.json();
+      console.log(body)
 
-    if (body.success) {
-      setWantTranscript(true)
-      setTranscript(body.content)
-      const response = await getTextSummary(body.content, "null");
-      if (response.success) {
-        setSummary(response.content);
+      if (body.success) {
+        setWantTranscript(true)
+        setTranscript(body.content)
+        const response = await getTextSummary(body.content, "null");
+        if (response.success) {
+          setSummary(response.content);
+        } else {
+          setTwitterThread("Error");
+        }
+        // Do some stuff on successfully upload
       } else {
-        setTwitterThread("Error");
+        // Do some stuff on error
       }
-      // Do some stuff on successfully upload
-    } else {
-      // Do some stuff on error
+
+    } catch (e) {
+      console.log(e)
     }
-    
     setLoadingAPICall(false);
 
   }
@@ -334,7 +338,7 @@ export default function Home() {
         }
         {
           threadPostResult !== '' &&
-          <a href={threadPostResult}>
+          <a href={threadPostResult.includes("https://twitter.com/") ? threadPostResult : ''}>
             {threadPostResult}
           </a>
         }
@@ -369,21 +373,12 @@ export default function Home() {
     if (outputSelected !== '') {
       return (
         <>
-          {/* <div className="container max-w-4xl">
-            {CustomEditor && <CustomEditor data={valueChosen} onChange={null} holder="editorjs-container" />}
-          </div>
-          <div className="col-span-1 ">
-            <h1>Preview</h1>
-            <div className="border rounded-md">
-              <div className="p-16">{valueChosen && valueChosen !== '' && <EditorJsRenderer data={valueChosen} />}</div>
-            </div>
-          </div> */}
           <Textarea
-          style={{ height: '500px' }}
-          value={valueChosen}
-          onChange={handleInputChange}
-          placeholder='Here is a sample placeholder'
-          size='lg' />
+            style={{ height: '500px' }}
+            value={valueChosen}
+            onChange={handleInputChange}
+            placeholder='Here is a sample placeholder'
+            size='lg' />
         </>
       )
     }
@@ -410,7 +405,7 @@ export default function Home() {
               setInputText('')
             }} value={outputSelectedI} >
               {input.map((value, index) => (
-                <option  key={index} value={value}>{value}</option>
+                <option key={index} value={value}>{value}</option>
               ))}
             </Select>
           </div>
@@ -540,7 +535,7 @@ export default function Home() {
                   </Select>
 
                   <div className={styles.transcriptSummary}>
-                    <Button isDisabled={( (summary === "")  || canStopB.current)} colorScheme='purple' onClick={() => {
+                    <Button isDisabled={((summary === "") || canStopB.current)} colorScheme='purple' onClick={() => {
                       setConvertedText('');
                       setTwitterThreadTextPerTweet(['']);
                       setRegenerate(true);
