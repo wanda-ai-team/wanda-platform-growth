@@ -53,6 +53,7 @@
   align-items: center;
   background-color: #ffffff;
   border-top: 1px solid #e3dfe9;
+  gap: 16px;
   display: flex;
   height: 80px;
   justify-content: flex-end;
