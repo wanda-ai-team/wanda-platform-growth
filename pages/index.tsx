@@ -174,20 +174,26 @@ export default function Home() {
   async function textToSummary(text: string) {
     setLoadingAPICall(true);
     setApiStep('Getting Medium Text...');
-    await summarizeTextAndCreateThread(text, "null")
+    await summarizeTextAndCreateThread(text, "null", text)
     setLoadingAPICall(false);
     setApiStep('');
   }
 
-  async function youtubeToThread(youtubeURLN: string, transB = false) {
-    const subtitles = await getYoutubeSubtitles(youtubeURLN);
+  async function youtubeToThread(youtubeURLN: string, transB = true) {
+    let subtitles = await getYoutubeSubtitles(youtubeURLN);
     if (subtitles !== "") {
-      if (transB) {
-        setTranscript(subtitles);
-      }
-      await summarizeTextAndCreateThread(subtitles, youtubeURLN);
-    }
-    else {
+      let stringF = "";
+      const sub = subtitles;
+      sub.forEach((element: any) => {
+        stringF = stringF + '[' + element.offser + 's] ' + element.text + "\n";
+      });
+      setTranscript(stringF);
+
+      subtitles = subtitles.map((caption: any) => caption.text);
+      subtitles = subtitles.join('');
+      subtitles = subtitles.replace(/(\r\n|\n|\r)/gm, "");
+      await summarizeTextAndCreateThread(subtitles, youtubeURLN, stringF);
+    } else {
       setApiStep('No Subtitles Found, calling Batman to fix this, Batsignal can take some minutes ...');
       const response = await getAudioFromYoutube(youtubeURLN);
       if (response.success) {
@@ -197,7 +203,7 @@ export default function Home() {
         }
         const responseWhisper = await speechToText(response.content);
         if (responseWhisper.success) {
-          await summarizeTextAndCreateThread(responseWhisper.content, youtubeURLN);
+          await summarizeTextAndCreateThread(responseWhisper.content, youtubeURLN, response.content,);
         }
       }
     }
@@ -226,7 +232,7 @@ export default function Home() {
     setApiStep('Getting Medium Text...');
     const response = await getBlogText(youtubeURLN)
     if (response.success) {
-      await summarizeTextAndCreateThread(response.content, youtubeURLN)
+      await summarizeTextAndCreateThread(response.content, youtubeURLN, response.content,)
     } else {
       setTwitterThread("Error");
     }
@@ -253,10 +259,10 @@ export default function Home() {
     }
   }
 
-  async function summarizeTextAndCreateThread(data: any, url: string) {
+  async function summarizeTextAndCreateThread(data: any, url: string, transc: string = "") {
     setApiStep('Formatting Text...');
     const response = await getTextSummary(data, url);
-    setTranscript(data)
+    setTranscript(transc)
     if (response.success) {
       setSummary(response.content);
     } else {
