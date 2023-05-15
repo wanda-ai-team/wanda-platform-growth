@@ -7,8 +7,6 @@ function getTextToTwitterThreadPrompt(tone: string, writing: string) {
     You have a ${writing === 'Default' ? 'Analytical' : writing} writing style.
     Create a Twitter thread on the topic of the summary.
     There should be around 5 to 8 tweets.
-    Include emojis and hashtags in some of the tweets.
-    Try to use unique emojis in some of the tweets.
     The first tweet should have a hook and entice the readers.
     The last tweet should have a small summary of the thread.
     Talk in-depth of the topic on all the tweets.
@@ -27,8 +25,6 @@ You have a Casual tone of voice.
 You have a Analytical writing style. 
 Create a Twitter thread on the topic of the summary.
 There should be around 5 to 8 tweets.
-Include emojis and hashtags in some of the tweets.
-Try to use unique emojis in some of the tweets.
 The first tweet should have a hook and entice the readers.
 The last tweet should have a small summary of the thread.
 Talk in-depth of the topic on all the tweets
@@ -50,8 +46,6 @@ function getTextToInstagramCarrouselTextPrompt(tone: string, writing: string) {
     Generate an exact content example for every slide.
     After writing the carousel slides, please add a separator line.
     Then generate an Instagram post description in just a few sentences for the carousel.
-    Include emojis and the Instagram hashtags in the description.
-    Try to use unique emojis in the content.
     The description should have a hook and entice the readers.
     Please separate the slides with a break line.
     Do not repeat yourself. Do not self reference.
@@ -72,8 +66,6 @@ Write down details on all the slides with titles.
 Generate an exact content example for every slide.
 After writing the carousel slides, please add a separator line.
 Then generate an Instagram post description in just a few sentences for the carousel.
-Include emojis and the Instagram hashtags in the description.
-Try to use unique emojis in the content.
 The description should have a hook and entice the readers.
 Do not repeat yourself. Do not self reference.
 Do not explain what you are doing.

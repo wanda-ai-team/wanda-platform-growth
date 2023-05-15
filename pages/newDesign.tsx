@@ -209,17 +209,28 @@ export default function Home() {
 
   async function textToSummary(text: string) {
     setLoadingAPICall(true);
-    await summarizeTextAndCreateThread(text, "null");
+    await summarizeTextAndCreateThread(text, "null", text);
     setLoadingAPICall(false);
   }
 
-  async function youtubeToThread(youtubeURLN: string, transB = false) {
-    const subtitles = await getYoutubeSubtitles(youtubeURLN);
+  async function youtubeToThread(youtubeURLN: string, transB = true) {
+    let subtitles = await getYoutubeSubtitles(youtubeURLN);
+    console.log("subtitles")
     if (subtitles !== "") {
-      if (transB) {
-        setTranscript(subtitles);
-      }
-      await summarizeTextAndCreateThread(subtitles, youtubeURLN);
+      console.log("subtitles1")
+      let stringF = "";
+      const sub = subtitles;
+      sub.forEach((element: any) => {
+        stringF = stringF + '[' + element.offser + 's] ' + element.text + "\n";
+      });
+      console.log(stringF)
+      setTranscript(stringF);
+      console.log("subtitles2")
+
+      subtitles = subtitles.map((caption: any) => caption.text);
+      subtitles = subtitles.join('');
+      subtitles = subtitles.replace(/(\r\n|\n|\r)/gm, "");
+      await summarizeTextAndCreateThread(subtitles, youtubeURLN, stringF);
     } else {
       const response = await getAudioFromYoutube(youtubeURLN);
       if (response.success) {
@@ -230,7 +241,8 @@ export default function Home() {
         if (responseWhisper.success) {
           await summarizeTextAndCreateThread(
             responseWhisper.content,
-            youtubeURLN
+            youtubeURLN,
+            responseWhisper.content
           );
         }
       }
@@ -251,7 +263,7 @@ export default function Home() {
     setLoadingAPICall(true);
     const response = await getBlogText(youtubeURLN);
     if (response.success) {
-      await summarizeTextAndCreateThread(response.content, youtubeURLN);
+      await summarizeTextAndCreateThread(response.content, youtubeURLN, response.content);
     }
     setLoadingAPICall(false);
   }
@@ -266,9 +278,9 @@ export default function Home() {
     }
   }
 
-  async function summarizeTextAndCreateThread(data: any, url: string) {
+  async function summarizeTextAndCreateThread(data: any, url: string, transc: string = "") {
     const response = await getTextSummary(data, url);
-    setTranscript(data);
+    setTranscript(transc);
     if (response.success) {
       setSummary(response.content);
     }
@@ -452,29 +464,31 @@ export default function Home() {
                           </InputRightElement>
                         )}
                       </InputGroup>
-                      {/* <Checkbox
-                        colorScheme="purple"
-                        isChecked={wantTranscript}
-                        onChange={(e) => setWantTranscript(e.target.checked)}
-                      >
-                        Transcript (for video and audios)
-                      </Checkbox> */}
                     </>
                   )}
 
                   {outputSelectedI === "text" && (
-                    <Textarea
-                      style={{ height: "10vh", width: "40vw" }}
-                      value={inputText}
-                      onChange={(e) => {
-                        setInputText(e.target.value);
-                        if (e.target.value !== "") {
-                          youtubeTransformText(e.target.value);
-                        }
-                      }}
-                      placeholder="Paste your text here"
-                      size="lg"
-                    />
+                    <>
+                      <InputGroup>
+                        <Textarea
+                          style={{ height: "10vh", width: "40vw" }}
+                          value={inputText}
+                          onChange={(e) => {
+                            setInputText(e.target.value);
+                            if (e.target.value !== "") {
+                              youtubeTransformText(e.target.value);
+                            }
+                          }}
+                          placeholder="Paste your text here"
+                          size="lg"
+                        />
+                        {loadingAPICall && (
+                          <InputRightElement>
+                            <Spinner color="#8F50E2" />
+                          </InputRightElement>
+                        )}
+                      </InputGroup>
+                    </>
                   )}
 
                   {outputSelectedI === "podcast" && (
@@ -510,6 +524,7 @@ export default function Home() {
                     placeholder="Select Platform"
                     onChange={(e) => {
                       setOutputSelected(e.target.value);
+                      setOutputSelectedO(outputsWithPlatform.filter(v => v.platform === e.target.value)[0].outputs[0]);
                     }}
                     value={outputSelected}
                   >
@@ -662,12 +677,12 @@ export default function Home() {
             </div>
           </>
         )}
-      </main>
+      </main >
 
       <footer className={styles.generate__footer}>
 
         <Button
-          isDisabled={((summary === "") || canStopB.current)} 
+          isDisabled={((summary === "") || canStopB.current)}
           colorScheme="purple"
           onClick={handleConvert}
         >
