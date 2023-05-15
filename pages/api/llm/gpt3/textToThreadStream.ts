@@ -1,23 +1,13 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
-import type { NextApiRequest, NextApiResponse } from "next";
-import {
-    Configuration,
-    OpenAIApi,
-} from "openai";
 import { OpenAIStream } from "./openAIStream";
 import { getTextToBlogPostPrompt, getTextToInstagramCarrouselTextPrompt, getTextToLinkedInPostPrompt, getTextToTwitterThreadPrompt, textToTwitterThreadPrompt } from "@/utils/globalPrompts";
 
-const configuration = new Configuration({
-    apiKey: process.env.OPENAI_API_KEY,
-});
 
 export const config = {
     runtime: "edge",
 };
 
 
-
-const openai = new OpenAIApi(configuration);
 
 const handler = async (req: Request): Promise<Response> => {
     let { text, output, outputO, isText, toneStyle, writingStyle } = (await req.json()) as {
@@ -72,7 +62,7 @@ Linkedin Post:\n`;
                 }
                 break;
             case "blog":
-                if (outputO === "post") {
+                if (outputO === "post" || outputO === "thread") {
                     basePromptPrefix =
                         getTextToBlogPostPrompt(toneStyle, writingStyle) + `
 Summary: ${text}\n
@@ -84,6 +74,7 @@ Blog Post:\n`;
 Summary: ${text}\n
 Blog Post:\n`;
                 }
+                console.log(basePromptPrefix);
                 break;
             default:
                 break;

@@ -4,6 +4,7 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "../auth/[...nextauth]";
 import { TwitterApi } from 'twitter-api-v2';
+import Client from "twitter-api-sdk";
 
 export default async function handler(
     req: NextApiRequest,
@@ -32,6 +33,7 @@ export default async function handler(
             1
         );
 
+        const client = new Client(process.env.TWITTER_BEARER as string);
         const twitterClient = new TwitterApi({
             appKey: process.env.TWITTER_CLIENT_ID as string,
             appSecret: process.env.TWITTER_CLIENT_SECRET as string,

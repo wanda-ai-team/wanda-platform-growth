@@ -505,7 +505,9 @@ export default function Home() {
             <div className={styles.options}>
 
               <span> Platform: </span>
-              <Select onChange={(e) => { setOutputSelected(e.target.value); setOutputSelectedO(outputsWithPlatform.filter(v => v.platform === e.target.value)[0].outputs[0]); setRegenerate(false); }} value={outputSelected} >
+              <Select onChange={(e) => { setOutputSelected(e.target.value); 
+                setOutputSelectedO(outputsWithPlatform.filter(v => v.platform === e.target.value)[0].outputs[0]); 
+                setRegenerate(false); }} value={outputSelected} >
                 {outputsWithPlatform.map((output, index) => (
                   <option key={index} value={output.platform}>{output.platform}</option>
                 ))}
