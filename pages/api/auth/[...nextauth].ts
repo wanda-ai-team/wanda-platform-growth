@@ -5,6 +5,7 @@ import updateDBEntry from "@/utils/api/db/updateDBEntry";
 import Stripe from "stripe";
 import { v4 as uuidv4 } from "uuid";
 import { updateUserInfo } from "@/utils/api/db/updateUser";
+import { getUser } from "@/utils/api/db/getUser";
 
 export const authOptions: NextAuthOptions = {
   pages: {
@@ -80,13 +81,15 @@ export const authOptions: NextAuthOptions = {
   events: {
     signIn: async (message) => {
       if (message.account !== null) {
-        updateDBEntry("accounts", message.account, ['providerAccountId'], ['=='], [message.account.providerAccountId], 1);
-        // const dbUser = await getUser("email", "==", user.email);
-        if (!message.user.stripeCustomerId) {
+        // updateDBEntry("accounts", message.account, ['providerAccountId'], ['=='], [message.account.providerAccountId], 1);
+
+        const dbUser = await getUser("email", "==", message.user.email);
+        if (dbUser !== null && !dbUser.stripeCustomerId) {
           console.log("no stripe customer id");
           const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string, {
             apiVersion: "2022-11-15",
           });
+
 
           stripe.customers
             .create({
@@ -116,7 +119,7 @@ export const authOptions: NextAuthOptions = {
         apiVersion: "2022-11-15",
       });
 
-      stripe.customers
+      await stripe.customers
         .create({
           email: user.email!,
         })
@@ -131,7 +134,7 @@ export const authOptions: NextAuthOptions = {
               "-" +
               uuidv4(),
           };
-          updateUserInfo(bodyN, "email", "==", user.email!);
+          await updateUserInfo(bodyN, "email", "==", user.email!);
         });
     },
   },

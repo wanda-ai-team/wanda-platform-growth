@@ -1,4 +1,4 @@
-import { userCollection } from "@/utils/globalVariables.js";
+import { userCollection } from "@/utils/globalVariables";
 import db from "./index.js";
 
 async function getUser(condition: string | FirebaseFirestore.FieldPath, conditionOperation: any, conditionValue: any) {
