@@ -42,7 +42,8 @@ const PriceBlock = ({ footnote, loading, onclick, title, price, subtitle, featur
 
             </div>
 
-            <ButtonC icon={undefined} className={buttonColor} label={buttonText} loading={loading} loadingLabel={'...'} valueExists={true} classButton={undefined} classText={undefined} onclick={() => { title === 'Believer' ? setIsOpen(true) : onclick }}></ButtonC>
+            <ButtonC icon={undefined} className={buttonColor} label={buttonText} loading={loading} loadingLabel={'...'} valueExists={true}
+                classButton={undefined} classText={undefined} onclick={() => { title === 'Believer' ? setIsOpen(true) : onclick() }}></ButtonC>
 
             <PopupModal
                 url="https://calendly.com/wandaai/wizard-early-access"

@@ -107,7 +107,7 @@ export default function Payment() {
                                                         loading={loading1}
                                                         onclick={() => buyPro("Pro-Month")}
                                                         title={'Pro'}
-                                                        price={'$37'}
+                                                        price={'$39'}
                                                         priceSubtitle={'/month'}
                                                         subtitle={'For Teams scaling their documentation.'}
                                                         featuresList={['All Content Outputs', 'All Content Inputs', 'Access to beta features']} buttonText={'Start a 14-day Free Trial'} baseColor={'#f9f9f9'} buttonColor={'buttonMainPurple'} />
@@ -119,7 +119,7 @@ export default function Payment() {
                                             <TabPanel>
                                                 <SimpleGrid columns={2} spacing={10}>
                                                     <PriceBlock footnote={'No credit card required.'} loading={loading1} onclick={() => buyPro("Pro-Year")} title={'Pro'}
-                                                        price={'$370'} priceSubtitle={'/year'} subtitle={'For Teams scaling their documentation.'}
+                                                        price={'$390'} priceSubtitle={'/year'} subtitle={'For Teams scaling their documentation.'}
                                                         featuresList={['All Content Outputs', 'All Content Inputs', 'Access to beta features']} buttonText={'Start a 14-day Free Trial'} baseColor={'#f9f9f9'} buttonColor={'buttonMainPurple'} />
                                                     <PriceBlock footnote={undefined} loading={loading2} onclick={buyBeliever} title={'Believer'} price={'Talk with us'} priceSubtitle={''}
                                                         subtitle={'Everything in Pro plan plus...'}
