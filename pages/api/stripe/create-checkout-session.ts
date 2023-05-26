@@ -10,7 +10,7 @@ const productIdS = [
   },
   {
     name: "Pro-Year",
-    productId: process.env.STRIPE_PRODUCT_ID_PRO_MONTH as string,
+    productId: process.env.STRIPE_PRODUCT_ID_PRO_YEAR as string,
     mode: "subscription",
   },
   {
@@ -19,6 +19,8 @@ const productIdS = [
     mode: "payment",
   },
 ];
+
+
 
 export default async function handler(
   req: NextApiRequest,
@@ -30,7 +32,7 @@ export default async function handler(
 
   // This object will contain the user's data if the user is signed in
   const session = await getSession({ req });
-
+  console.log("olaaa")
   // Error handling
   if (!session?.user) {
     return res.status(401).json({
