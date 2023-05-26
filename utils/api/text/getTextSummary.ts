@@ -11,7 +11,6 @@ async function getTextSummary(dataF: any, url: string) {
     })
         .then((res) => res.json())
         .then(async (data) => {
-
             if (data.success === false) {
                 return await fetch('https://langchain-py.vercel.app/', {
                     headers: {
@@ -32,7 +31,7 @@ async function getTextSummary(dataF: any, url: string) {
                             await fetch('/api/llm/gpt3/textToSummary', {
                                 method: 'POST',
                                 body: JSON.stringify({
-                                    text:  data.response.trim(),
+                                    text: data.response.trim(),
                                     url: url,
                                     newF: false
                                 })
