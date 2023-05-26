@@ -1,3 +1,8 @@
+const userCollection = "users";
+const documentCollection = "documents";
+const automationCollection = "autoRepos";
+const customPromptsCollection = "customPrompts";
+
 const toneList = [
     "Default",
     "Authoritative",
@@ -78,6 +83,9 @@ const outputsWithPlatform = [
 ];
 
 export {
+    userCollection,
+    automationCollection,
+    customPromptsCollection,
     toneList,
     writingStyles,
     outputsWithPlatform

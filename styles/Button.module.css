@@ -1,0 +1,161 @@
+.buttonMainPurple,
+.buttonMainPurpleClose {
+    font-family: 'Basier Circle', sans-serif !important;
+    display: flex;
+    flex-direction: row;
+    filter: drop-shadow(0px 2px 4px rgba(44, 21, 79, .05));
+    order: 0;
+    font-style: normal
+}
+
+.buttonMainPurple,
+.buttonMainPurpleClose,
+.buttonMainPurpleDark {
+    font-size: 15px !important;
+    line-height: 24px !important
+}
+
+.buttonMainPurple {
+    justify-content: center;
+    align-items: center;
+    background: #8f50e2 !important;
+    color: #fff;
+    border-radius: 24px !important;
+    flex: none;
+    padding-left: 35px !important;
+    padding-right: 35px !important;
+    flex-grow: 0;
+    font-weight: 400 !important
+}
+
+.buttonMainPurpleClose {
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    background: #fff !important;
+    border: 1px solid #e3dfe9;
+    border-radius: 20px !important;
+    color: #2c154f !important;
+    flex: none;
+    flex-grow: 0;
+    font-weight: 500 !important;
+    letter-spacing: .005em !important
+}
+
+.buttonMainBlack,
+.buttonMainPurpleDark {
+    flex-direction: row;
+    border-radius: 24px !important;
+    color: #fff !important;
+    order: 0;
+    font-style: normal;
+    font-weight: 400 !important;
+    font-family: 'Basier Circle', sans-serif !important;
+    padding-left: 35px !important;
+    padding-right: 35px !important;
+    filter: drop-shadow(0px 2px 4px rgba(44, 21, 79, .05));
+    display: flex
+}
+
+.buttonMainPurpleDark {
+    justify-content: center;
+    align-items: center;
+    background: #2c154f !important;
+    flex: none;
+    flex-grow: 0
+}
+
+.buttonMainBlack {
+    justify-content: center;
+    align-items: center;
+    background: #171515 !important;
+    flex: none;
+    flex-grow: 0;
+    font-size: 15px !important;
+    line-height: 24px !important
+}
+
+.buttonMainSimple,
+.buttonMainWhite {
+    gap: 10px;
+    order: 0;
+    font-style: normal;
+    font-weight: 500 !important;
+    font-size: 15px !important;
+    line-height: 24px !important;
+    letter-spacing: .005em !important;
+    background: #fff !important
+}
+
+.buttonMainWhite {
+    font-family: 'Basier Circle', sans-serif !important;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    padding-left: 35px !important;
+    padding-right: 35px !important;
+    filter: drop-shadow(0px 2px 4px rgba(44, 21, 79, .05));
+    border: 1px solid #e3dfe9;
+    border-radius: 20px !important;
+    color: #2c154f !important;
+    flex: none;
+    flex-grow: 0
+}
+
+.buttonMainSimple {
+    flex: none;
+    flex-grow: 0
+}
+
+.buttonRepositoriesSimple {
+    display: flex;
+    align-items: flex-start !important;
+    justify-content: flex-start !important;
+    padding: 8px;
+    gap: 8px;
+    background: #fff !important;
+    border-radius: 10px;
+    order: 1;
+    align-self: stretch;
+    flex-grow: 0
+}
+
+.buttonRepositoriesSimple:hover,
+.buttonRepositoriesSimpleSelected {
+    align-items: flex-start !important;
+    display: flex;
+    border-radius: 10px;
+    order: 1;
+    align-self: stretch
+}
+
+.buttonRepositoriesSimpleSelected {
+    justify-content: flex-start !important;
+    padding: 8px;
+    gap: 8px;
+    background: #edeaf1 !important;
+    flex-grow: 0
+}
+
+.buttonRepositoriesSimple:hover {
+    justify-content: flex-start !important;
+    background: #fbf9fe !important;
+    flex-grow: 0
+}
+
+.buttonRepositoriesSimple:active {
+    display: flex;
+    align-items: flex-start !important;
+    justify-content: flex-start !important;
+    background: #edeaf1 !important;
+    border-radius: 10px;
+    order: 1;
+    align-self: stretch;
+    flex-grow: 0
+}
+
+.button-disabled {
+    opacity: .6;
+    pointer-events: none
+}

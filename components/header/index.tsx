@@ -47,6 +47,8 @@ const Header = () => {
               )}
             </MenuButton>
             <MenuList>
+
+              <MenuItem ><Link href="https://billing.stripe.com/p/login/test_eVa02A8e6glT3QI5kk">Subscription</Link></MenuItem>
               <MenuItem onClick={() => signOut()}>Logout</MenuItem>
             </MenuList>
           </>

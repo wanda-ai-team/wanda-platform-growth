@@ -48,23 +48,23 @@ export default async function handler(
             else {
                 /* Split the text into chunks. */
 
-                var dataToSend: any;
-                // spawn new child process to call the python script
-                const python = spawn('python', ['pages/api/llm/gpt3/script1.py']);
-                // collect data from script
-                await python.stdout.on('data', function (data: { toString: () => any; }) {
-                    console.log('Pipe data from python script ...');
-                    dataToSend = data.toString();
-                });
-                python.stderr.on('data', (data: { toString: (arg0: string) => any; }) => {
-                    console.error('stderr: ', data.toString('utf8'));
-                })
-                // in close event we are sure that stream from child process is closed
-                await python.on('close', (code: any) => {
-                    console.log(`child process close all stdio with code ${code}`);
-                    // send data to browser
-                    console.log(dataToSend)
-                });
+                // var dataToSend: any;
+                // // spawn new child process to call the python script
+                // const python = spawn('python', ['pages/api/llm/gpt3/script1.py']);
+                // // collect data from script
+                // await python.stdout.on('data', function (data: { toString: () => any; }) {
+                //     console.log('Pipe data from python script ...');
+                //     dataToSend = data.toString();
+                // });
+                // python.stderr.on('data', (data: { toString: (arg0: string) => any; }) => {
+                //     console.error('stderr: ', data.toString('utf8'));
+                // })
+                // // in close event we are sure that stream from child process is closed
+                // await python.on('close', (code: any) => {
+                //     console.log(`child process close all stdio with code ${code}`);
+                //     // send data to browser
+                //     console.log(dataToSend)
+                // });
 
 
                 const textSplitter = new RecursiveCharacterTextSplitter({ chunkSize: 1000 });
