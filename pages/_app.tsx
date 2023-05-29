@@ -46,6 +46,9 @@ function Auth({ children }: any) {
   else {
 
     if (session && session.data && session.data.user.isActive === false) {
+      if(session.data.user.stripeCustomerId === undefined){
+        console.log("olaaaa")
+      }
       if (router.pathname !== '/payment') {
         // router.push('/payment');
         return children

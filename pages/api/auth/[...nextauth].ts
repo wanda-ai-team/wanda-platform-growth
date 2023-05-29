@@ -55,7 +55,6 @@ export const authOptions: NextAuthOptions = {
       if (session?.user) {
         session.user.id = token.uid as string;
       }
-
       if (token) {
         session.user.image = token.image as string;
         if (!session.user.image) {
@@ -68,16 +67,26 @@ export const authOptions: NextAuthOptions = {
 
       return session;
     },
+
     jwt: async ({ user, token }) => {
       if (user) {
         token.image = user.image;
         token.uid = user.id;
         token.isActive = user.isActive;
-        token.stripeCustomerId = user.stripeCustomerId;
+        if (user.stripeCustomerId === undefined) {
+
+          const dbUser = await getUser("email", "==", user.email);
+          if (dbUser !== null && !dbUser.stripeCustomerId) {
+            token.stripeCustomerId = dbUser.stripeCustomerId;
+          }
+        } else {
+          token.stripeCustomerId = user.stripeCustomerId;
+        }
       }
       return token;
     },
   },
+
   events: {
     signIn: async (message) => {
       if (message.account !== null) {
@@ -90,9 +99,7 @@ export const authOptions: NextAuthOptions = {
             apiVersion: "2022-11-15",
           });
 
-
-          stripe.customers
-            .create({
+          const customer = await stripe.customers.create({
               email: message.user.email!,
             })
             .then(async (customer) => {
@@ -106,7 +113,8 @@ export const authOptions: NextAuthOptions = {
                   "-" +
                   uuidv4(),
               };
-              updateUserInfo(bodyN, "email", "==", message.user.email!);
+              await updateUserInfo(bodyN, "email", "==", message.user.email!);
+              console.log("olaaa")
             });
         }
 

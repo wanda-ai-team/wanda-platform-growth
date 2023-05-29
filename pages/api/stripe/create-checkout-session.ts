@@ -1,3 +1,4 @@
+import getDBEntry from "@/utils/api/db/getDBEntry";
 import type { NextApiRequest, NextApiResponse } from "next";
 import { getSession } from "next-auth/react";
 import Stripe from "stripe";
@@ -32,7 +33,6 @@ export default async function handler(
 
   // This object will contain the user's data if the user is signed in
   const session = await getSession({ req });
-  console.log("olaaa")
   // Error handling
   if (!session?.user) {
     return res.status(401).json({
@@ -41,6 +41,11 @@ export default async function handler(
         message: "You are not signed in.",
       },
     });
+  }
+  let user = null;
+  if (!session?.user.stripeCustomerId) {
+    user = await getDBEntry("users", ["email"], ["=="], [session.user.email], 1);
+    session.user.stripeCustomerId = user[0].data.stripeCustomerId;
   }
 
   const productId = <string>req.query.productId;
@@ -70,7 +75,7 @@ export default async function handler(
   const checkoutSession = await stripe.checkout.sessions.create({
     mode:
       productIdS.filter((product) => product.name === productId)[0].mode ===
-      "subscription"
+        "subscription"
         ? "subscription"
         : "payment",
     /* This is where the magic happens - this line will automatically link this Checkout page to the existing customer we created when the user signed-up, so that when the webhook is called our database can automatically be updated correctly.*/
@@ -87,10 +92,10 @@ export default async function handler(
     success_url:
       (process.env.ENV_URL as string) + `/?session_id={CHECKOUT_SESSION_ID}`,
     cancel_url: (process.env.ENV_URL as string) + "/payment",
-    subscription_data: subscription_data  as any,
+    subscription_data: subscription_data as any,
     payment_method_collection:
       productIdS.filter((product) => product.name === productId)[0].mode ===
-      "subscription"
+        "subscription"
         ? "if_required"
         : "always",
   });
