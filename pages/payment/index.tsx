@@ -10,16 +10,16 @@ export default function Payment() {
     const [loading1, setLoading1] = useState(false);
     const [loading2, setLoading2] = useState(false);
     const router = useRouter();
-    const session = useSession();
+    const { data: session } = useSession();
 
     async function getUser() {
         await fetch('/api/user/getUser')
             .then((res) => res.json())
-            .then((data) => {
-                console.log(data.content[0].data.isActive);
+            .then(async (data) => {
+
                 if (data.content[0].data.isActive === true) {
-                    if (session && session.data) {
-                        session.data.user.isActive = true;
+                    if (data) {
+                        data.user.isActive = true;
                     }
                     router.push('/');
                 } else {
