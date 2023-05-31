@@ -6,6 +6,7 @@ import Stripe from "stripe";
 import { v4 as uuidv4 } from "uuid";
 import { updateUserInfo } from "@/utils/api/db/updateUser";
 import { getUser } from "@/utils/api/db/getUser";
+import Airtable from "airtable";
 
 export const authOptions: NextAuthOptions = {
   pages: {
@@ -89,6 +90,7 @@ export const authOptions: NextAuthOptions = {
 
   events: {
     signIn: async (message) => {
+      console.log(message)
       if (message.account !== null) {
         // updateDBEntry("accounts", message.account, ['providerAccountId'], ['=='], [message.account.providerAccountId], 1);
 
@@ -100,8 +102,8 @@ export const authOptions: NextAuthOptions = {
           });
 
           const customer = await stripe.customers.create({
-              email: message.user.email!,
-            })
+            email: message.user.email!,
+          })
             .then(async (customer) => {
               const bodyN = {
                 stripeCustomerId: customer.id,
@@ -123,8 +125,28 @@ export const authOptions: NextAuthOptions = {
     },
 
     createUser: async ({ user }) => {
+      console.log(user)
+
       const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string, {
         apiVersion: "2022-11-15",
+      });
+      var base = new Airtable({ apiKey: process.env.AIRTABLE_API_KEY }).base('appyIJz2lXYjsZvwp');
+
+      base('Table 7').create([
+        {
+          "fields": {
+            "Name": user.name !== null ? user.name as string : "null",
+            "Email": user.email !== null ? user.email as string : "null"
+          }
+        }
+      ], function (err, records: any) {
+        if (err) {
+          console.error(err);
+          return;
+        }
+        records.forEach(function (record: any) {
+          console.log(record.getId());
+        });
       });
 
       await stripe.customers
