@@ -10,28 +10,26 @@ export default function Payment() {
     const [loading1, setLoading1] = useState(false);
     const [loading2, setLoading2] = useState(false);
     const router = useRouter();
-    const { data: session } = useSession();
+    const { data: session, status, update } = useSession();
+    // const session = useSession();
 
     async function getUser() {
         await fetch('/api/user/getUser')
             .then((res) => res.json())
-            .then(async (data) => {
-
-                if (data.content[0].data.isActive === true) {
-                    if (data) {
-                        data.user.isActive = true;
-                    }
+            .then(async (data1) => {
+                if (data1.content[0].data.isActive === true) {
                     router.push('/');
                 } else {
-
                     setLoading(false);
                 }
             }).catch((err) => {
                 setLoading(false);
             });
+            setLoading(false);
     }
 
     useEffect(() => {
+        console.log("Olaa")
         getUser();
     }, []);
 

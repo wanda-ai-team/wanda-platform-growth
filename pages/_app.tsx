@@ -19,13 +19,7 @@ export default function App({ Component, pageProps: { session, ...pageProps } }:
     <Provider store={store}>
       <SessionProvider session={session} >
         <ChakraProvider>
-          {Component.auth ? (
-            <Auth>
-              <Component {...pageProps} />
-            </Auth>
-          ) : (
-            <Component {...pageProps} />
-          )}
+          <Component {...pageProps} />
         </ChakraProvider>
       </SessionProvider>
     </Provider>
@@ -46,10 +40,13 @@ function Auth({ children }: any) {
   else {
 
     if (session && session.data && session.data.user.isActive === false) {
+
       if (router.pathname !== '/payment') {
+        console.log("olaaaa")
         router.push('/payment');
         // return children
       } else {
+        console.log("olaaaa")
         return children
       }
     } else {

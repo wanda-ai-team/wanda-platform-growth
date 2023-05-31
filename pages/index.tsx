@@ -50,6 +50,7 @@ const inputList: {
   ];
 
 export default function Home() {
+  const router = useRouter();
   const stopB = useRef(false);
   const canStopB = useRef(false);
   const [youtubeURL, setYoutubeURL] = useState("");
@@ -91,6 +92,21 @@ export default function Home() {
   });
 
   const group = getRootProps();
+  async function getUser() {
+    await fetch('/api/user/getUser')
+      .then((res) => res.json())
+      .then(async (data1) => {
+        if (data1.content[0].data.isActive === false) {
+          router.push('/payment');
+        }
+      }).catch((err) => {
+      });
+  }
+
+  useEffect(() => {
+    console.log("Olaa")
+    getUser();
+  }, []);
 
   async function test1() {
     const response = await fetch("/api/agents/agent_textToSummary", {
