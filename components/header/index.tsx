@@ -67,17 +67,14 @@ const Header = () => {
         </Menu>
       </div>
 
-
-      <PopupModal
-        url="https://calendly.com/wandaai/wizard-early-access"
-        /*
-         * react-calendly uses React's Portal feature (https://reactjs.org/docs/portals.html) to render the popup modal. As a result, you'll need to
-         * specify the rootElement property to ensure that the modal is inserted into the correct domNode.
-         */
-        rootElement={document.getElementById("__next") as HTMLElement}
-        onModalClose={() => setIsOpen(false)}
-        open={isOpen}
-      />
+      {typeof window !== 'undefined' && (
+        <PopupModal
+          url="https://calendly.com/wandaai/wizard-early-access"
+          rootElement={document.getElementById("__next") as HTMLElement}
+          onModalClose={() => setIsOpen(false)}
+          open={isOpen}
+        />
+      )}
     </header>
   );
 };
