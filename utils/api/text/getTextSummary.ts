@@ -1,7 +1,6 @@
 async function getTextSummary(dataF: any, url: string) {
-
+    console.log(dataF);
     return await fetch('/api/llm/gpt3/textToSummary', {
-
         method: 'POST',
         body: JSON.stringify({
             text: dataF,

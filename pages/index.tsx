@@ -1,7 +1,12 @@
 import styles from "@/styles/HomeN.module.css";
 import { useEffect, useRef, useState } from "react";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import { RepeatIcon } from '@chakra-ui/icons'
 import {
+  InputRightAddon,
   Button,
+  IconButton,
   Input,
   InputGroup,
   InputRightElement,
@@ -256,6 +261,16 @@ export default function Home() {
       });
       console.log(stringF)
       setTranscript(stringF);
+      toast.success('Transcript done', {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "light",
+      });
       console.log("subtitles2")
 
       subtitles = subtitles.map((caption: any) => caption.text);
@@ -267,6 +282,16 @@ export default function Home() {
       if (response.success) {
         if (transB) {
           setTranscript(response.content);
+          toast.success('Transcript done', {
+            position: "top-right",
+            autoClose: 5000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "light",
+          });
         }
         const responseWhisper = await speechToText(response.content);
         if (responseWhisper.success) {
@@ -312,8 +337,32 @@ export default function Home() {
   async function summarizeTextAndCreateThread(data: any, url: string, transc: string = "") {
     const response = await getTextSummary(data, url);
     setTranscript(transc);
+    console.log("Ola111aa")
+
     if (response.success) {
       setSummary(response.content);
+      
+      toast.success('Summary done', {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "light",
+      });
+    } else {
+      toast.error('OpenAPI is overloaded, please try again later', {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "light",
+      });
     }
 
     setLoadingAPICall(false);
@@ -467,34 +516,78 @@ export default function Home() {
                   {outputSelectedI === "url" && (
                     <>
                       <InputGroup>
-                        <Input
-                          sx={{ backgroundColor: "white" }}
-                          placeholder={
-                            outputSelectedI === "url"
-                              ? "URL (works with Medium, Youtube, Twitter tweets)"
-                              : "URL (works with spotify)"
-                          }
-                          value={youtubeURL}
-                          onChange={(e) => {
-                            setYoutubeURL(e.target.value);
-                            if (e.target.value !== "") {
-                              if (outputSelectedI === "url") {
-                                youtubeTransformText(
-                                  e.target.value,
-                                  wantTranscript
-                                );
-                              } else {
-                                // getAudioTranscript(e.target.value);
-                              }
+                        <InputGroup>
+                          <Input
+                            sx={{ backgroundColor: "white" }}
+                            placeholder={
+                              outputSelectedI === "url"
+                                ? "URL (works with Medium, Youtube, Twitter tweets)"
+                                : "URL (works with spotify)"
                             }
-                          }}
-                        />
-                        {loadingAPICall && (
-                          <InputRightElement>
-                            <Spinner color="#8F50E2" />
-                          </InputRightElement>
-                        )}
+                            value={youtubeURL}
+                            onChange={(e) => {
+                              setYoutubeURL(e.target.value);
+                              if (e.target.value !== "") {
+                                if (outputSelectedI === "url") {
+                                  if (e.target.value.includes('youtu.be')) {
+                                    const urlN = 'https://www.youtube.com/watch?v=' + e.target.value.split('youtu.be/')[1];
+                                    youtubeTransformText(
+                                      urlN,
+                                      wantTranscript
+                                    );
+                                  } else {
+                                    youtubeTransformText(
+                                      e.target.value,
+                                      wantTranscript
+                                    );
+
+                                  }
+                                } else {
+                                  // getAudioTranscript(e.target.value);
+                                }
+                              }
+                            }}
+                          />
+                          {loadingAPICall && (
+                            <InputRightElement style={{ marginLeft: '-1rem' }}>
+                              <Spinner color="#8F50E2" />
+                            </InputRightElement>
+                          )}
+                        </InputGroup>
+                        <InputRightAddon style={{backgroundColor: '#f7f5fa', borderWidth: '0px'}}>
+                          {/* right add-on element */}
+                          <IconButton
+                            onClick={() => {
+                              setTranscript("");
+                              setSummary("");
+                              if (youtubeURL !== "") {
+                                if (outputSelectedI === "url") {
+                                  if (youtubeURL.includes('youtu.be')) {
+                                    const urlN = 'https://www.youtube.com/watch?v=' + youtubeURL.split('youtu.be/')[1];
+                                    youtubeTransformText(
+                                      urlN,
+                                      wantTranscript
+                                    );
+                                  } else {
+                                    youtubeTransformText(
+                                      youtubeURL,
+                                      wantTranscript
+                                    );
+
+                                  }
+                                } else {
+                                  // getAudioTranscript(e.target.value);
+                                }
+                              }
+                            }}
+                            variant='outline'
+                            colorScheme='purple'
+                            aria-label='Call Sage'
+                            icon={<RepeatIcon />}
+                          />
+                        </InputRightAddon>
                       </InputGroup>
+
                     </>
                   )}
 
@@ -552,7 +645,6 @@ export default function Home() {
                 <div className={styles.options}>
                   <Select
                     sx={{ backgroundColor: "white" }}
-                    placeholder="Select Platform"
                     onChange={(e) => {
                       setOutputSelected(e.target.value);
                       setOutputSelectedO(outputsWithPlatform.filter(v => v.platform === e.target.value)[0].outputs[0]);
@@ -731,6 +823,20 @@ export default function Home() {
         )}
 
       </footer>
+      <ToastContainer
+        position="top-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light"
+      />
+      {/* Same as */}
+      <ToastContainer />
     </>
   );
 }
