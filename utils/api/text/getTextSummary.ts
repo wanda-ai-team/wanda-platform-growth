@@ -7,8 +7,7 @@ async function getTextSummary(dataF: any, url: string) {
             url: url,
             newF: true
         })
-    })
-        .then((res) => res.json())
+    }).then((res) => res.json())
         .then(async (data) => {
             if (data.success === false) {
                 return await fetch('https://langchain-py.vercel.app/', {
@@ -38,6 +37,7 @@ async function getTextSummary(dataF: any, url: string) {
                             return { content: data.response.trim(), success: true };
                         }
                     }).catch((err) => {
+                        console.log(err);
                         return { content: "Error", success: false };
                     });
             }

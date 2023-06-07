@@ -30,6 +30,7 @@ export default async function handler(
         }
         /** Load the summarization chain. */
         let resSummarization;
+        console.log("Loading summarization chain...");
         try {
             let summary = [];
             if (newF) {
