@@ -338,7 +338,7 @@ export default function Home() {
     const response = await getTextSummary(data, url);
     setTranscript(transc);
     console.log("Ola111aa")
-
+    console.log(response)
     if (response.success) {
       setSummary(response.content);
       
