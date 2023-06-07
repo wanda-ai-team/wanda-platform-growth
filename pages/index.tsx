@@ -353,7 +353,7 @@ export default function Home() {
         theme: "light",
       });
     } else {
-      toast.error('OpenAPI is overloaded, please try again later', {
+      toast.error('OpenAI is overloaded, please try again later', {
         position: "top-right",
         autoClose: 5000,
         hideProgressBar: false,
