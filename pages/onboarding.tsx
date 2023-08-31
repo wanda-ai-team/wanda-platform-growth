@@ -300,7 +300,7 @@ const Step1: FunctionComponent<Step1Props> = ({
       <Text fontSize="xl" fontWeight={600}>
         Add X (former Twitter) handle
       </Text>
-      
+
       <Text fontSize="l" fontWeight={400}>
         Tell us your X handle so we can understand your brand.
       </Text>
@@ -331,8 +331,8 @@ const Step1: FunctionComponent<Step1Props> = ({
             <Text fontWeight={500} fontSize="sm">
               latest tweets...
             </Text>
-            {tweets.map((tweet: any) => (
-              <Text fontSize="sm">{tweet}</Text>
+            {tweets.map((tweet: any, index: any) => (
+              <Text key={index} fontSize="sm">{tweet}</Text>
             )
             )}
           </VStack>

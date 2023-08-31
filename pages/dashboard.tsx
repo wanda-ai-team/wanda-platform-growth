@@ -220,8 +220,8 @@ const Dashboard: FunctionComponent<DashboardProps> = () => {
               <>
                 <RadioGroup onChange={setValue} value={value}>
                   <Stack direction='column'>
-                    {ideas.map((idea) => (
-                      <Radio value={idea}>{idea}</Radio>
+                    {ideas.map((idea, index) => (
+                      <Radio key={index} value={idea}>{idea}</Radio>
                     ))}
                     <Radio value={'custom'}>
                       Custom
