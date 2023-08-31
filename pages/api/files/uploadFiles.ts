@@ -11,6 +11,7 @@ import mime from 'mime';
 export const config = {
     api: {
         bodyParser: false,
+        sizeLimit: '20mb',
     },
 };
 

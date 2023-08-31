@@ -7,8 +7,6 @@ export const config = {
     runtime: "edge",
 };
 
-
-
 const handler = async (req: Request): Promise<Response> => {
     let { text, output, outputO, isText, toneStyle, writingStyle } = (await req.json()) as {
         text?: string;

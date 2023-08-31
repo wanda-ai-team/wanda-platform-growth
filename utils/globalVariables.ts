@@ -3,6 +3,7 @@ const documentCollection = "documents";
 const automationCollection = "autoRepos";
 const customPromptsCollection = "customPrompts";
 
+
 const toneList = [
     "Default",
     "Authoritative",
@@ -82,11 +83,17 @@ const outputsWithPlatform = [
     { platform: 'Summary', outputs: ['Summary'] }
 ];
 
+const platformsToGenerateIdeas = [
+    "Twitter",
+    "Blog",
+];
+
 export {
     userCollection,
     automationCollection,
     customPromptsCollection,
     toneList,
     writingStyles,
-    outputsWithPlatform
+    outputsWithPlatform,
+    platformsToGenerateIdeas
 }

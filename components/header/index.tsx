@@ -13,10 +13,12 @@ import styles from "@/styles/Header.module.css";
 import { signOut, useSession } from "next-auth/react";
 import { PopupModal } from "react-calendly";
 import { useState } from "react";
+import { useRouter } from "next/router";
 
 const Header = () => {
   const { data: session } = useSession();
   const [isOpen, setIsOpen] = useState(false);
+  const router = useRouter();
 
   return (
     <header className={styles.navbar__container}>
@@ -30,6 +32,24 @@ const Header = () => {
         />
       </Link>
 
+      {!router.pathname.includes('onboarding') && !router.pathname.includes('login') && (
+        <div style={{ display: 'flex', gap: '12px', verticalAlign: 'middle' }}>
+          <Button
+            size='sm'
+            colorScheme="purple"
+            onClick={() => router.push('/dashboard')}
+          >
+            Create
+          </Button>
+          <Button
+            size='sm'
+            colorScheme="purple"
+            onClick={() => router.push('/reporpuse')}
+          >
+            Reporpuse
+          </Button>
+        </div>
+      )}
       <div style={{ display: 'flex', gap: '12px', verticalAlign: 'middle' }}>
         <Menu>
           {() => (
