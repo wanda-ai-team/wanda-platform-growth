@@ -389,7 +389,7 @@ const Step2: FunctionComponent<Step2Props> = ({
           Questions
         </Text>
         <Text fontSize="l" fontWeight={400}>
-          What are your main competitors?
+          Who are your main competitors?
         </Text>
         <Textarea
           placeholder="Who are your main competitors"

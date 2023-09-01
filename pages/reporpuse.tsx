@@ -107,6 +107,24 @@ export default function Reporpuse() {
     onChange: (value: Contents) => setOutputSelectedI(value),
   });
 
+  async function getStoredThreads(selectedProject: string) {
+    return await fetch('/api/user/getProjectById', {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        projectId: selectedProject
+      }),
+    })
+      .then((res) => res.json())
+      .then(async (data1) => {
+        return data1;
+      }).catch((err) => {
+        return err;
+      })
+  }
+
   const group = getRootProps();
 
   async function getUser() {
@@ -457,23 +475,23 @@ export default function Reporpuse() {
     }
   };
 
-  let handleInputSChange = (e: { target: { value: any } }) => {
-    let inputValue = e.target.value;
-    setSummary(inputValue);
-  };
-
-  const handleStopGeneration = () => (stopB.current = true);
-
-  const handleConvert = () => {
+  const handleConvert = async () => {
     setConvertedText("");
     setTwitterThreadTextPerTweet([""]);
-    if (outputSelected === "Twitter") {
-      convertSummaryS(summary, false, toneStyle);
+    if (outputSelectedI === 'context') {
+      const response = await getStoredThreads(selectedProject);
+      if (response.success) {
+        convertSummaryS(response.project.content, false, toneStyle);
+      }
     } else {
-      if (outputSelectedO === "Text") {
-        convertSummaryS(inputText, true, toneStyle);
-      } else {
+      if (outputSelected === "Twitter") {
         convertSummaryS(summary, false, toneStyle);
+      } else {
+        if (outputSelectedO === "Text") {
+          convertSummaryS(inputText, true, toneStyle);
+        } else {
+          convertSummaryS(summary, false, toneStyle);
+        }
       }
     }
     // setCurrentStep("result");
@@ -750,7 +768,11 @@ export default function Reporpuse() {
                   )}
 
                   <Button
-                    isDisabled={((summary === "") || canStopB.current || (outputSelectedI !== "context" && selectedProject === ""))}
+                    isDisabled={(
+                      (outputSelectedI !== "context" && summary === "")
+                      || canStopB.current
+                      || (outputSelectedI === "context" && selectedProject === "")
+                    )}
                     colorScheme="purple"
                     onClick={handleConvert}
                   >
@@ -885,3 +907,5 @@ export default function Reporpuse() {
 }
 
 Reporpuse.auth = true
+
+

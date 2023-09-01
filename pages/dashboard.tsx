@@ -1,11 +1,12 @@
-import { Button, Center, CircularProgress, HStack, Input, Radio, RadioGroup, Select, Spinner, Stack, Text, Textarea, VStack } from "@chakra-ui/react";
-import { FunctionComponent, useEffect, useState } from "react";
+import { Button, Center, CircularProgress, HStack, Input, Progress, Radio, RadioGroup, Select, Spinner, Stack, Text, Textarea, VStack } from "@chakra-ui/react";
+import { FunctionComponent, useEffect, useRef, useState } from "react";
 import { platformsToGenerateIdeas } from "@/utils/globalVariables";
 import styles from "@/styles/HomeN.module.css";
 import 'react-toastify/dist/ReactToastify.css';
 import { ToastContainer } from "react-toastify";
 import TwitterThread from "@/components/text/twitterThread/twitterThreadN";
 import toastDisplay from "@/utils/common/toast";
+import { width } from "@mui/system";
 
 
 interface DashboardProps { }
@@ -27,6 +28,18 @@ const Dashboard: FunctionComponent<DashboardProps> = () => {
   const [convertedText, setConvertedText] = useState("Example");
   const [selectedTweets, setSelectedTweets] = useState<any>([]);
   const [threadPostResult, setThreadPostResult] = useState("");
+  const stopB = useRef(false);
+  const canStopB = useRef(false);
+  
+  let handleInputChange = (e: { target: { value: any } }) => {
+    if (selectedPlatform === "Twitter") {
+      let newArr = [...twitterThreadText];
+      newArr[0] = e.target.value;
+      setTwitterThreadText([...newArr]);
+    } else {
+      setConvertedText(e.target.value);
+    }
+  };
 
   const getIdeas = async () => {
     setLoading(true);
@@ -53,13 +66,14 @@ const Dashboard: FunctionComponent<DashboardProps> = () => {
   }, []);
 
   const generateBlogIdea = async (chosenIdeaN: string) => {
+    console.log(chosenIdeaN)
     setLoadingC(true);
     const response = await fetch("/api/llm/gpt3/generateBlogIdeasStream", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ idea: chosenIdeaN }),
+      body: JSON.stringify({ idea: chosenIdeaN, platform: selectedPlatform }),
     });
     if (!response.ok) {
       throw new Error(response.statusText);
@@ -76,15 +90,14 @@ const Dashboard: FunctionComponent<DashboardProps> = () => {
     let newTweet = false;
     let index = 0;
     let tweetThread: string[] = [];
-
-    setLoadingC(false);
+    setConvertedText("")
     while (!done) {
-      // canStopB.current = true;
-      // if (stopB.current) {
-      //   stopB.current = false;
-      //   canStopB.current = false;
-      //   break;
-      // }
+      canStopB.current = true;
+      if (stopB.current) {
+        stopB.current = false;
+        canStopB.current = false;
+        break;
+      }
       const { value, done: doneReading } = await reader.read();
       done = doneReading;
       const chunkValue = decoder.decode(value);
@@ -121,7 +134,11 @@ const Dashboard: FunctionComponent<DashboardProps> = () => {
       }
     }
 
+    canStopB.current = false;
+    setLoadingC(false);
   }
+
+  
 
   function getTwitterThread() {
     return (
@@ -214,7 +231,7 @@ const Dashboard: FunctionComponent<DashboardProps> = () => {
 
 
             {loading && (
-              <CircularProgress isIndeterminate />
+              <Progress size='xs' isIndeterminate />
             )}
             {!loading && ideas.length > 0 && (
               <>
@@ -241,9 +258,10 @@ const Dashboard: FunctionComponent<DashboardProps> = () => {
             <Button
               colorScheme="purple"
               onClick={() => {
-                generateBlogIdea(chosenIdea);
+                const valueToPass = (value === 'custom') ? chosenIdea : value;
+                generateBlogIdea(valueToPass);
               }}
-              isDisabled={loading || (!value)}
+              isDisabled={loading || (!value) || canStopB.current}
             >
               Generate {selectedPlatform} Post
             </Button>
@@ -262,9 +280,9 @@ const Dashboard: FunctionComponent<DashboardProps> = () => {
           <hr className={styles.divider} />
 
           {loadingC && (
-            <Center>
-              <CircularProgress isIndeterminate />
-            </Center>
+            <div style={{ width: '100%', marginTop: '-15px' }}>
+              <Progress size='xs' isIndeterminate />
+            </div>
           )}
 
           {selectedPlatform === "Twitter"
@@ -274,6 +292,7 @@ const Dashboard: FunctionComponent<DashboardProps> = () => {
               value={convertedText}
               style={{ height: '600px' }}
               // isDisabled={!convertedText}
+              onChange={handleInputChange}
               placeholder='AI Post will show up here when it is generated'
               size="lg"
             />
@@ -284,9 +303,11 @@ const Dashboard: FunctionComponent<DashboardProps> = () => {
           </div>
 
         </div>
-      </main>
+      </main >
 
       <footer className={styles.generate__footer}>
+
+        <Button colorScheme='purple' isDisabled={!canStopB.current} onClick={() => stopB.current = true}> Stop Generation </Button>
         <Button colorScheme='purple'
           isDisabled={!twitterThreadText || !convertedText || loadingS}
           onClick={() => saveGeneratedContent(selectedPlatform, convertedText)}>

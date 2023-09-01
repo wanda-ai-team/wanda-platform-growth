@@ -136,6 +136,31 @@ Do not self reference.
 Do not explain what you are doing.
 Do not explain what you are going to do.`;
 
+function getGenerationToBlogPrompt(context: string) {
+    return `
+This is the main topic that you will base your new blog post on: ${context}. 
+Based on this idea for a blog, write a blog post of about 1,500 words, make it be SEO relevant.
+Provide a blog compliant markdown response following the correct format.
+Do not repeat yourself.
+Do not self reference.
+Do not explain what you are doing.
+Do not explain what you are going to do.`
+}
+
+function getGenerationToXPrompt(context: string) {
+    return `
+This is the main topic that you will base your new twitter thread on: ${context}. 
+Based on this idea for a Twitter thread, write a twitter thread, make it relevant and so that people will engange with it.
+There should be around 5 to 8 tweets.
+The first tweet should have a hook and entice the readers.
+The last tweet should have a small summary of the thread.
+Talk in-depth of the topic on all the tweets.
+Please separate the tweets with a double break line.
+Do not repeat yourself.
+Do not self reference.
+Do not explain what you are doing.
+Do not explain what you are going to do.`
+}
 
 export {
     textToInstagramCarrouselTextPrompt,
@@ -145,5 +170,7 @@ export {
     getTextToInstagramCarrouselTextPrompt,
     getTextToTwitterThreadPrompt,
     getTextToBlogPostPrompt,
-    getTextToLinkedInPostPrompt
+    getTextToLinkedInPostPrompt,
+    getGenerationToBlogPrompt,
+    getGenerationToXPrompt,
 };
