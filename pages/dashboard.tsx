@@ -25,17 +25,19 @@ const Dashboard: FunctionComponent<DashboardProps> = () => {
   const [twitterThreadTextPerTweet, setTwitterThreadTextPerTweet] = useState([
     "",
   ]);
-  const [convertedText, setConvertedText] = useState("Example");
+  const [convertedText, setConvertedText] = useState("");
   const [selectedTweets, setSelectedTweets] = useState<any>([]);
   const [threadPostResult, setThreadPostResult] = useState("");
   const stopB = useRef(false);
   const canStopB = useRef(false);
-  
+
   let handleInputChange = (e: { target: { value: any } }) => {
+    console.log("newArr")
     if (selectedPlatform === "Twitter") {
       let newArr = [...twitterThreadText];
       newArr[0] = e.target.value;
       setTwitterThreadText([...newArr]);
+      console.log(newArr)
     } else {
       setConvertedText(e.target.value);
     }
@@ -138,7 +140,7 @@ const Dashboard: FunctionComponent<DashboardProps> = () => {
     setLoadingC(false);
   }
 
-  
+
 
   function getTwitterThread() {
     return (
@@ -288,13 +290,14 @@ const Dashboard: FunctionComponent<DashboardProps> = () => {
           {selectedPlatform === "Twitter"
             ? getTwitterThread()
             :
+
             <Textarea
+              style={{ marginLeft: '5%', resize: "none", height: "600px", marginRight: '5%', width: '90%' }}
               value={convertedText}
-              style={{ height: '600px' }}
-              // isDisabled={!convertedText}
               onChange={handleInputChange}
+              variant="filled"
               placeholder='AI Post will show up here when it is generated'
-              size="lg"
+              size="sm"
             />
           }
           {/* {getTextArea(outputSelected === 'Summary' ? summary : outputSelected === 'Transcript' ? transcript : convertedText)} */}
@@ -309,7 +312,12 @@ const Dashboard: FunctionComponent<DashboardProps> = () => {
 
         <Button colorScheme='purple' isDisabled={!canStopB.current} onClick={() => stopB.current = true}> Stop Generation </Button>
         <Button colorScheme='purple'
-          isDisabled={!twitterThreadText || !convertedText || loadingS}
+          isDisabled={
+            loadingS
+            || canStopB.current
+            || (selectedPlatform === "Twitter" && twitterThreadTextPerTweet[0].length <= 0)
+            || (selectedPlatform === "Blog" && convertedText.length <= 0)
+          }
           onClick={() => saveGeneratedContent(selectedPlatform, convertedText)}>
           Save
         </Button>

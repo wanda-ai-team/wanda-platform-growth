@@ -73,9 +73,10 @@ export default function Reporpuse() {
   const [transcript, setTranscript] = useState("");
   const [inputText, setInputText] = useState("");
   const [loadingAPICall, setLoadingAPICall] = useState(false);
+  const [loadingProjects, setLoadingProjects] = useState(false);
   const [loadingConversion, setLoadingConversion] = useState(false);
   const [twitterThreadText, setTwitterThreadText] = useState([""]);
-  const [projects, setProjects] = useState([""]);
+  const [projects, setProjects] = useState([]);
   const [twitterThreadTextPerTweet, setTwitterThreadTextPerTweet] = useState([
     "",
   ]);
@@ -139,13 +140,20 @@ export default function Reporpuse() {
   }
 
   async function getProjects() {
-    await fetch('/api/user/getProjects')
+    setLoadingProjects(true);
+    await fetch('/api/user/getProjectsWithInfo')
       .then((res) => res.json())
       .then(async (data1) => {
-        console.log(data1.projects[0])
-        setProjects(data1.projects[0].data.generatedContent)
-        setSelectedproject(data1.projects[0].data.generatedContent[0])
+        console.log("data1.projects")
+        if (data1.projects.length > 0) {
+          setProjects(data1.projects)
+          setSelectedproject(data1.projects[0].id)
+        } else {
+          setProjects([])
+        }
+        setLoadingProjects(false);
       }).catch((err) => {
+        setLoadingProjects(false);
       });
   }
 
@@ -646,7 +654,22 @@ export default function Reporpuse() {
                     </>
                   )}
 
-                  {outputSelectedI === "context" && (
+                  {outputSelectedI === "context" && loadingProjects && (
+                    <>
+                      <Text>
+                        Loading created content.
+                      </Text>
+                      <Progress size='xs' isIndeterminate />
+                    </>
+                  )}
+
+
+                  {outputSelectedI === "context" && !loadingProjects && projects.length <= 0 && (
+                    <Text>
+                      No previous created content.
+                    </Text>
+                  )}
+                  {outputSelectedI === "context" && projects.length > 0 && (
                     <>
                       <Select
                         sx={{ backgroundColor: "white" }}
@@ -655,12 +678,11 @@ export default function Reporpuse() {
                         //   setOutputSelectedO(outputsWithPlatform.filter(v => v.platform === e.target.value)[0].outputs[0]);
                         // }}
                         value={selectedProject}
-
                         onChange={(e) => { setSelectedproject(e.target.value); }}
                       >
-                        {projects.map((project, index) => (
-                          <option key={index} value={project}>
-                            {project}
+                        {projects.map((project: any, index) => (
+                          <option key={index} value={project.id}>
+                            {project.platform} - {project.content.substring(0, 75) + ' ...'}
                           </option>
                         ))}
                       </Select>
