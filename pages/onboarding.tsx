@@ -5,14 +5,18 @@ import {
   HStack,
   Input,
   Progress,
+  Skeleton,
+  Spinner,
+  Stack,
   Text,
   Textarea,
   VStack,
 } from "@chakra-ui/react";
-import React from "react";
+import React, { useEffect } from "react";
 import { FunctionComponent, useState } from "react";
 import { useRouter } from 'next/navigation';
 import toastDisplay from "@/utils/common/toast";
+import sleep from "@/utils/common/utils";
 
 interface OnboardingProps { }
 
@@ -21,7 +25,7 @@ const Onboarding: FunctionComponent<OnboardingProps> = () => {
   const [siteData, setSiteData] = useState<any>({});
   const { push } = useRouter();
 
-  const MAX_STEPS = 4;
+  const MAX_STEPS = 5;
 
   const handleNext = () => {
     setStep((prev) => Math.min(prev + 1, MAX_STEPS - 1));
@@ -86,6 +90,16 @@ const Onboarding: FunctionComponent<OnboardingProps> = () => {
 
               }
               //   createSiteMutation(siteDataToPost);
+              handleNext();
+            }}
+          />
+        );
+      case 3:
+        return (
+          <Step3
+            onPrevAction={() => {
+            }}
+            onNextAction={() => {
               push('/dashboard');
             }}
           />
@@ -102,7 +116,7 @@ const Onboarding: FunctionComponent<OnboardingProps> = () => {
           <Center alignItems="center" justifyItems="center" w="full" h="full">
             <VStack w={700} align="flex-start" spacing={10}>
               <VStack w={700} align="flex-start" spacing={2}>
-                <Text fontSize="sm" color="gray.500">{`${step + 2}/${MAX_STEPS}`}</Text>
+                <Text visibility={(step + 2 === MAX_STEPS ? 'hidden' : 'visible')} fontSize="sm" color="gray.500">{`${step + 2}/${MAX_STEPS}`}</Text>
                 <VStack w={700} align="flex-start" spacing={6}>
                   {renderStep()}
                 </VStack>
@@ -181,8 +195,9 @@ const Step0: FunctionComponent<Step0Props> = ({
         setLoading(false);
       })
       .catch((error) => {
+        console.error("Error:", error);
         setLoading(false);
-        toastDisplay('Error while scraping', false);
+        toastDisplay('Error while scraping, check if URL is well formed', false);
       });
   };
 
@@ -271,7 +286,6 @@ const Step1: FunctionComponent<Step1Props> = ({
   onNextAction,
 }: Step1Props) => {
   const [xHandle, setXHandle] = useState("here_is_abrams");
-  const [library, setLibrary] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [tweets, setTweets] = useState([]);
 
@@ -286,11 +300,21 @@ const Step1: FunctionComponent<Step1Props> = ({
     })
       .then((response) => response.json())
       .then(({ data }: any) => {
+        console.log(data);
+        if (data.status === 200) {
+          toastDisplay('X handle added successfully', true);
+          setTweets(data);
+        }
+        else {
+          toastDisplay('Error while accessing X, check your handle.', false);
+        }
         setLoading(false);
-        setTweets(data);
       })
       .catch((error) => {
         console.error("Error:", error);
+        setLoading(false);
+        setTweets([]);
+        toastDisplay('Error while accessing X, check your handle.', false);
       });
   };
 
@@ -323,7 +347,7 @@ const Step1: FunctionComponent<Step1Props> = ({
           </Button>
         </HStack>
         {loading && (
-          <Progress size="xs" isIndeterminate colorScheme="brand" w="full" />
+          <Progress size="xs" isIndeterminate colorScheme="purple" w="full" />
         )}
 
         {tweets.length > 0 && (
@@ -413,6 +437,50 @@ const Step2: FunctionComponent<Step2Props> = ({
         </Button>
       </HStack>
     </>
+  );
+};
+
+interface Step3Props {
+  onPrevAction: () => void;
+  onNextAction: () => void;
+}
+
+const Step3: FunctionComponent<Step3Props> = ({
+  onPrevAction,
+  onNextAction,
+}: Step3Props) => {
+  const contentArray = [
+    "Ideas brewing in the cosmic cauldron 🌌🔮...",
+    "Summoning the Batsignal of inspiration 🦇💡...",
+    "Exploring your digital universe 🌟🌐...",
+  ]
+
+  const [currentContent, setCurrentContent] = useState(contentArray[0]);
+
+  async function changer() {
+    await sleep(2000)
+    setCurrentContent(contentArray[1]);
+    await sleep(2000)
+    setCurrentContent(contentArray[2]);
+    await sleep(2000)
+    onNextAction();
+  }
+
+  useEffect(() => {
+    changer()
+  });
+
+  return (
+    <Center>
+      <Stack w="40vw">
+        <Text fontSize="xl" fontWeight={600}>
+          {currentContent}
+        </Text>
+        <Skeleton height='20px' />
+        <Skeleton height='20px' />
+        <Skeleton height='20px' />
+      </Stack>
+    </Center>
   );
 };
 

@@ -59,6 +59,7 @@ const Dashboard: FunctionComponent<DashboardProps> = () => {
       })
       .catch((error) => {
         console.error("Error:", error);
+        toastDisplay('Error while generating, try again', false)
         setLoading(false);
       });
   }
@@ -78,7 +79,9 @@ const Dashboard: FunctionComponent<DashboardProps> = () => {
       body: JSON.stringify({ idea: chosenIdeaN, platform: selectedPlatform }),
     });
     if (!response.ok) {
-      throw new Error(response.statusText);
+      toastDisplay('Error while generating, try again', false)
+      setLoadingC(false);
+      return;
     }
 
     const data = response.body;

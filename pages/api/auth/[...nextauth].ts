@@ -1,5 +1,7 @@
 import NextAuth, { NextAuthOptions } from "next-auth";
 import TwitterProvider from "next-auth/providers/twitter";
+import GoogleProvider from "next-auth/providers/google";
+
 import { FirestoreAdapter } from "@next-auth/firebase-adapter";
 import updateDBEntry from "@/utils/api/db/updateDBEntry";
 import Stripe from "stripe";
@@ -13,15 +15,10 @@ export const authOptions: NextAuthOptions = {
     signIn: "/login",
   },
   providers: [
-    TwitterProvider({
-      clientId: process.env.TWITTER_CLIENT_ID as string,
-      clientSecret: process.env.TWITTER_CLIENT_SECRET as string,
+    GoogleProvider({
+      clientId: process.env.GOOGLE_ID as string,
+      clientSecret: process.env.GOOGLE_SECRET as string,
       allowDangerousEmailAccountLinking: true,
-      authorization: {
-        params: {
-          scope: "users.read tweet.read tweet.write offline.access like.read list.read",
-        },
-      },
     }),
   ],
   adapter: FirestoreAdapter({
@@ -50,7 +47,6 @@ export const authOptions: NextAuthOptions = {
         ? ""
         : process.env.FIREBASE_APP_ID as string,
   }),
-
   callbacks: {
     session: async ({ session, token }) => {
       if (session?.user) {

@@ -9,6 +9,7 @@ function getTextToTwitterThreadPrompt(tone: string, writing: string) {
     There should be around 5 to 8 tweets.
     The first tweet should have a hook and entice the readers.
     The last tweet should have a small summary of the thread.
+    Separate each tweet from the thread with a double break line.
     Talk in-depth of the topic on all the tweets.
     Please separate the tweets with a double break line.
     Do not repeat yourself.
@@ -154,6 +155,7 @@ Based on this idea for a Twitter thread, write a twitter thread, make it relevan
 There should be around 5 to 8 tweets.
 The first tweet should have a hook and entice the readers.
 The last tweet should have a small summary of the thread.
+Separate each tweet from the thread with a double break line.
 Talk in-depth of the topic on all the tweets.
 Please separate the tweets with a double break line.
 Do not repeat yourself.

@@ -22,6 +22,7 @@ export default async function handler(
   res: NextApiResponse
 ) {
   const session = await getServerSession(req, res, authOptions)
+  console.log("olaaaa")
   // Error handling
 
   if (!session?.user) {
@@ -33,42 +34,52 @@ export default async function handler(
     });
   }
 
-  const { url } = req.body
+  try {
+    let { url } = req.body
 
-  const { data } = await axios.get(url)
-  const $ = load(data)
+    if (!new URL(url)) {
+      url = `https://${url}`
+    }
 
-  const bodyText: any = []
-  let result: string = ""
-  const t = $('body').find('h1,h2,h3,h4,h5,h6,p,a').text()
+    const { data } = await axios.get(url)
+    console.log({ data })
+    const $ = load(data)
 
-  $($('body').find('h1,h2,h3,h4,h5,h6,p,a')).each(function (index, element) {
-    bodyText.push($(element).text())
-  });
+    const bodyText: any = []
+    let result: string = ""
+    const t = $('body').find('h1,h2,h3,h4,h5,h6,p,a').text()
 
-  result = bodyText.join('\n\n')
+    $($('body').find('h1,h2,h3,h4,h5,h6,p,a')).each(function (index, element) {
+      bodyText.push($(element).text())
+    });
 
-  const openAIResult = await getOpenAIAnswer(result.substring(0, 1000))
+    result = bodyText.join('\n\n')
+
+    const openAIResult = await getOpenAIAnswer(result.substring(0, 1000))
 
 
 
-  // const context = await addContext({ email: session.user?.email })
+    // const context = await addContext({ email: session.user?.email })
 
-  let context = await getDBEntry("userContexts", ['email'], ['=='], [session.user.email], 1)
-  if (context.length <= 0) {
-    context = await createDBEntry("userContexts", { email: session.user.email });
+    let context = await getDBEntry("userContexts", ['email'], ['=='], [session.user.email], 1)
+    if (context.length <= 0) {
+      context = await createDBEntry("userContexts", { email: session.user.email });
+    }
+    else {
+      context = context[0]
+    }
+    const site = await createDBEntry("userSites", { url: url, product: openAIResult.product, target_audience: openAIResult.target_audience, contextId: context.id });
+    await updateDBEntryArray("userContexts", site.id, 'sites', ['email'], '==', [session.user.email], 1);
+
+    await updateDBEntry("users", { context: context.id }, ['email'], '==', [session.user.email], 1);
+
+    // await addSite({ url: url, product: openAIResult.product, target_audience: openAIResult.target_audience, contextId: context.id })
+
+    res.status(200).json({ data: openAIResult })
+  } catch (error) {
+    console.log({ error })
+    res.status(400).json({ error })
   }
-  else {
-    context = context[0]
-  }
-  const site = await createDBEntry("userSites", { url: url, product: openAIResult.product, target_audience: openAIResult.target_audience, contextId: context.id });
-  await updateDBEntryArray("userContexts", site.id, 'sites', ['email'], '==', [session.user.email], 1);
-
-  await updateDBEntry("users", { context: context.id }, ['email'], '==', [session.user.email], 1);
-
-  // await addSite({ url: url, product: openAIResult.product, target_audience: openAIResult.target_audience, contextId: context.id })
-
-  res.status(200).json({ data: openAIResult })
 
 }
 

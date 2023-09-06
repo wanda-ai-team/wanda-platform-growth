@@ -54,13 +54,14 @@ const Header = () => {
         <Menu>
           {() => (
             <>
-              <Button
-                size='sm'
-                colorScheme="purple"
-                onClick={() => setIsOpen(true)}
-              >
-                Feedback
-              </Button>
+              <a  target="_blank" href="https://app.frill.co/embed/widget/39ae3c1b-25d9-4212-8e67-fc56fb451206">
+                <Button
+                  size='sm'
+                  colorScheme="purple"
+                >
+                  Feedback
+                </Button>
+              </a>
               <MenuButton>
                 {session?.user?.name && (
                   <button className={styles.dropdown__trigger}>
@@ -71,15 +72,13 @@ const Header = () => {
                         borderRadius: "10px",
                       }}
                     />
-                    <Text fontSize="sm" fontWeight="semibold">
-                      {session.user.name}
-                    </Text>
+                    {session.user.name}
                   </button>
                 )}
               </MenuButton>
               <MenuList>
 
-                <MenuItem ><Link href="https://billing.stripe.com/p/login/test_eVa02A8e6glT3QI5kk">Subscription</Link></MenuItem>
+                {/* <MenuItem ><Link href="https://billing.stripe.com/p/login/test_eVa02A8e6glT3QI5kk">Subscription</Link></MenuItem> */}
                 <MenuItem onClick={() => signOut()}>Logout</MenuItem>
               </MenuList>
             </>

@@ -23,9 +23,7 @@ const handler = async (req: Request): Promise<Response> => {
         output = output.toLowerCase();
         outputO = outputO.toLowerCase();
         let basePromptPrefix = "";
-        console.log(text)
-        console.log(output)
-        console.log(outputO)
+        console.log("ola, tudo bem?");
         switch (output) {
             case "twitter":
                 if (outputO === "thread") {
@@ -79,7 +77,7 @@ Blog Post:\n`;
         }
 
         const payload = {
-            model: "gpt-4",
+            model: "gpt-3.5",
             // model: "text-davinci-003",
             // prompt: basePromptPrefix,
             messages: [{ role: "user", content: basePromptPrefix }],
@@ -87,7 +85,6 @@ Blog Post:\n`;
             stream: true,
             n: 1,
         };
-
         const stream = await OpenAIStream(payload);
         return new Response(stream);
         // return res.status(200).send(stream);

@@ -75,6 +75,7 @@ export default function Reporpuse() {
   const [loadingAPICall, setLoadingAPICall] = useState(false);
   const [loadingProjects, setLoadingProjects] = useState(false);
   const [loadingConversion, setLoadingConversion] = useState(false);
+  const [loadingC, setLoadingC] = useState(false);
   const [twitterThreadText, setTwitterThreadText] = useState([""]);
   const [projects, setProjects] = useState([]);
   const [twitterThreadTextPerTweet, setTwitterThreadTextPerTweet] = useState([
@@ -180,7 +181,8 @@ export default function Reporpuse() {
     text: boolean,
     toneStyle: string
   ) {
-    setLoadingConversion(true);
+    console.log("summaryN")
+    console.log(summaryN)
     const response = await fetch("/api/llm/gpt3/textToThreadStream", {
       method: "POST",
       headers: {
@@ -195,6 +197,7 @@ export default function Reporpuse() {
         writingStyle: outputSelectedW
       }),
     });
+    console.log(response)
     if (!response.ok) {
       throw new Error(response.statusText);
     }
@@ -203,6 +206,9 @@ export default function Reporpuse() {
     if (!data) {
       return;
     }
+    console.log("data")
+    console.log(data)
+
     const reader = data.getReader();
     const decoder = new TextDecoder();
     let done = false;
@@ -221,32 +227,56 @@ export default function Reporpuse() {
       done = doneReading;
       const chunkValue = decoder.decode(value);
 
-      if (chunkValue === "\n") {
-        if (newTweet) {
-          index++;
-          setNumberOfTweets(index);
-          newTweet = false;
-        } else {
-          newTweet = true;
-        }
-      }
+      // if (chunkValue === "\n") {
+      //   if (newTweet) {
+      //     index++;
+      //     setNumberOfTweets(index);
+      //     newTweet = false;
+      //   } else {
+      //     newTweet = true;
+      //   }
+      // }
 
-      if (chunkValue === "\n\n") {
-        index++;
-        setNumberOfTweets(index);
-      }
+      // if (chunkValue === "\n\n") {
+      //   index++;
+      //   setNumberOfTweets(index);
+      // }
+
+
+      console.log("chunkValue")
+      console.log(chunkValue)
+
 
       if (outputSelected === "Twitter") {
-        if (!newTweet) {
-          if (chunkValue !== "\n") {
-            if (tweetThread[index] !== undefined) {
-              tweetThread[index] = tweetThread[index] + chunkValue;
-            } else {
-              tweetThread[index] = chunkValue;
+
+        if (/\n/.exec(chunkValue)) {
+          if (chunkValue === "\n" || chunkValue === "\n\n") {
+            console.log("chunkValue333")
+            index++;
+            setNumberOfTweets(index);
+          } else {
+            if (chunkValue.length > 5) {
+              chunkValue.split(/\n/).map((value) => {
+                console.log("value")
+                console.log(value)
+                if (value !== "") {
+                  tweetThread[index] = value;
+                  setTwitterThreadTextPerTweet([...tweetThread]);
+                  index++;
+                  setNumberOfTweets(index);
+                }
+              });
             }
-            tweetThread[index] = tweetThread[index].replace("\n", "");
-            setTwitterThreadTextPerTweet([...tweetThread]);
           }
+          // Do something, the string contains a line break
+        } else {
+          if (tweetThread[index] !== undefined) {
+            tweetThread[index] = tweetThread[index] + chunkValue;
+          } else {
+            tweetThread[index] = chunkValue;
+          }
+          tweetThread[index] = tweetThread[index].replace("\n", "");
+          setTwitterThreadTextPerTweet([...tweetThread]);
         }
       } else {
         setConvertedText((prev) => prev + chunkValue);
@@ -255,6 +285,7 @@ export default function Reporpuse() {
 
     canStopB.current = false;
     setLoadingConversion(false);
+    setLoadingC(false);
   }
 
   async function postTweet1() {
@@ -431,7 +462,6 @@ export default function Reporpuse() {
 
     const res = await fetch("/api/files/uploadFiles", {
       method: "POST",
-
       body: formData,
     });
 
@@ -487,6 +517,7 @@ export default function Reporpuse() {
     setConvertedText("");
     setTwitterThreadTextPerTweet([""]);
     if (outputSelectedI === 'context') {
+      setLoadingC(true);
       const response = await getStoredThreads(selectedProject);
       if (response.success) {
         convertSummaryS(response.project.content, false, toneStyle);
@@ -813,6 +844,13 @@ export default function Reporpuse() {
 
 
               <hr className={styles.divider} />
+
+              {loadingC && (
+                <div style={{ width: '100%', marginTop: '-15px' }}>
+                  <Progress size='xs' isIndeterminate />
+                </div>
+              )}
+
               {getTextArea(outputSelected === 'Summary' ? summary : outputSelected === 'Transcript' ? transcript : convertedText)}
 
               <div className={styles.texts}>
@@ -881,6 +919,9 @@ export default function Reporpuse() {
               </div>
 
               <hr className={styles.divider} />
+
+
+
               <div className={styles.texts}>
                 {outputSelected === "Twitter"
                   ? getTwitterThread()
