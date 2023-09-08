@@ -181,8 +181,6 @@ export default function Reporpuse() {
     text: boolean,
     toneStyle: string
   ) {
-    console.log("summaryN")
-    console.log(summaryN)
     const response = await fetch("/api/llm/gpt3/textToThreadStream", {
       method: "POST",
       headers: {
@@ -197,6 +195,7 @@ export default function Reporpuse() {
         writingStyle: outputSelectedW
       }),
     });
+    console.log("response")
     console.log(response)
     if (!response.ok) {
       throw new Error(response.statusText);

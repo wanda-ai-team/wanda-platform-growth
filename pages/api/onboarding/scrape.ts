@@ -42,7 +42,6 @@ export default async function handler(
     }
 
     const { data } = await axios.get(url)
-    console.log({ data })
     const $ = load(data)
 
     const bodyText: any = []
@@ -68,6 +67,10 @@ export default async function handler(
     else {
       context = context[0]
     }
+
+    console.log(openAIResult)
+    console.log(openAIResult.product)
+    console.log(openAIResult.target_audience)
     const site = await createDBEntry("userSites", { url: url, product: openAIResult.product, target_audience: openAIResult.target_audience, contextId: context.id });
     await updateDBEntryArray("userContexts", site.id, 'sites', ['email'], '==', [session.user.email], 1);
 
@@ -75,7 +78,7 @@ export default async function handler(
 
     // await addSite({ url: url, product: openAIResult.product, target_audience: openAIResult.target_audience, contextId: context.id })
 
-    res.status(200).json({ data: openAIResult })
+    res.status(200).json({ data: openAIResult, siteContent: result })
   } catch (error) {
     console.log({ error })
     res.status(400).json({ error })
@@ -95,7 +98,7 @@ const getOpenAIAnswer = async (context: string) => {
       role: "system", content: "You are a senior marketing expert at a SaaS company. Only respond in JSON format.",
     }, {
       role: "user", content: `This is the copy of a landing page for a product: ${context}. Write a short description of the product and the target audience in the space below.
-
+      Don't forget to always put product descriptions and target audiences.
     Provide a RFC8259 compliant JSON response following this format without deviation.
     {"product": "product description", "target_audience": "target audience of the product: ${context}"}`
     }],

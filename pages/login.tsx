@@ -71,7 +71,7 @@ export default function Login({ providers }: InferGetServerSidePropsType<typeof 
                         height={24}
                         src="/assets/icons/googleLogin.png"
                       />}
-                    Sign in with Twitter
+                    Sign in
                   </button>
                 </div>
               ))}

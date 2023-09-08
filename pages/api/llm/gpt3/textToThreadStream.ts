@@ -51,6 +51,9 @@ Instagram Carousel:\n`;
             case "linkedin":
                 if (outputO === "post") {
                     console.log("linkedin post");
+                    console.log(text)
+                    console.log(getTextToLinkedInPostPrompt(toneStyle, writingStyle));
+                    console.log("linkedin post");
                     basePromptPrefix =
                         getTextToLinkedInPostPrompt(toneStyle, writingStyle) + `
 Summary: ${text}\n
@@ -75,17 +78,18 @@ Blog Post:\n`;
             default:
                 break;
         }
-
         const payload = {
-            model: "gpt-3.5",
-            // model: "text-davinci-003",
-            // prompt: basePromptPrefix,
-            messages: [{ role: "user", content: basePromptPrefix }],
+            model: "gpt-4",
             temperature: 0.7,
+            top_p: 1,
+            frequency_penalty: 0,
+            presence_penalty: 0,
+            messages: [{ role: "user", content: basePromptPrefix }],
             stream: true,
-            n: 1,
         };
+
         const stream = await OpenAIStream(payload);
+        console.log(stream);
         return new Response(stream);
         // return res.status(200).send(stream);
         // // return new Response(stream).status(200);

@@ -17,6 +17,8 @@ import { FunctionComponent, useState } from "react";
 import { useRouter } from 'next/navigation';
 import toastDisplay from "@/utils/common/toast";
 import sleep from "@/utils/common/utils";
+import { embedText } from "@/utils/api/backend/backendCalls";
+import { useSession } from "next-auth/react";
 
 interface OnboardingProps { }
 
@@ -24,6 +26,7 @@ const Onboarding: FunctionComponent<OnboardingProps> = () => {
   const [step, setStep] = useState<number>(-1);
   const [siteData, setSiteData] = useState<any>({});
   const { push } = useRouter();
+  const { data: session, status } = useSession()
 
   const MAX_STEPS = 5;
 
@@ -34,6 +37,8 @@ const Onboarding: FunctionComponent<OnboardingProps> = () => {
   const handlePrev = () => {
     setStep((prev) => Math.max(0, prev - 1));
   };
+
+
 
   const renderStep = () => {
     switch (step) {
@@ -178,6 +183,7 @@ const Step0: FunctionComponent<Step0Props> = ({
   const [targetAudience, setTargetAudience] = useState("");
 
   const [loading, setLoading] = useState(false);
+  const { data: session, status } = useSession()
 
   const handleScrape = async () => {
     setLoading(true);
@@ -189,9 +195,11 @@ const Step0: FunctionComponent<Step0Props> = ({
       body: JSON.stringify({ url }),
     })
       .then((response) => response.json())
-      .then(({ data }: any) => {
+      .then(({ data, siteContent }: any) => {
+        console.log(data);
         setProduct(data.product);
         setTargetAudience(data.target_audience);
+        // embedText("This information is from " + session?.user.email + "and should only be used if the call was done by this particular person, this information is about the user company or personal website content  " + data.product + data.target_audience + siteContent, 'helloworld');
         setLoading(false);
       })
       .catch((error) => {
@@ -288,6 +296,7 @@ const Step1: FunctionComponent<Step1Props> = ({
   const [xHandle, setXHandle] = useState("here_is_abrams");
   const [loading, setLoading] = useState(false);
   const [tweets, setTweets] = useState([]);
+  const { data: session, status } = useSession()
 
   const addXHandle = async () => {
     setLoading(true);
@@ -301,9 +310,10 @@ const Step1: FunctionComponent<Step1Props> = ({
       .then((response) => response.json())
       .then(({ data }: any) => {
         console.log(data);
-        if (data.status === 200) {
+        if (data.status === 200 || data.length > 0) {
           toastDisplay('X handle added successfully', true);
           setTweets(data);
+          // embedText("This information is from " + session?.user.email + "and should only be used if the call was done by this particular person, this information is the user tweets " + data, 'helloworld');
         }
         else {
           toastDisplay('Error while accessing X, check your handle.', false);
