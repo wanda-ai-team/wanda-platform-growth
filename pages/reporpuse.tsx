@@ -37,6 +37,7 @@ import { outputsWithPlatform, toneList, writingStyles } from "@/utils/globalVari
 import { useSession } from 'next-auth/react';
 import { useRouter } from "next/router";
 import toastDisplay from "@/utils/common/toast";
+import { put, type PutBlobResult } from '@vercel/blob';
 
 type Contents = "context" | "url" | "text" | "podcast";
 
@@ -65,6 +66,8 @@ const inputList: {
 
 export default function Reporpuse() {
   const router = useRouter();
+  const inputFileRefF = useRef<HTMLInputElement>(null);
+  const [blob, setBlob] = useState<PutBlobResult | null>(null);
   const stopB = useRef(false);
   const canStopB = useRef(false);
   const [youtubeURL, setYoutubeURL] = useState("");
@@ -452,35 +455,72 @@ export default function Reporpuse() {
     setLoadingAPICall(true);
     e.preventDefault();
     let formData = new FormData();
-    if (inputFileRef.current === null) {
+    if (inputFileRef === null || inputFileRef.current === null || inputFileRef.current.files === null || inputFileRef.current.files.length === 0) {
       return;
     }
-    Object.values((inputFileRef.current.files as any)).forEach(file => {
-      formData.append('file', (file as Blob | string));
-    })
+    let a;
 
-    const res = await fetch("/api/files/uploadFiles", {
-      method: "POST",
-      body: formData,
-    });
+    for (let i = 0; i < inputFileRef.current.files.length; i++) {
+      console.log("file")
+      console.log(inputFileRef.current.files[i])
 
-    const body = await res.json();
-    console.log(body)
+      a = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
 
-    if (body.success) {
-      setWantTranscript(true)
-      setTranscript(body.content)
-      const response = await getTextSummary(body.content, "null");
-      if (response.success) {
-        setSummary(response.content);
-      } else {
-      }
-      // Do some stuff on successfully upload
-    } else {
-      // Do some stuff on error
+        reader.onload = (event) => {
+          if(!event.target) return;
+          resolve(event.target.result);
+        };
+
+        reader.onerror = (err) => {
+          reject(err);
+        };
+        if (inputFileRef === null || inputFileRef.current === null || inputFileRef.current.files === null || inputFileRef.current.files.length === 0) {
+          return;
+        }
+        reader.readAsDataURL(inputFileRef.current.files[i]);
+      });
     }
 
-    setLoadingAPICall(false);
+    console.log("a")
+    console.log(a)
+
+    await fetch("/api/llm/whisper/speechToTextAAI", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        file: a,
+      }),
+    })
+      .then((response) => response.json())
+      .then(async ({ content, success }: any) => {
+        console.log("data")
+        console.log(content)
+        if (success) {
+          setWantTranscript(true)
+          setTranscript(content)
+          const response = await getTextSummary(content, "null");
+          if (response.success) {
+            setSummary(response.content);
+          } else {
+          }
+          // Do some stuff on successfully upload
+        } else {
+          // Do some stuff on error
+        }
+
+        setLoadingAPICall(false);
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+        setLoadingAPICall(false);
+      });
+
+
+
+
 
   }
 
@@ -555,6 +595,78 @@ export default function Reporpuse() {
     }
   }
 
+  const uploadPhoto = async (e: any) => {
+    setLoadingAPICall(true);
+
+    if (inputFileRef === null || inputFileRef.current === null || inputFileRef.current.files === null || inputFileRef.current.files.length === 0) {
+      return;
+    }
+    console.log("ola")
+    
+    const file = inputFileRef.current.files[0];
+    const filename = encodeURIComponent(inputFileRef.current.files[0].name.replace(/\s/g, ""));
+    const res = await fetch(`/api/files/upload/upload?file=${filename}`);
+    const { url, fields } = await res.json();
+    const formData = new FormData();
+
+    Object.entries({ ...fields, file }).forEach(([key, value]) => {
+      console.log("key")
+      console.log(key)
+      console.log("value")
+      console.log(value)
+      // @ts-ignore
+      formData.append(key, value);
+    });
+
+    const upload = await fetch(url, {
+      method: 'POST',
+      body: formData,
+    });
+
+    if (upload.ok) {
+      console.log(upload)
+
+      await fetch("/api/llm/whisper/speechToTextAAIURL", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          url: "a",
+        }),
+      })
+        .then((response) => response.json())
+        .then(async ({ content, success }: any) => {
+          console.log("data")
+          console.log(content)
+          if (success) {
+            setWantTranscript(true)
+            setTranscript(content)
+            toastDisplay('Transcript done', true);
+            const response = await getTextSummary(content, "null");
+            if (response.success) {
+              setSummary(response.content);
+              toastDisplay('Summary done', true);
+            } else {
+            }
+            // Do some stuff on successfully upload
+          } else {
+            // Do some stuff on error
+          }
+
+          setLoadingAPICall(false);
+        })
+        .catch((error) => {
+          console.error("Error:", error);
+          setLoadingAPICall(false);
+        });
+
+
+      console.log('Uploaded successfully!');
+    } else {
+      console.error('Upload failed.');
+    }
+  };
   return (
     <>
       <main className={styles.main}>
@@ -726,14 +838,15 @@ export default function Reporpuse() {
                   {outputSelectedI === "podcast" && (
                     <>
 
+
                       <InputGroup>
                         <input
                           type="file"
                           name="myfile"
-                          accept=".mp3"
+                          accept="audio/*"
                           ref={inputFileRef}
                         />
-                        <Button colorScheme="purple" onClick={(e) => submitFile(e)}>
+                        <Button colorScheme="purple" onClick={(e) => uploadPhoto(e)}>
                           Upload
                         </Button>
                         {loadingAPICall && (
