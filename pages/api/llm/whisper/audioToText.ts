@@ -7,11 +7,6 @@ var https = require('https');
 const itunesAPI = require("node-itunes-search");
 var request = require('request');
 
-import fetch, {
-    FormData,
-    File,
-} from 'node-fetch'
-
 
 export default async function handler(
     req: NextApiRequest,

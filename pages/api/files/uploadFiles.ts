@@ -1,9 +1,5 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
 import type { NextApiRequest, NextApiResponse } from 'next'
-import fetch, {
-    FormData,
-    File,
-} from 'node-fetch'
 import fs from 'fs';
 import formidable from "formidable";
 import mime from 'mime';

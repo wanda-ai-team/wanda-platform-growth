@@ -468,7 +468,7 @@ export default function Reporpuse() {
         const reader = new FileReader();
 
         reader.onload = (event) => {
-          if(!event.target) return;
+          if (!event.target) return;
           resolve(event.target.result);
         };
 
@@ -602,7 +602,7 @@ export default function Reporpuse() {
       return;
     }
     console.log("ola")
-    
+
     const file = inputFileRef.current.files[0];
     const filename = encodeURIComponent(inputFileRef.current.files[0].name.replace(/\s/g, ""));
     const res = await fetch(`/api/files/upload/upload?file=${filename}`);
@@ -624,9 +624,9 @@ export default function Reporpuse() {
     });
 
     if (upload.ok) {
+      const decoder = new TextDecoder();
       console.log(upload)
-
-      await fetch("/api/llm/whisper/speechToTextAAIURL", {
+      const response = await fetch("/api/llm/whisper/speechToTextAAIURL", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -635,31 +635,82 @@ export default function Reporpuse() {
           url: "https://storage.googleapis.com/audios-wanda/" + filename,
         }),
       })
-        .then((response) => response.json())
-        .then(async ({ content, success }: any) => {
-          console.log("data")
-          console.log(content)
-          if (success) {
-            setWantTranscript(true)
-            setTranscript(content)
-            toastDisplay('Transcript done', true);
-            const response = await getTextSummary(content, "null");
-            if (response.success) {
-              setSummary(response.content);
-              toastDisplay('Summary done', true);
-            } else {
-            }
-            // Do some stuff on successfully upload
-          } else {
-            // Do some stuff on error
-          }
+      console.log("response")
+      console.log(response)
+      let done = false;
+      if (response === undefined) return;
+      const reader = response?.body?.getReader();
+      let trans = "";
+      while (!done) {
+        if (reader === undefined) return;
+        console.log("reader")
+        console.log(reader)
+        const { value, done: doneReading } = await reader?.read();
+        console.log("doneReading")
+        console.log(doneReading)
 
-          setLoadingAPICall(false);
-        })
-        .catch((error) => {
-          console.error("Error:", error);
-          setLoadingAPICall(false);
-        });
+        done = doneReading;
+        console.log("value")
+        console.log(value)
+        if(value && decoder.decode(value) !== "processing") {
+
+          const data = decoder.decode(value);
+          // Do something with data
+          trans += data;
+          console.log("data")
+          console.log(data)
+        };
+
+        // Do some stuff on successfully upload
+
+      }
+      setWantTranscript(true)
+      setTranscript(trans)
+      toastDisplay('Transcript done', true);
+      const responseS = await getTextSummary(trans, "null");
+      if (responseS.success) {
+        setSummary(responseS.content);
+        toastDisplay('Summary done', true);
+      } else {
+      }
+
+
+      setLoadingAPICall(false);
+
+      // await fetch("/api/llm/whisper/speechToTextAAIURL", {
+      //   method: "POST",
+      //   headers: {
+      //     "Content-Type": "application/json",
+      //   },
+      //   body: JSON.stringify({
+      //     url: "https://storage.googleapis.com/audios-wanda/" + filename,
+      //   }),
+      // })
+      //   .then((response) => response.json())
+      //   .then(async ({ content, success }: any) => {
+      //     console.log("data")
+      //     console.log(content)
+      //     if (success) {
+      //       setWantTranscript(true)
+      //       setTranscript(content)
+      //       toastDisplay('Transcript done', true);
+      //       const response = await getTextSummary(content, "null");
+      //       if (response.success) {
+      //         setSummary(response.content);
+      //         toastDisplay('Summary done', true);
+      //       } else {
+      //       }
+      //       // Do some stuff on successfully upload
+      //     } else {
+      //       // Do some stuff on error
+      //     }
+
+      //     setLoadingAPICall(false);
+      //   })
+      //   .catch((error) => {
+      //     console.error("Error:", error);
+      //     setLoadingAPICall(false);
+      //   });
 
 
       console.log('Uploaded successfully!');

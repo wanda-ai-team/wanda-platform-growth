@@ -2,10 +2,6 @@
 import deleteDBEntry from "@/utils/api/db/deleteDBEntry";
 import getDBEntry from "@/utils/api/db/getDBEntry";
 import type { NextApiRequest, NextApiResponse } from "next";
-import fetch, {
-    FormData,
-    File,
-} from 'node-fetch'
 import axios from "axios";
 import formidable from "formidable";
 import fs from 'fs';
