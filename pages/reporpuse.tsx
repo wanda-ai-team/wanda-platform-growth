@@ -632,7 +632,7 @@ export default function Reporpuse() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          url: "a",
+          url: "https://storage.googleapis.com/audios-wanda/" + filename,
         }),
       })
         .then((response) => response.json())

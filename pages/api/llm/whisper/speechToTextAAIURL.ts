@@ -14,7 +14,7 @@ export default async function handler(
 
     if (url) {
         let transcribe: any = {};
-        transcribe = await transcribeAudio(process.env.ASSEMBLYAI_API_KEY, "https://storage.googleapis.com/audios-wanda/onlymp3.to%20-%200%20Embeddings%20OpenAI%20vs.%20free%20open%20source%20-QdDoFfkVkcw-192k-1693912119.mp3")
+        transcribe = await transcribeAudio(process.env.ASSEMBLYAI_API_KEY, url)
         return res.status(200).json({
             content: transcribe.text,
             success: true,
