@@ -1,71 +1,34 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
-import axios from 'axios';
-import { load } from 'cheerio';
 import type { NextApiRequest, NextApiResponse } from 'next';
+import { getServerSession } from 'next-auth/next';
 
-import { Configuration, OpenAIApi } from 'openai';
+import { authOptions } from '../../auth/[...nextauth]';
+import { getContext } from '@/utils/api/context/contextCalls';
+import { getOpenAIAnswer } from '@/utils/api/openAI/openAICalls';
 
 
-const configuration = new Configuration({
-    apiKey: process.env.OPENAI_API_KEY,
-});
-
-const openai = new OpenAIApi(configuration);
 
 export default async function handler(
     req: NextApiRequest,
     res: NextApiResponse
 ) {
-    const { url } = req.body
-    const { generateIdeas } = req.body
+    const session = await getServerSession(req, res, authOptions)
+    // Error handling
 
-    const { data } = await axios.get(url)
-    const $ = load(data)
+    if (!session?.user || !session?.user?.email) {
+        return res.status(401).json({
+            error: {
+                code: "no-access",
+                message: "You are not signed in.",
+            },
+        });
+    }
 
-    const bodyText: any = []
-    let result: string = ""
-    const t = $('body').find('h1,h2,h3,h4,h5,h6,p,a').text()
+    const { platform } = req.body
+    const documents = await getContext(session.user.email, platform)
 
-    $($('body').find('h1,h2,h3,h4,h5,h6,p,a')).each(function (index, element) {
-        bodyText.push($(element).text())
-    });
-
-    result = bodyText.join('\n\n')
-
-    const openAIResult = await getOpenAIAnswer(result.substring(0, 1000), generateIdeas)
+    const openAIResult = await getOpenAIAnswer(documents.page_content, platform)
 
     res.status(200).json({ data: openAIResult })
 
-}
-
-export const getOpenAIAnswer = async (context: string, generateIdeas: string) => {
-    const completion = await openai.createChatCompletion({
-        model: "gpt-3.5-turbo",
-        temperature: 0.7,
-        max_tokens: 1024,
-        top_p: 1,
-        frequency_penalty: 0,
-        presence_penalty: 0,
-        messages: [{
-            role: "system", content: "You are a senior marketing expert at a SaaS company. Only respond in JSON format.",
-        }, {
-            role: "user", content: `This is the copy of a landing page for a product: ${context}. 
-      Based on this landing page, provide me with 3 to 5 relevant topic ideas to write ${generateIdeas} of 1,500 words.
-    Provide a RFC8259 compliant JSON response following this format without deviation.
-    {"ideas": "idea"}`
-        }],
-    });
-    const result = completion.data.choices[0].message?.content || "No results"
-
-    console.log({ result })
-
-    try {
-        const parsedResult: any = JSON.parse(result)
-
-        console.log({ parsedResult })
-        return parsedResult
-    } catch (error) {
-        console.log({ error })
-        return result
-    }
 }

@@ -36,9 +36,15 @@ export default async function handler(
 
   try {
     let { url } = req.body
+    let { businessName } = req.body
+    console.log({ url })
+    if (url.indexOf("http") === -1 && url.indexOf("https") === -1 && url.indexOf("www") === -1) {
+      console.log("no url")
+      url = `https://${url}`
+    }
 
     if (!new URL(url)) {
-      url = `https://${url}`
+      res.status(400).json({ error: "Invalid URL" })
     }
 
     const { data } = await axios.get(url)
@@ -68,10 +74,7 @@ export default async function handler(
       context = context[0]
     }
 
-    console.log(openAIResult)
-    console.log(openAIResult.product)
-    console.log(openAIResult.target_audience)
-    const site = await createDBEntry("userSites", { url: url, product: openAIResult.product, target_audience: openAIResult.target_audience, contextId: context.id });
+    const site = await createDBEntry("userSites", { url: url, product: openAIResult.product, target_audience: openAIResult.target_audience, contextId: context.id, businessName: businessName, email: session.user.email });
     await updateDBEntryArray("userContexts", site.id, 'sites', ['email'], '==', [session.user.email], 1);
 
     await updateDBEntry("users", { context: context.id }, ['email'], '==', [session.user.email], 1);

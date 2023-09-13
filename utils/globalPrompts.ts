@@ -137,6 +137,22 @@ Do not self reference.
 Do not explain what you are doing.
 Do not explain what you are going to do.`;
 
+function getGenerateIdeasX(context: string) {
+    return `
+This is information regarding the business and its landing page: ${context}. 
+Based on the previous given information, provide me with 3 to 5 relevant topic ideas so that the business marketing team can write Twitter threads about.
+Provide a RFC8259 compliant JSON response following this format without deviation.
+{"ideas": "idea"}`
+}
+
+function getGenerateIdeasBlog(context: string) {
+    return `
+This is information regarding the business and its landing page: ${context}. 
+Based on the previous given information, provide me with 3 to 5 relevant topic ideas so that the business marketing team can write Blog posts of 1.500 words about.
+Provide a RFC8259 compliant JSON response following this format without deviation.
+{"ideas": "idea"}`
+}
+
 function getGenerationToBlogPrompt(context: string) {
     return `
 This is the main topic that you will base your new blog post on: ${context}. 
@@ -175,4 +191,6 @@ export {
     getTextToLinkedInPostPrompt,
     getGenerationToBlogPrompt,
     getGenerationToXPrompt,
+    getGenerateIdeasX,
+    getGenerateIdeasBlog
 };

@@ -6,18 +6,17 @@ export default async function handler(
     req: NextApiRequest,
     res: NextApiResponse
 ) {
-    const { content } = req.body
-    const { type } = req.body
-
-    await axios.post(process.env.BACKEND_URL + '/llmTools/embedText', {
+    let { content } = req.body
+    const { company } = req.body
+    const { typeOfContent } = req.body
+    const { url } = req.body
+    return await axios.post(process.env.BACKEND_URL + '/llmTools/embedText', {
         userPrompt: content,
         systemPrompt: "",
         config: {
-            "index": type,
-            "output": "",
-            "tone":"",
-            "url": "",
-            "writing": ""
+            "company": company,
+            "typeOfContent": typeOfContent,
+            "url": url
         }
     },
         {

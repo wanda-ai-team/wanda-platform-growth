@@ -1,4 +1,4 @@
-async function embedText(contet: string, type: string) {
+async function embedText(contet: string, company: string, url: string, typeOfContent: string) {
     await fetch('/api/backend/embedText',
         {
             method: 'POST',
@@ -7,12 +7,14 @@ async function embedText(contet: string, type: string) {
             },
             body: JSON.stringify({
                 "content": contet,
-                "type": type
+                "company": company,
+                "url": url,
+                "typeOfContent": typeOfContent
             })
         })
 }
 
-async function vectorDBQuery(contet: string, type: string) {
+async function vectorDBQuery(contet: string) {
     await fetch('/api/backend/vectorDBQuery',
         {
             method: 'POST',
@@ -20,8 +22,7 @@ async function vectorDBQuery(contet: string, type: string) {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                "content": contet,
-                "type": type
+                "content": contet
             })
         })
 }
