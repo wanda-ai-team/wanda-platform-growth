@@ -25,6 +25,7 @@ export default async function handler(
     }
 
     const { platform } = req.body
+
     const documents = await getContext(session.user.email, platform)
 
     const openAIResult = await getOpenAIAnswer(documents.page_content, platform)
