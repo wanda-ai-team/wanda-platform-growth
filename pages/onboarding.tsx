@@ -486,7 +486,8 @@ const Step2: FunctionComponent<Step2Props> = ({
   const { data: session, status } = useSession();
 
   const addQuestionResponses = async (response1: string) => {
-    fetch("/api/onboarding/questions", {
+    setLoading(true);
+    await fetch("/api/onboarding/questions", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -494,27 +495,28 @@ const Step2: FunctionComponent<Step2Props> = ({
       body: JSON.stringify({ response1 }),
     })
       .then((response) => response.json())
-      .then(({ data }: any) => {
-        console.log(data);
-        if (data.status === 200 || data.length > 0) {
+      .then(({ status, response1 }: any) => {
+        console.log(response1);
+        console.log(status);
+        if (status === 200 || length > 0) {
 
           embedText(
             "This information is from " + session?.user.email + " about " + businessName + ", this information is some business information, like competition.\n"
-            + "Information: " + data
+            + "Information: " + response1
             , businessName
             , businessName
             , 'Business Information, like competition');
 
         }
         else {
-          // toastDisplay('Error while storing answers', false);
+          toastDisplay('Error while storing answers', false);
         }
         setLoading(false);
       })
       .catch((error) => {
         console.error("Error:", error);
         setLoading(false);
-        // toastDisplay('Error while storing answers', false);
+        toastDisplay('Error while storing answers', false);
       });
   };
 

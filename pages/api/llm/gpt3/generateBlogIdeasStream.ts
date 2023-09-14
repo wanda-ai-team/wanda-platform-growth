@@ -1,48 +1,27 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
-import { getGenerationToBlogPrompt, getGenerationToXPrompt } from '@/utils/globalPrompts';
 import { OpenAIStream } from './openAIStream';
-
+import { getContext } from '@/utils/api/context/contextCalls';
+import { getOpenAIAnswer } from '@/utils/api/openAI/openAICalls';
+import { NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
 export const config = {
     runtime: "edge",
 };
+const handler = async (req: NextRequest): Promise<NextResponse> => {
 
-const handler = async (req: Request): Promise<Response> => {
-    let { idea, platform } = (await req.json()) as {
-        idea?: string;
-        platform?: string;
-    };
+    const json = await req.json();
+    console.log({ json });
 
-    return await getOpenAIAnswer(idea, platform)
-}
-
-export const getOpenAIAnswer = async (context = "", platform = "twitter") => {
-    let userContent = ``
-    switch (platform) {
-        case "Twitter":
-            userContent = getGenerationToXPrompt(context);
-            break;
-        case "Blog":
-            userContent = getGenerationToBlogPrompt(context);
-            break;
+    if (!json.email || !json.platform) {
+        return new NextResponse("No email or platform", { status: 400 });
     }
-    let systemContent = `You are a professional ${platform} writter at a SaaS company. ${platform === `Blog` ? `Only respond in Markdown format`: ``}.`
-    const payload = {
-        model: "gpt-4",
-        temperature: 0.7,
-        max_tokens: 1024,
-        top_p: 1,
-        frequency_penalty: 0,
-        presence_penalty: 0,
-        messages: [{
-            role: "system", content: systemContent
-        }, {
-            role: "user", content: userContent
-        }],
-        stream: true,
-    };
 
-    const stream = await OpenAIStream(payload);
-    return new Response(stream);
+    const documents = await getContext(json.email, json.platform)
+
+    console.log(documents)
+    const stream = await getOpenAIAnswer(json.idea + documents.page_content, json.platform + '-generation', true, )
+
+    return stream
 }
 
 export default handler;
