@@ -324,20 +324,21 @@ const Step0: FunctionComponent<Step0Props> = ({
 
         <Button
           onClick={() => {
-            let skip = 'skip'
-            onNextAction({ skip, targetAudience, product });
-          }}
-        >
-          Skip
-        </Button>
-
-        <Button
-          onClick={() => {
             onNextAction({ url, targetAudience, product, businessName });
           }}
           isDisabled={!product || !targetAudience || !businessName}
         >
           Next
+        </Button>
+        
+
+        <Button
+          onClick={() => {
+            let skip = 'skip'
+            onNextAction({ skip, targetAudience, product });
+          }}
+        >
+          Skip
         </Button>
       </HStack>
     </>
@@ -506,14 +507,14 @@ const Step2: FunctionComponent<Step2Props> = ({
 
         }
         else {
-          toastDisplay('Error while storing answers', false);
+          // toastDisplay('Error while storing answers', false);
         }
         setLoading(false);
       })
       .catch((error) => {
         console.error("Error:", error);
         setLoading(false);
-        toastDisplay('Error while storing answers', false);
+        // toastDisplay('Error while storing answers', false);
       });
   };
 
