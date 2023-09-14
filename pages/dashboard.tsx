@@ -7,6 +7,7 @@ import { ToastContainer } from "react-toastify";
 import TwitterThread from "@/components/text/twitterThread/twitterThreadN";
 import toastDisplay from "@/utils/common/toast";
 import { width } from "@mui/system";
+import { useSession } from "next-auth/react";
 
 
 interface DashboardProps { }
@@ -30,6 +31,7 @@ const Dashboard: FunctionComponent<DashboardProps> = () => {
   const [threadPostResult, setThreadPostResult] = useState("");
   const stopB = useRef(false);
   const canStopB = useRef(false);
+  const { data: session, status } = useSession()
 
   let handleInputChange = (e: { target: { value: any } }) => {
     console.log("newArr")
@@ -76,7 +78,7 @@ const Dashboard: FunctionComponent<DashboardProps> = () => {
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ idea: chosenIdeaN, platform: selectedPlatform }),
+      body: JSON.stringify({ idea: chosenIdeaN, platform: selectedPlatform, email: session?.user.email }),
     });
     if (!response.ok) {
       toastDisplay('Error while generating, try again', false)
