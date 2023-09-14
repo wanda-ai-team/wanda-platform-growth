@@ -81,6 +81,8 @@ export default async function handler(
 
     // await addSite({ url: url, product: openAIResult.product, target_audience: openAIResult.target_audience, contextId: context.id })
 
+    console.log({ openAIResult })
+
     res.status(200).json({ data: openAIResult, siteContent: result })
   } catch (error) {
     console.log({ error })
@@ -100,10 +102,10 @@ const getOpenAIAnswer = async (context: string) => {
     messages: [{
       role: "system", content: "You are a senior marketing expert at a SaaS company. Only respond in JSON format.",
     }, {
-      role: "user", content: `This is the copy of a landing page for a product: ${context}. Write a short description of the product and the target audience in the space below.
-      Don't forget to always put product descriptions and target audiences.
-    Provide a RFC8259 compliant JSON response following this format without deviation.
-    {"product": "product description", "target_audience": "target audience of the product: ${context}"}`
+      role: "user", content: `This is the copy of a landing page for a product: ${context}. Write a short description of the product and the target audience.
+Don't forget to always put product descriptions and target audience.
+Provide a RFC8259 compliant JSON response following this format without deviation.
+{"product": "product description", "target_audience": "target audience of the product: ${context}"}`
     }],
   });
   const result = completion.data.choices[0].message?.content || "No results"
