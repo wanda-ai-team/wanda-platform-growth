@@ -10,7 +10,17 @@ export default async function handler(
     const { company } = req.body
     const { typeOfContent } = req.body
     const { url } = req.body
-    return await axios.post(process.env.BACKEND_URL + '/llmTools/embedText', {
+
+    console.log("body", {
+        userPrompt: content,
+        systemPrompt: "",
+        config: {
+            "company": company,
+            "typeOfContent": typeOfContent,
+            "url": url
+        }
+    })
+    const response = await axios.post(process.env.BACKEND_URL + '/llmTools/embedText', {
         userPrompt: content,
         systemPrompt: "",
         config: {
@@ -26,5 +36,8 @@ export default async function handler(
             }
         }
     );
+
+    console.log("response", response)
+    return res.status(200).json(response.data);
 
 }
