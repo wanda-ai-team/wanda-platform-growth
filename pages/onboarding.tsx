@@ -281,6 +281,7 @@ const Step0: FunctionComponent<Step0Props> = ({
               isDisabled={loading || !businessNameT}
               defaultValue={url}
               placeholder="https://wanda.so"
+              type="url"
               onChange={(evt) => {
                 setURL(evt.target.value);
               }}
@@ -330,7 +331,7 @@ const Step0: FunctionComponent<Step0Props> = ({
         >
           Next
         </Button>
-        
+
 
         <Button
           onClick={() => {
@@ -483,9 +484,11 @@ const Step2: FunctionComponent<Step2Props> = ({
 }: Step2Props) => {
   const [content, setContent] = useState("");
   const [loading, setLoading] = useState(false);
+  const [numberOfCompetitors, setNumberOfCompetitors] = useState([0]);
   const { data: session, status } = useSession();
+  const [inputs, setInputs] = useState({});
 
-  const addQuestionResponses = async (response1: string) => {
+  const addQuestionResponses = async (response1: {}) => {
     setLoading(true);
     await fetch("/api/onboarding/questions", {
       method: "POST",
@@ -496,8 +499,6 @@ const Step2: FunctionComponent<Step2Props> = ({
     })
       .then((response) => response.json())
       .then(({ status, response1 }: any) => {
-        console.log(response1);
-        console.log(status);
         if (status === 200 || length > 0) {
 
           embedText(
@@ -529,25 +530,53 @@ const Step2: FunctionComponent<Step2Props> = ({
         <Text fontSize="l" fontWeight={400}>
           Who are your main competitors?
         </Text>
-        <Textarea
-          placeholder="Who are your main competitors"
-          resize="none"
-          h={2}
-          size='sm'
-          onChange={(evt) => {
-            setContent(evt.target.value);
-          }}
-        />
+
+        <HStack align="flex-end" w="full">
+          <VStack align="flex-start" w="full">
+            {numberOfCompetitors.map((item, index) => (
+              <Input
+              key={index}
+                placeholder="https://wanda.so"
+                type="url"
+                onChange={(e) =>
+                  setInputs((prev) => {
+                    return { ...prev, [item]: e.target.value };
+                  })
+                }
+              />
+            ))}
+          </VStack>
+        </HStack>
+        <HStack align="flex-end" w="full">
+
+          <Button
+            onClick={() => {
+              setNumberOfCompetitors([...numberOfCompetitors, numberOfCompetitors.length]);
+            }}
+          >
+            +
+          </Button>
+          <Button
+            onClick={() => {
+              if (numberOfCompetitors.length > 1) {
+                setNumberOfCompetitors(numberOfCompetitors.slice(0, -1));
+              }
+            }}
+          >
+            -
+          </Button>
+        </HStack>
+
       </VStack>
 
       <HStack w="full" justify="space-between">
 
         <Button
-          isDisabled={!content || content.length === 0 || loading}
+          isDisabled={!inputs["0" as keyof typeof inputs] || loading}
 
           onClick={async () => {
-            await addQuestionResponses(content);
-            onNextAction({ setContent });
+            await addQuestionResponses(inputs);
+            // onNextAction({ setContent });
           }}
         >
           Start generating ideas

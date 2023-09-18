@@ -31,14 +31,19 @@ export default async function handler(
     const { response1 } = req.body
 
     let context = await getDBEntry("userContexts", ['email'], ['=='], [session.user.email], 1)
-    if (context.length <= 0) {
-      context = await createDBEntry("userContexts", { email: session.user.email, response1: response1 });
-    }
-    else {
-      await updateDBEntry("userContexts", { response1: response1 }, ['email'], '==', [session.user.email], 1);
-    }
 
-    console.log({ response1 })
+    Object.values(response1).forEach(async (response: any) => {
+      if(response.length > 0) {
+        if (context.length <= 0) {
+          context = await createDBEntry("userContexts", { email: session.user.email, response1: response });
+        }
+        else {
+          await updateDBEntry("userContexts", { response1: response }, ['email'], '==', [session.user.email], 1);
+        }
+
+      }
+    })
+
     return res.json({ response1: response1, status: 200})
 
   } catch (error) {

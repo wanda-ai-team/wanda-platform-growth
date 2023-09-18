@@ -60,7 +60,7 @@ const inputList: {
     },
     {
       key: "podcast",
-      value: "Podcast (File)",
+      value: "Podcast & Video(File)",
     },
   ];
 
@@ -606,73 +606,63 @@ export default function Reporpuse() {
     const file = inputFileRef.current.files[0];
     const filename = encodeURIComponent(inputFileRef.current.files[0].name.replace(/\s/g, ""));
     const res = await fetch(`/api/files/upload/upload?file=${filename}`);
-    const { url, fields } = await res.json();
-    const formData = new FormData();
+    let { url, fields } = await res.json();
+    console.log("url")
+    console.log(url + filename)
+    let URLF = url + filename;
+    toastDisplay('Upload done, transcribing..', true);
+    
+    // const formData = new FormData();
 
-    Object.entries({ ...fields, file }).forEach(([key, value]) => {
-      console.log("key")
-      console.log(key)
-      console.log("value")
-      console.log(value)
-      // @ts-ignore
-      formData.append(key, value);
-    });
+    // Object.entries({ ...fields, file }).forEach(([key, value]) => {
+    //   // @ts-ignore
+    //   formData.append(key, value);
+    // });
 
-    const upload = await fetch(url, {
-      method: 'POST',
-      body: formData,
-    });
-
-    if (upload.ok) {
+    // const upload = await fetch(url, {
+    //   method: 'POST',
+    //   body: formData,
+    // });
+    
+    if (fields.success_action_status === '201') {
       const decoder = new TextDecoder();
-      console.log(upload)
       const response = await fetch("/api/llm/whisper/speechToTextAAIURL", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          url: "https://storage.googleapis.com/audios-wanda/" + filename,
+          url: URLF,
         }),
       })
+      let done = false;
       console.log("response")
       console.log(response)
-      let done = false;
       if (response === undefined) return;
       const reader = response?.body?.getReader();
       let trans = "";
       while (!done) {
         if (reader === undefined) return;
-        console.log("reader")
-        console.log(reader)
         const { value, done: doneReading } = await reader?.read();
-        console.log("doneReading")
-        console.log(doneReading)
 
         done = doneReading;
-        console.log("value")
-        console.log(value)
         if(value && decoder.decode(value) !== "processing") {
 
           const data = decoder.decode(value);
           // Do something with data
           trans += data;
-          console.log("data")
-          console.log(data)
         };
-
-        // Do some stuff on successfully upload
 
       }
       setWantTranscript(true)
       setTranscript(trans)
-      toastDisplay('Transcript done', true);
-      const responseS = await getTextSummary(trans, "null");
-      if (responseS.success) {
-        setSummary(responseS.content);
-        toastDisplay('Summary done', true);
-      } else {
-      }
+      toastDisplay('Transcript done, summarizing...', true);
+      // const responseS = await getTextSummary(trans, "null");
+      // if (responseS.success) {
+      //   setSummary(responseS.content);
+      //   toastDisplay('Summary done', true);
+      // } else {
+      // }
 
 
       setLoadingAPICall(false);

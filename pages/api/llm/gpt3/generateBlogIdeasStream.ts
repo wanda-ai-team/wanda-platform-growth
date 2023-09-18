@@ -1,27 +1,21 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
-import { OpenAIStream } from './openAIStream';
 import { getContext } from '@/utils/api/context/contextCalls';
 import { getOpenAIAnswer } from '@/utils/api/openAI/openAICalls';
-import { NextResponse } from 'next/server';
-import type { NextRequest } from 'next/server';
 export const config = {
-    runtime: "edge",
+    runtime: "edge"
 };
-const handler = async (req: NextRequest): Promise<NextResponse> => {
+const handler = async (req: Request): Promise<Response> => {
 
-    const json = await req.json();
-    console.log({ json });
+    try {
+        const json = await req.json();
 
-    if (!json.email || !json.platform) {
-        return new NextResponse("No email or platform", { status: 400 });
+        const stream = await getOpenAIAnswer(json.idea, json.platform + '-generation', true, json.documents.page_content)
+
+        return stream
+    } catch (e) {
+        console.log(e)
+        return new Response(null);
     }
-
-    const documents = await getContext(json.email, json.platform)
-
-    console.log(documents)
-    const stream = await getOpenAIAnswer(json.idea + documents.page_content, json.platform + '-generation', true, )
-
-    return stream
 }
 
 export default handler;

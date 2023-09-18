@@ -9,23 +9,26 @@ const configuration = new Configuration({
 
 const openai = new OpenAIApi(configuration);
 
-async function getOpenAIAnswer(context: string, platform: string, streamB = false) {
+async function getOpenAIAnswer(context: string, platform: string, streamB = false, contextuser = "") {
+    console.log({ context, platform, streamB, contextuser })
     let userContent = ``
     switch (platform.toLocaleLowerCase()) {
         case "twitter":
             userContent = getGenerateIdeasX(context);
             break;
-        case "Blog":
+        case "blog":
             userContent = getGenerateIdeasBlog(context);
             break;
-        case "Twitter-generation":
-            userContent = getGenerationToXPrompt(context);
+        case "twitter-generation":
+            userContent = getGenerationToXPrompt(context, contextuser);
             break;
-        case "Blog-generation":
-            userContent = getGenerationToBlogPrompt(context);
+        case "blog-generation":
+            userContent = getGenerationToBlogPrompt(context, contextuser);
             break;
 
     }
+
+    console.log({ userContent })
 
     let systemContent = `You are a professional ${platform} writter at a SaaS company. ${platform.toLocaleLowerCase() === `blog` ? `Only respond in Markdown format` : ``}.`
 
