@@ -8,28 +8,21 @@ export const config = {
 };
 
 
-export default async function handler(
-    req: NextApiRequest,
-    res: NextApiResponse
-) {
 
-    let { url } = req.body;
-    url = "https://storage.googleapis.com/audios-wanda/TESTaudio.mp3"
-    console.log(url);
-    
-    if (url) {
-        let transcribe: any = {};
-        console.log("ola, tudo bem?");
-        transcribe = await transcribeAudio(process.env.ASSEMBLYAI_API_KEY, url)
-        return new Response(transcribe, {
-            headers: { "Content-Type": "text/html; charset=utf-8" },
-        });
+const handler = async (req: Request): Promise<Response> => {
+    let { url } = (await req.json()) as {
+        url?: string;
+    };
 
-        return res.status(200).json({
-            content: transcribe.text,
-            success: true,
-        })
-    }
+
+    let transcribe: any = {};
+    console.log("ola, tudo bem?");
+    transcribe = await transcribeAudio(process.env.ASSEMBLYAI_API_KEY, url)
+    console.log(transcribe)
+    return new Response(transcribe, {
+        headers: { "Content-Type": "text/html; charset=utf-8" },
+    });
+
 
 }
 
@@ -49,6 +42,8 @@ async function transcribeAudio(api_token: any, audio_url: any) {
         headers,
     });
 
+    console.log(audio_url)
+
     // Retrieve the ID of the transcript from the response data
     let responseData: any = {};
     responseData = await response.json();
@@ -66,13 +61,11 @@ async function transcribeAudio(api_token: any, audio_url: any) {
                 let transcriptionResult: any = {};
                 transcriptionResult = await pollingResponse.json();
                 const text = transcriptionResult;
-                console.log(text);
                 if (transcriptionResult.status === "processing") {
                     controller.enqueue(encoder.encode("processing"));
                 }
                 // If the transcription is complete, return the transcript object
                 if (transcriptionResult.status === "completed") {
-                    console.log(text)
                     controller.enqueue(encoder.encode(transcriptionResult.text));
                     controller.close();
                     return transcriptionResult;
@@ -89,3 +82,5 @@ async function transcribeAudio(api_token: any, audio_url: any) {
         },
     });
 }
+
+export default handler;

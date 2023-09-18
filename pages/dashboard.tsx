@@ -1,5 +1,5 @@
 import { Button, Center, CircularProgress, HStack, Input, Progress, Radio, RadioGroup, Select, Spinner, Stack, Text, Textarea, VStack } from "@chakra-ui/react";
-import { FunctionComponent, useEffect, useRef, useState } from "react";
+import { FunctionComponent, MutableRefObject, SetStateAction, useEffect, useRef, useState } from "react";
 import { platformsToGenerateIdeas } from "@/utils/globalVariables";
 import styles from "@/styles/HomeN.module.css";
 import 'react-toastify/dist/ReactToastify.css';
@@ -8,6 +8,8 @@ import TwitterThread from "@/components/text/twitterThread/twitterThreadN";
 import toastDisplay from "@/utils/common/toast";
 import { width } from "@mui/system";
 import { useSession } from "next-auth/react";
+import { getContext } from "@/utils/api/context/contextCalls";
+import streamResponse from "@/utils/common/stream";
 
 
 interface DashboardProps { }
@@ -71,15 +73,39 @@ const Dashboard: FunctionComponent<DashboardProps> = () => {
   }, []);
 
   const generateBlogIdea = async (chosenIdeaN: string) => {
-    console.log(chosenIdeaN)
     setLoadingC(true);
+    const documents = await fetch("/api/context/getContext", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ platform: selectedPlatform }),
+    });
+
+    let documentContextData;
+    if (!documents.ok) {
+      toastDisplay('Error while generating, try again', false)
+      setLoadingC(false);
+      return;
+    } else {
+      documentContextData = await documents.json();
+    }
+    let documentContextDataF = "";
+    if (documentContextData.status !== 500 && documentContextData.documents.length > 0) {
+      documentContextData.documents.map((document: any) => {
+        if (document && document.page_content && document.page_content.length > 0) {
+          documentContextDataF += document.page_content
+        }
+      })
+    }
     const response = await fetch("/api/llm/gpt3/generateBlogIdeasStream", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ idea: chosenIdeaN, platform: selectedPlatform, email: session?.user.email }),
+      body: JSON.stringify({ idea: chosenIdeaN, platform: selectedPlatform, email: session?.user.email, documents: documentContextDataF }),
     });
+
     if (!response.ok) {
       toastDisplay('Error while generating, try again', false)
       setLoadingC(false);
@@ -91,57 +117,7 @@ const Dashboard: FunctionComponent<DashboardProps> = () => {
       return;
     }
 
-    const reader = data.getReader();
-    const decoder = new TextDecoder();
-    let done = false;
-    let newTweet = false;
-    let index = 0;
-    let tweetThread: string[] = [];
-    setConvertedText("")
-    while (!done) {
-      canStopB.current = true;
-      if (stopB.current) {
-        stopB.current = false;
-        canStopB.current = false;
-        break;
-      }
-      const { value, done: doneReading } = await reader.read();
-      done = doneReading;
-      const chunkValue = decoder.decode(value);
-
-      if (chunkValue === "\n") {
-        if (newTweet) {
-          index++;
-          setNumberOfTweets(index);
-          newTweet = false;
-        } else {
-          newTweet = true;
-        }
-      }
-
-      if (chunkValue === "\n\n") {
-        index++;
-        setNumberOfTweets(index);
-      }
-
-      if (selectedPlatform === "Twitter") {
-        if (!newTweet) {
-          if (chunkValue !== "\n") {
-            if (tweetThread[index] !== undefined) {
-              tweetThread[index] = tweetThread[index] + chunkValue;
-            } else {
-              tweetThread[index] = chunkValue;
-            }
-            tweetThread[index] = tweetThread[index].replace("\n", "");
-            setTwitterThreadTextPerTweet([...tweetThread]);
-          }
-        }
-      } else {
-        setConvertedText((prev) => prev + chunkValue);
-      }
-    }
-
-    canStopB.current = false;
+    await streamResponse(data, setConvertedText, canStopB, stopB, setNumberOfTweets, selectedPlatform, setTwitterThreadTextPerTweet);
     setLoadingC(false);
   }
 
@@ -219,6 +195,7 @@ const Dashboard: FunctionComponent<DashboardProps> = () => {
               onClick={() => {
                 getIdeas();
               }}
+              isDisabled={loading}
             >
               Start Idea Generator
             </Button>
@@ -268,7 +245,7 @@ const Dashboard: FunctionComponent<DashboardProps> = () => {
                 const valueToPass = (value === 'custom') ? chosenIdea : value;
                 generateBlogIdea(valueToPass);
               }}
-              isDisabled={loading || (!value) || canStopB.current}
+              isDisabled={loading || (!value) || canStopB.current || loadingC}
             >
               Generate {selectedPlatform} Post
             </Button>
@@ -352,3 +329,4 @@ const Dashboard: FunctionComponent<DashboardProps> = () => {
 };
 
 export default Dashboard;
+
