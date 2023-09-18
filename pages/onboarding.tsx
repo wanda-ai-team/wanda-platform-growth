@@ -498,10 +498,10 @@ const Step2: FunctionComponent<Step2Props> = ({
       body: JSON.stringify({ response1 }),
     })
       .then((response) => response.json())
-      .then(({ status, response1 }: any) => {
+      .then(async ({ status, response1 }: any) => {
         if (status === 200 || length > 0) {
 
-          embedText(
+          await embedText(
             "This information is from " + session?.user.email + " about " + businessName + ", this information is some business information, like competition.\n"
             + "Information: " + response1
             , businessName
@@ -576,7 +576,7 @@ const Step2: FunctionComponent<Step2Props> = ({
 
           onClick={async () => {
             await addQuestionResponses(inputs);
-            // onNextAction({ setContent });
+            onNextAction({ setContent });
           }}
         >
           Start generating ideas
