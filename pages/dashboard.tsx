@@ -58,7 +58,15 @@ const Dashboard: FunctionComponent<DashboardProps> = () => {
     })
       .then((response) => response.json())
       .then(({ data }: any) => {
-        setIdeas(data.ideas);
+        console.log(data)
+        if(data.ideas.length > 0) {
+          setIdeas(data.ideas);
+        }
+        else{
+          setIdeas([]);
+          toastDisplay('Error while generating, try again', false)
+          
+        }
         setLoading(false);
       })
       .catch((error) => {
@@ -217,7 +225,7 @@ const Dashboard: FunctionComponent<DashboardProps> = () => {
             {loading && (
               <Progress size='xs' isIndeterminate />
             )}
-            {!loading && ideas.length > 0 && (
+            {!loading && ideas && ideas.length > 0 && (
               <>
                 <RadioGroup onChange={setValue} value={value}>
                   <Stack direction='column'>
