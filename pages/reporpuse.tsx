@@ -607,105 +607,123 @@ export default function Reporpuse() {
     const filename = encodeURIComponent(inputFileRef.current.files[0].name.replace(/\s/g, ""));
     const res = await fetch(`/api/files/upload/upload?file=${filename}`);
     let { url, fields } = await res.json();
-    console.log("url")
-    console.log(url + filename)
-    let URLF = url + filename;
-    toastDisplay('Upload done, transcribing..', true);
-    
-    // const formData = new FormData();
+    const formData = new FormData();
 
-    // Object.entries({ ...fields, file }).forEach(([key, value]) => {
-    //   // @ts-ignore
-    //   formData.append(key, value);
-    // });
+    Object.entries({ ...fields, file }).forEach(([key, value]) => {
+      console.log("key")
+      console.log(key)
+      console.log("value")
+      console.log(value)
+      // @ts-ignore
+      formData.append(key, value);
+    });
 
-    // const upload = await fetch(url, {
-    //   method: 'POST',
-    //   body: formData,
-    // });
-    
-    if (fields.success_action_status === '201') {
-      const decoder = new TextDecoder();
-      const response = await fetch("/api/llm/whisper/speechToTextAAIURL", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          url: URLF,
-        }),
-      })
-      let done = false;
-      console.log("response")
-      console.log(response)
-      if (response === undefined) return;
-      const reader = response?.body?.getReader();
-      let trans = "";
-      while (!done) {
-        if (reader === undefined) return;
-        const { value, done: doneReading } = await reader?.read();
+    const upload = await fetch(url, {
+      method: 'POST',
+      body: formData,
+    });
 
-        done = doneReading;
-        if(value && decoder.decode(value) !== "processing") {
+    if (upload.ok) {
+      console.log("url")
+      console.log(url + filename)
+      let URLF = url + filename;
+      toastDisplay('Upload done, transcribing..', true);
 
-          const data = decoder.decode(value);
-          // Do something with data
-          trans += data;
-        };
+      // const formData = new FormData();
 
+      // Object.entries({ ...fields, file }).forEach(([key, value]) => {
+      //   // @ts-ignore
+      //   formData.append(key, value);
+      // });
+
+      // const upload = await fetch(url, {
+      //   method: 'POST',
+      //   body: formData,
+      // });
+
+      if (fields.success_action_status === '201') {
+        const decoder = new TextDecoder();
+        const response = await fetch("/api/llm/whisper/speechToTextAAIURL", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            url: URLF,
+          }),
+        })
+        let done = false;
+        console.log("response")
+        console.log(response)
+        if (response === undefined) return;
+        const reader = response?.body?.getReader();
+        let trans = "";
+        while (!done) {
+          if (reader === undefined) return;
+          const { value, done: doneReading } = await reader?.read();
+
+          done = doneReading;
+          if (value && decoder.decode(value) !== "processing") {
+
+            const data = decoder.decode(value);
+            // Do something with data
+            trans += data;
+          };
+
+        }
+        setWantTranscript(true)
+        setTranscript(trans)
+        toastDisplay('Transcript done, summarizing...', true);
+        // const responseS = await getTextSummary(trans, "null");
+        // if (responseS.success) {
+        //   setSummary(responseS.content);
+        //   toastDisplay('Summary done', true);
+        // } else {
+        // }
+
+
+        setLoadingAPICall(false);
+
+        // await fetch("/api/llm/whisper/speechToTextAAIURL", {
+        //   method: "POST",
+        //   headers: {
+        //     "Content-Type": "application/json",
+        //   },
+        //   body: JSON.stringify({
+        //     url: "https://storage.googleapis.com/audios-wanda/" + filename,
+        //   }),
+        // })
+        //   .then((response) => response.json())
+        //   .then(async ({ content, success }: any) => {
+        //     console.log("data")
+        //     console.log(content)
+        //     if (success) {
+        //       setWantTranscript(true)
+        //       setTranscript(content)
+        //       toastDisplay('Transcript done', true);
+        //       const response = await getTextSummary(content, "null");
+        //       if (response.success) {
+        //         setSummary(response.content);
+        //         toastDisplay('Summary done', true);
+        //       } else {
+        //       }
+        //       // Do some stuff on successfully upload
+        //     } else {
+        //       // Do some stuff on error
+        //     }
+
+        //     setLoadingAPICall(false);
+        //   })
+        //   .catch((error) => {
+        //     console.error("Error:", error);
+        //     setLoadingAPICall(false);
+        //   });
+
+
+        console.log('Uploaded successfully!');
+      } else {
+        console.error('Upload failed.');
       }
-      setWantTranscript(true)
-      setTranscript(trans)
-      toastDisplay('Transcript done, summarizing...', true);
-      // const responseS = await getTextSummary(trans, "null");
-      // if (responseS.success) {
-      //   setSummary(responseS.content);
-      //   toastDisplay('Summary done', true);
-      // } else {
-      // }
-
-
-      setLoadingAPICall(false);
-
-      // await fetch("/api/llm/whisper/speechToTextAAIURL", {
-      //   method: "POST",
-      //   headers: {
-      //     "Content-Type": "application/json",
-      //   },
-      //   body: JSON.stringify({
-      //     url: "https://storage.googleapis.com/audios-wanda/" + filename,
-      //   }),
-      // })
-      //   .then((response) => response.json())
-      //   .then(async ({ content, success }: any) => {
-      //     console.log("data")
-      //     console.log(content)
-      //     if (success) {
-      //       setWantTranscript(true)
-      //       setTranscript(content)
-      //       toastDisplay('Transcript done', true);
-      //       const response = await getTextSummary(content, "null");
-      //       if (response.success) {
-      //         setSummary(response.content);
-      //         toastDisplay('Summary done', true);
-      //       } else {
-      //       }
-      //       // Do some stuff on successfully upload
-      //     } else {
-      //       // Do some stuff on error
-      //     }
-
-      //     setLoadingAPICall(false);
-      //   })
-      //   .catch((error) => {
-      //     console.error("Error:", error);
-      //     setLoadingAPICall(false);
-      //   });
-
-
-      console.log('Uploaded successfully!');
-    } else {
-      console.error('Upload failed.');
     }
   };
   return (
