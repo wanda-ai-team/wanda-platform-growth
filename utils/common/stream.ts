@@ -23,28 +23,44 @@ export default async function streamResponse(data: ReadableStream<Uint8Array>, s
   
         if (selectedPlatform === "Twitter") {
   
+          console.log("chunkValue")
+          console.log(chunkValue)
           if (/\n/.exec(chunkValue)) {
             if (chunkValue === "\n" || chunkValue === "\n\n") {
-              console.log("chunkValue333")
-              index++;
-              setNumberOfTweets(index);
-            } else {
-              if (chunkValue.length > 5) {
-                chunkValue.split(/\n/).map((value, index) => {
-                  console.log("value")
-                  console.log(value)
-                  if (value !== "") {
-                    tweetThread[index] = value;
-                    setTwitterThreadTextPerTweet([...tweetThread]);
-                    console.log("1")
-                    console.log(chunkValue.split(/\n/).length)
-                    console.log(index)
-                    index++;
-                    setNumberOfTweets(index);
-                  }
-                });
+              if(chunkValue === "\n" && newTweet === false){
+                newTweet = true;
+              }else{
+                console.log("chunkValue333")
+                index++;
+                setNumberOfTweets(index);
+                newTweet = false;
               }
-            }
+
+              if(chunkValue === "\n\n"){
+                index++;
+                setNumberOfTweets(index);
+
+                newTweet = false;
+              }
+            } 
+            
+            // else {
+            //   if (chunkValue.length > 5) {
+            //     chunkValue.split(/\n/).map((value, index) => {
+            //       console.log("value")
+            //       console.log(value)
+            //       if (value !== "") {
+            //         tweetThread[index] = value;
+            //         setTwitterThreadTextPerTweet([...tweetThread]);
+            //         console.log("1")
+            //         console.log(chunkValue.split(/\n/).length)
+            //         console.log(index)
+            //         index++;
+            //         setNumberOfTweets(index);
+            //       }
+            //     });
+            //   }
+            // }
             // Do something, the string contains a line break
           } else {
             if (tweetThread[index] !== undefined) {

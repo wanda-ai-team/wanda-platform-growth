@@ -5,7 +5,6 @@ export default async function handler(
     req: NextApiRequest,
     res: NextApiResponse,
 ) {
-    console.log("ola")
     const storage = new Storage({
         projectId: process.env.FIREBASE_PROJECT_ID,
         credentials: {
@@ -15,6 +14,8 @@ export default async function handler(
     });
 
     const bucket = storage.bucket("audios-wanda");
+    console.log(req.query.file)
+    console.log(bucket)
     return await configureBucketCors(bucket)
         .then(async () => {
         const file = bucket.file(req.query.file as string);

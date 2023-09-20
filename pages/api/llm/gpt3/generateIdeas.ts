@@ -30,17 +30,21 @@ export default async function handler(
         const { platform } = req.body
 
         console.log(platform)
-
-        const documents = await getContext(session.user.email, platform)
+        let documents = null
+        try {
+            documents = await getContext(session.user.email, platform)
+        } catch (e) {
+            console.log(e)
+        }
 
         let documentsString = ""
 
-        if(documents && documents.length > 0 && documents[0].page_content){
+        if (documents && documents.length > 0 && documents[0].page_content) {
             documents.forEach((document: { page_content: string; }) => {
                 documentsString += document.page_content
             }
             )
-        } 
+        }
 
         console.log(documentsString)
 
@@ -48,6 +52,7 @@ export default async function handler(
 
         res.status(200).json({ data: openAIResult, status: 200 })
     } catch (e) {
+        console.log(e)
         res.status(500).json({ error: e, status: 500 })
     }
 
