@@ -884,7 +884,7 @@ export default function Reporpuse() {
                         <input
                           type="file"
                           name="myfile"
-                          accept="audio/*"
+                          accept="audio/*,video/*"
                           ref={inputFileRef}
                         />
                         <Button colorScheme="purple" onClick={(e) => uploadPhoto(e)}>

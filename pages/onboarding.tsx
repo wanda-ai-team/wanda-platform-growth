@@ -222,14 +222,16 @@ const Step0: FunctionComponent<Step0Props> = ({
       }),
     })
       .then((response) => response.json())
-      .then(({ data, siteContent }: any) => {
+      .then(async ({ data, siteContent }: any) => {
         console.log(data);
+        toastDisplay('Business understood, storing ...', true);
+        
         setProduct(data.product);
         setTargetAudience(data.target_audience);
 
         const content = siteContent.replace(/(\r\n|\n|\r)/gm, "");
 
-        embedText(
+        await embedText(
           "This information is from " + session?.user.email + " about " + businessNameT + ", this information is about the user business or website content.\n"
           + "What is the product: " + data.product
           + "\nWhat is the target audience: " + data.target_audience
@@ -375,13 +377,13 @@ const Step1: FunctionComponent<Step1Props> = ({
       body: JSON.stringify({ xHandle }),
     })
       .then((response) => response.json())
-      .then(({ data }: any) => {
+      .then(async ({ data }: any) => {
         console.log(data);
         if (data.status === 200 || data.length > 0) {
-          toastDisplay('X handle added successfully', true);
+          toastDisplay('X handle added successfully, storing ...', true);
           setTweets(data);
 
-          embedText(
+          await embedText(
             "This information is from " + session?.user.email + " about " + businessName + ", this information is a set of different tweets written the the user for that particular business, it should be used to create new content based on the tweets tone of writing.\n"
             + "Tweets: " + data
             , businessName
@@ -489,6 +491,9 @@ const Step2: FunctionComponent<Step2Props> = ({
   const [inputs, setInputs] = useState({});
 
   const addQuestionResponses = async (response1: {}) => {
+    if(Object.keys(response1).length === 0){
+      return;
+    }
     setLoading(true);
     await fetch("/api/onboarding/questions", {
       method: "POST",
@@ -500,6 +505,8 @@ const Step2: FunctionComponent<Step2Props> = ({
       .then((response) => response.json())
       .then(async ({ status, response1 }: any) => {
         if (status === 200 || length > 0) {
+          
+        toastDisplay('Answer to questions received, storing ...', true);
 
           await embedText(
             "This information is from " + session?.user.email + " about " + businessName + ", this information is some business information, like competition.\n"
@@ -562,6 +569,7 @@ const Step2: FunctionComponent<Step2Props> = ({
                 setNumberOfCompetitors(numberOfCompetitors.slice(0, -1));
               }
             }}
+            isDisabled={numberOfCompetitors.length === 1}
           >
             -
           </Button>
@@ -572,7 +580,7 @@ const Step2: FunctionComponent<Step2Props> = ({
       <HStack w="full" justify="space-between">
 
         <Button
-          isDisabled={!inputs["0" as keyof typeof inputs] || loading}
+          isDisabled={loading}
 
           onClick={async () => {
             await addQuestionResponses(inputs);
@@ -627,7 +635,7 @@ const Step3: FunctionComponent<Step3Props> = ({
 
   return (
     <Center>
-      <Stack w="40vw">
+      <Stack w="30vw">
         <Text fontSize="xl" fontWeight={600}>
           {currentContent}
         </Text>

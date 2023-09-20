@@ -58,7 +58,14 @@ const Dashboard: FunctionComponent<DashboardProps> = () => {
     })
       .then((response) => response.json())
       .then(({ data }: any) => {
-        setIdeas(data.ideas);
+        console.log(data)
+        if(data.ideas.length > 0) {
+          setIdeas(data.ideas);
+        }
+        else{
+          setIdeas([]);
+          toastDisplay('Error while generating, try again', false)
+        }
         setLoading(false);
       })
       .catch((error) => {
@@ -74,6 +81,8 @@ const Dashboard: FunctionComponent<DashboardProps> = () => {
 
   const generateBlogIdea = async (chosenIdeaN: string) => {
     setLoadingC(true);
+    setNumberOfTweets(1);
+    setTwitterThreadTextPerTweet([""]);
     const documents = await fetch("/api/context/getContext", {
       method: "POST",
       headers: {
@@ -82,16 +91,14 @@ const Dashboard: FunctionComponent<DashboardProps> = () => {
       body: JSON.stringify({ platform: selectedPlatform }),
     });
 
-    let documentContextData;
-    if (!documents.ok) {
-      toastDisplay('Error while generating, try again', false)
-      setLoadingC(false);
-      return;
-    } else {
+    let documentContextData = null;
+
+    if (documents.ok) {
       documentContextData = await documents.json();
-    }
+    } 
+    
     let documentContextDataF = "";
-    if (documentContextData.status !== 500 && documentContextData.documents.length > 0) {
+    if (documentContextData && documentContextData.status !== 500 && documentContextData.documents.length > 0) {
       documentContextData.documents.map((document: any) => {
         if (document && document.page_content && document.page_content.length > 0) {
           documentContextDataF += document.page_content
@@ -193,9 +200,10 @@ const Dashboard: FunctionComponent<DashboardProps> = () => {
             <Button
               colorScheme="purple"
               onClick={() => {
+                setIdeas([]);
                 getIdeas();
               }}
-              isDisabled={loading}
+              isDisabled={loading || loadingC}
             >
               Start Idea Generator
             </Button>
@@ -217,7 +225,7 @@ const Dashboard: FunctionComponent<DashboardProps> = () => {
             {loading && (
               <Progress size='xs' isIndeterminate />
             )}
-            {!loading && ideas.length > 0 && (
+            {!loading && ideas && ideas.length > 0 && (
               <>
                 <RadioGroup onChange={setValue} value={value}>
                   <Stack direction='column'>

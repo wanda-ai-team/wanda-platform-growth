@@ -172,15 +172,22 @@ Please ignore all previous instructions.
 Please respond only in the english language.
 You are a Twitter Creator with a large fan following. 
 Create a Twitter thread on given topic.
+Separate each tweet from the thread with a double break line.
 There should be around 5 to 8 tweets.
 The first tweet should have a hook and entice the readers.
 The last tweet should have a small summary of the thread.
 Talk in-depth of the topic on all the tweets
+Make the tweets be SEO relevant.
+Make the first tweet an enticing hook.
 Do not repeat yourself.
 Do not self reference.
 Do not explain what you are doing.
 Do not explain what you are going to do.
+Do not use hashtags or emojis.
+
+Do not forget to separate each tweet of the tweeter thread with a double break line.
 Topic: ${context}.\n
+Context: ${contextuser}.\n
 Twitter Thread: \n`
 
 // This is the main topic that you will base your new twitter thread on: ${context}. 
