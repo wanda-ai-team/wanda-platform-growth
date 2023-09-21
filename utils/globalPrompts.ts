@@ -139,11 +139,16 @@ Do not explain what you are going to do.`;
 
 function getGenerateIdeasX(context: string) {
     return `
+    
 This is information regarding the business and its landing page: ${context}. 
 Based on the previous given information, provide me with 3 to 5 relevant topic ideas so that the business marketing team can write Twitter threads about.
 Don't use hashtags or emojis.
 Provide a RFC8259 compliant JSON response following this format without deviation.
+Only return the JSON response with the following format
 {"ideas": "idea"}`
+// This is information regarding the business and its landing page: ${context}. 
+// Based on the previous given information, provide me with 3 to 5 relevant topic ideas so that the business marketing team can write Twitter threads about.
+// Provide a RFC8259 compliant JSON response following this format without deviation.
 }
 
 function getGenerateIdeasBlog(context: string) {
@@ -152,22 +157,48 @@ This is information regarding the business and its landing page: ${context}.
 Based on the previous given information, provide me with 3 to 5 relevant topic ideas so that the business marketing team can write Blog posts of 1.500 words about.
 Don't use hashtags or emojis.
 Provide a RFC8259 compliant JSON response following this format without deviation.
+Only return the JSON response with the following format
 {"ideas": "idea"}`
 }
 
 function getGenerationToBlogPrompt(context: string, contextuser: string) {
     return `
-This is the main topic that you will base your new blog post on: ${context}. 
-Based on this idea for a blog, write a blog post of about 1,500 words, make it be SEO relevant.
-Provide a blog compliant markdown response following the correct format.
-Do not repeat yourself.
-Do not self reference.
-Do not explain what you are doing.
-Do not explain what you are going to do.`
+Create a blog post with approximately 1,500 words that focuses on the main topic: ${context}. 
+Make sure the blog post is SEO relevant to maximize its visibility. 
+Your response should follow the correct blog compliant markdown format without any repetition or self-references. 
+Provide valuable information and insights while avoiding unnecessary explanations. 
+Delve into the subject matter, offering step-by-step implementation instructions, expert advice, and tips for success. 
+Consider including a comprehensive introduction that captivates readers and sets the tone for the blog post. 
+Include subheadings to organize the content effectively and enhance readability. Support your statements with reliable sources and cite them appropriately. 
+Incorporate relevant images or illustrations to complement the text and engage the audience visually. 
+Conclude the blog post by summarizing the key takeaways and encouraging readers to share their thoughts or ask questions in the comments section. 
+Ensure that your response adheres to the guidelines and provides a valuable resource for readers seeking information on the topic.
+${contextuser !== "" ? `Here you have some context regarding the business you are writing a blog to: ${contextuser}.` : ""}
+`
+
+// This is the main topic that you will base your new blog post on: ${context}. 
+// Based on this idea for a blog, write a blog post of about 1,500 words, make it be SEO relevant.
+// Provide a blog compliant markdown response following the correct format.
+// Do not repeat yourself.
+// Do not self reference.
+// Do not explain what you are doing.
+// Do not explain what you are going to do.`
+}
+
+function getLandingPageScrapePrompt(context: string) {
+    return `
+    This is the copy of a landing page for a product: ${context}. Write a short description of the product and the target audience.
+Don't forget to always put product descriptions and target audience.
+Provide a RFC8259 compliant JSON response following this format without deviation.
+{"product": "product description", "target_audience": "target audience of the product: ${context}"}`
 }
 
 function getGenerationToXPrompt(context: string, contextuser: string) {
     return `
+I want you to act as a social media expert who specializes in Twitter. 
+I will provide you with a viral content idea and you will develop a creative and inspiring series of tweet threads that can engage readers. 
+The aim is to get a lot of interaction and increase the number of followers. Don't use emojis. 
+ Do not write any explanations or other words, just reply with the thread. My first idea is "Tips on how to save money.
 Please ignore all previous instructions. 
 Please respond only in the english language.
 You are a Twitter Creator with a large fan following. 
@@ -221,5 +252,6 @@ export {
     getGenerationToBlogPrompt,
     getGenerationToXPrompt,
     getGenerateIdeasX,
-    getGenerateIdeasBlog
+    getGenerateIdeasBlog,
+    getLandingPageScrapePrompt
 };

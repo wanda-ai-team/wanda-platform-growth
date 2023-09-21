@@ -222,24 +222,28 @@ const Step0: FunctionComponent<Step0Props> = ({
       }),
     })
       .then((response) => response.json())
-      .then(async ({ data, siteContent }: any) => {
+      .then(async ({ data, siteContent, success }: any) => {
         console.log(data);
-        toastDisplay('Business understood, storing ...', true);
-        
-        setProduct(data.product);
-        setTargetAudience(data.target_audience);
+        console.log(success);
+        if (success) {
 
-        const content = siteContent.replace(/(\r\n|\n|\r)/gm, "");
+          toastDisplay('Business understood, storing ...', true);
 
-        await embedText(
-          "This information is from " + session?.user.email + " about " + businessNameT + ", this information is about the user business or website content.\n"
-          + "What is the product: " + data.product
-          + "\nWhat is the target audience: " + data.target_audience
-          + "\nContent of the landing page: " + content
-          , businessNameT
-          , url
-          , 'Landing Page Content');
+          setProduct(data.product);
+          setTargetAudience(data.target_audience);
 
+          const content = siteContent.replace(/(\r\n|\n|\r)/gm, "");
+
+          await embedText(
+            "This information is from " + session?.user.email + " about " + businessNameT + ", this information is about the user business or website content.\n"
+            + "What is the product: " + data.product
+            + "\nWhat is the target audience: " + data.target_audience
+            + "\nContent of the landing page: " + content
+            , businessNameT
+            , url
+            , 'Landing Page Content');
+
+        }
         setLoading(false);
       })
       .catch((error) => {
@@ -454,7 +458,7 @@ const Step1: FunctionComponent<Step1Props> = ({
           onClick={() => {
             onNextAction({ xHandle, tweets });
           }}
-          isDisabled={!xHandle || tweets.length === 0}
+          isDisabled={!xHandle || tweets.length === 0 || loading}
         >
           Next
         </Button>
@@ -491,7 +495,7 @@ const Step2: FunctionComponent<Step2Props> = ({
   const [inputs, setInputs] = useState({});
 
   const addQuestionResponses = async (response1: {}) => {
-    if(Object.keys(response1).length === 0){
+    if (Object.keys(response1).length === 0) {
       return;
     }
     setLoading(true);
@@ -505,8 +509,8 @@ const Step2: FunctionComponent<Step2Props> = ({
       .then((response) => response.json())
       .then(async ({ status, response1 }: any) => {
         if (status === 200 || length > 0) {
-          
-        toastDisplay('Answer to questions received, storing ...', true);
+
+          toastDisplay('Answer to questions received, storing ...', true);
 
           await embedText(
             "This information is from " + session?.user.email + " about " + businessName + ", this information is some business information, like competition.\n"
@@ -542,7 +546,7 @@ const Step2: FunctionComponent<Step2Props> = ({
           <VStack align="flex-start" w="full">
             {numberOfCompetitors.map((item, index) => (
               <Input
-              key={index}
+                key={index}
                 placeholder="https://wanda.so"
                 type="url"
                 onChange={(e) =>
