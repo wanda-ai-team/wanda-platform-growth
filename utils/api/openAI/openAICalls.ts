@@ -1,5 +1,5 @@
 import { OpenAIStream } from "@/pages/api/llm/gpt3/openAIStream";
-import { getGenerateIdeasX, getGenerateIdeasBlog, getGenerationToBlogPrompt, getGenerationToXPrompt } from "@/utils/globalPrompts";
+import { getGenerateIdeasX, getGenerateIdeasBlog, getGenerationToBlogPrompt, getGenerationToXPrompt, getLandingPageScrapePrompt } from "@/utils/globalPrompts";
 import { NextResponse } from "next/server";
 
 import { Configuration, OpenAIApi } from 'openai';
@@ -12,30 +12,36 @@ const openai = new OpenAIApi(configuration);
 async function getOpenAIAnswer(context: string, platform: string, streamB = false, contextuser = "") {
     console.log({ context, platform, streamB, contextuser })
     let userContent = ``
+    let systemContent = ``
+
     switch (platform.toLocaleLowerCase()) {
         case "twitter":
             userContent = getGenerateIdeasX(context);
+            systemContent = `You are a professional ${platform} writter at a SaaS company. ${platform.toLocaleLowerCase() === `blog` ? `Only respond in Markdown format` : ``}.`
             break;
         case "blog":
             userContent = getGenerateIdeasBlog(context);
+            systemContent = `You are a professional ${platform} writter at a SaaS company. ${platform.toLocaleLowerCase() === `blog` ? `Only respond in Markdown format` : ``}.`
             break;
         case "twitter-generation":
             userContent = getGenerationToXPrompt(context, contextuser);
+            systemContent = `You are a professional content creator. You know how to write a Twitter that can go viral.`
             break;
         case "blog-generation":
             userContent = getGenerationToBlogPrompt(context, contextuser);
+            systemContent = `Act as a content marketing specialist. I will provide you with a specific task. Your task is to generate a highly converting and appealing blog posts. Only respond in Markdown format`
+            break;
+        case "landing-page":
+            userContent = getLandingPageScrapePrompt(context);
+            systemContent = `You are a senior marketing expert at a SaaS company. Only respond in JSON format.`
             break;
 
     }
 
-    console.log({ userContent })
-
-    let systemContent = `You are a professional ${platform} writter at a SaaS company. ${platform.toLocaleLowerCase() === `blog` ? `Only respond in Markdown format` : ``}.`
-
     if (streamB) {
 
         const payload = {
-            model: "gpt-4",
+            model: "gpt-3.5-turbo",
             temperature: 0.7,
             max_tokens: 1024,
             top_p: 1,
@@ -52,6 +58,8 @@ async function getOpenAIAnswer(context: string, platform: string, streamB = fals
         return new NextResponse(stream);
     }
     else {
+
+        console.log(process.env.OPENAI_API_KEY)
 
         const completion = await openai.createChatCompletion({
             model: "gpt-3.5-turbo",

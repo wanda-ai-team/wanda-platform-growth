@@ -10,6 +10,7 @@ import updateDBEntry from '@/utils/api/db/updateDBEntry';
 import { authOptions } from '../auth/[...nextauth]';
 import getDBEntry from '@/utils/api/db/getDBEntry';
 import updateDBEntryArray from '@/utils/api/db/updateDBEntryArray';
+import { getOpenAIAnswer } from '@/utils/api/openAI/openAICalls';
 
 const configuration = new Configuration({
   apiKey: process.env.OPENAI_API_KEY,
@@ -59,9 +60,8 @@ export default async function handler(
     });
 
     result = bodyText.join('\n\n')
-
-    const openAIResult = await getOpenAIAnswer(result.substring(0, 1000))
-
+    
+    const openAIResult = await getOpenAIAnswer(result.replace(/\n/g, ' ').substring(0, 1000), 'landing-page', false, "")
 
 
     // const context = await addContext({ email: session.user?.email })
@@ -83,40 +83,40 @@ export default async function handler(
 
     console.log({ openAIResult })
 
-    res.status(200).json({ data: openAIResult, siteContent: result })
+    res.status(200).json({ data: openAIResult, siteContent: result, success: true })
   } catch (error) {
     console.log({ error })
-    res.status(400).json({ error })
+    res.status(400).json({ error, success: false })
   }
 
 }
 
-const getOpenAIAnswer = async (context: string) => {
-  const completion = await openai.createChatCompletion({
-    model: "gpt-3.5-turbo",
-    temperature: 0.7,
-    max_tokens: 1024,
-    top_p: 1,
-    frequency_penalty: 0,
-    presence_penalty: 0,
-    messages: [{
-      role: "system", content: "You are a senior marketing expert at a SaaS company. Only respond in JSON format.",
-    }, {
-      role: "user", content: `This is the copy of a landing page for a product: ${context}. Write a short description of the product and the target audience.
-Don't forget to always put product descriptions and target audience.
-Provide a RFC8259 compliant JSON response following this format without deviation.
-{"product": "product description", "target_audience": "target audience of the product: ${context}"}`
-    }],
-  });
-  const result = completion.data.choices[0].message?.content || "No results"
+// const getOpenAIAnswer = async (context: string) => {
+//   const completion = await openai.createChatCompletion({
+//     model: "gpt-3.5-turbo",
+//     temperature: 0.7,
+//     max_tokens: 1024,
+//     top_p: 1,
+//     frequency_penalty: 0,
+//     presence_penalty: 0,
+//     messages: [{
+//       role: "system", content: "You are a senior marketing expert at a SaaS company. Only respond in JSON format.",
+//     }, {
+//       role: "user", content: `This is the copy of a landing page for a product: ${context}. Write a short description of the product and the target audience.
+// Don't forget to always put product descriptions and target audience.
+// Provide a RFC8259 compliant JSON response following this format without deviation.
+// {"product": "product description", "target_audience": "target audience of the product: ${context}"}`
+//     }],
+//   });
+//   const result = completion.data.choices[0].message?.content || "No results"
 
 
-  try {
-    const parsedResult: any = JSON.parse(result)
+//   try {
+//     const parsedResult: any = JSON.parse(result)
 
-    return parsedResult
-  } catch (error) {
-    console.log({ error })
-    return result
-  }
-}
+//     return parsedResult
+//   } catch (error) {
+//     console.log({ error })
+//     return result
+//   }
+// }

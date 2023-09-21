@@ -38,7 +38,10 @@ async function transcribeAudio(api_token: any, audio_url: any) {
     // Send a POST request to the transcription API with the audio URL in the request body
     const response = await fetch("https://api.assemblyai.com/v2/transcript", {
         method: "POST",
-        body: JSON.stringify({ audio_url }),
+        body: JSON.stringify({
+            audio_url,
+            speaker_labels: true
+        }),
         headers,
     });
 

@@ -60,6 +60,7 @@ const Dashboard: FunctionComponent<DashboardProps> = () => {
       .then(({ data }: any) => {
         console.log(data)
         if(data.ideas.length > 0) {
+          console.log(data.ideas[0])
           setIdeas(data.ideas);
         }
         else{

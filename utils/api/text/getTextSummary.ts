@@ -1,5 +1,4 @@
 async function getTextSummary(dataF: any, url: string) {
-    console.log(dataF);
     return await fetch('/api/llm/gpt3/textToSummary', {
         method: 'POST',
         body: JSON.stringify({
@@ -10,36 +9,42 @@ async function getTextSummary(dataF: any, url: string) {
     }).then((res) => res.json())
         .then(async (data) => {
             if (data.success === false) {
-                return await fetch('https://langchain-py.vercel.app/', {
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    method: 'POST',
-                    body: JSON.stringify({
-                        docsT: dataF,
-                        url: url
-                    })
-                })
-                    .then((res) => res.json())
+                return await fetch('/api/backend/summarizeText',
+                    {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            "content": dataF,
+                            "company": "",
+                            "url": "url",
+                            "typeOfContent": "typeOfContent"
+                        })
+                    }).then((res) => res.json())
                     .then(async (data) => {
-                        if (!data) {
+                        console.log(data)
+                        if (!data || !data.content) {
                             return { content: "Error", success: false };
                         }
                         else {
                             await fetch('/api/llm/gpt3/textToSummary', {
                                 method: 'POST',
                                 body: JSON.stringify({
-                                    text: data.response.trim(),
+                                    text: data.content,
                                     url: url,
                                     newF: false
                                 })
                             })
-                            return { content: data.response.trim(), success: true };
+                            console.log("data")
+                            console.log(data.content)
+                            return { content: data.content, success: true };
                         }
                     }).catch((err) => {
-                        console.log(err);
-                        return { content: "Error", success: false };
+                        console.log(err)
+                        return { content: "Error", success: false }
                     });
+
             }
             else {
                 return { content: data.content, success: true };
