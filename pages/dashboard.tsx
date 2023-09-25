@@ -58,10 +58,9 @@ const Dashboard: FunctionComponent<DashboardProps> = () => {
     })
       .then((response) => response.json())
       .then(({ data }: any) => {
-        console.log(data)
-        if(data.ideas.length > 0) {
-          console.log(data.ideas[0])
-          setIdeas(data.ideas);
+        console.log(data.list)
+        if(data.list.length > 0) {
+          setIdeas(data.list);
         }
         else{
           setIdeas([]);
@@ -231,7 +230,7 @@ const Dashboard: FunctionComponent<DashboardProps> = () => {
                 <RadioGroup onChange={setValue} value={value}>
                   <Stack direction='column'>
                     {ideas.map((idea, index) => (
-                      <Radio key={index} value={idea}>{idea}</Radio>
+                      <Radio key={index} value={idea.item}>{idea.item}</Radio>
                     ))}
                     <Radio value={'custom'}>
                       Custom
