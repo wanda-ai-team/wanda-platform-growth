@@ -674,12 +674,12 @@ export default function Repurpose() {
         setWantTranscript(true)
         setTranscript(trans)
         toastDisplay('Transcript done, summarizing...', true);
-        // const responseS = await getTextSummary(trans, "null");
-        // if (responseS.success) {
-        //   setSummary(responseS.content);
-        //   toastDisplay('Summary done', true);
-        // } else {
-        // }
+        const responseS = await getTextSummary(trans, "null");
+        if (responseS.success) {
+          setSummary(responseS.content);
+          toastDisplay('Summary done', true);
+        } else {
+        }
 
 
         setLoadingAPICall(false);
