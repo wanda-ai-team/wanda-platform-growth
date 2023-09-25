@@ -1,5 +1,5 @@
 import { OpenAIStream } from "@/pages/api/llm/gpt3/openAIStream";
-import { getGenerateIdeasX, getGenerateIdeasBlog, getGenerationToBlogPrompt, getGenerationToXPrompt, getLandingPageScrapePrompt } from "@/utils/globalPrompts";
+import { getGenerateIdeasX, getGenerateIdeasBlog, getGenerationToBlogPrompt, getGenerationToXPrompt, getLandingPageScrapePrompt, getGenerateTestX, getGenerateTestBlog } from "@/utils/globalPrompts";
 import { NextResponse } from "next/server";
 
 import { Configuration, OpenAIApi } from 'openai';
@@ -24,11 +24,11 @@ async function getOpenAIAnswer(context: string, platform: string, streamB = fals
             systemContent = `You are a professional ${platform} writter at a SaaS company. ${platform.toLocaleLowerCase() === `blog` ? `Only respond in Markdown format` : ``}.`
             break;
         case "twitter-generation":
-            userContent = getGenerationToXPrompt(context, contextuser);
+            userContent = getGenerateTestX(context, contextuser);
             systemContent = `You are a professional content creator. You know how to write a Twitter that can go viral.`
             break;
         case "blog-generation":
-            userContent = getGenerationToBlogPrompt(context, contextuser);
+            userContent = getGenerateTestBlog(context, contextuser);
             systemContent = `Act as a content marketing specialist. I will provide you with a specific task. Your task is to generate a highly converting and appealing blog posts. Only respond in Markdown format`
             break;
         case "landing-page":
@@ -62,7 +62,7 @@ async function getOpenAIAnswer(context: string, platform: string, streamB = fals
         console.log(process.env.OPENAI_API_KEY)
 
         const completion = await openai.createChatCompletion({
-            model: "gpt-3.5-turbo",
+            model: "gpt-4",
             temperature: 0.7,
             max_tokens: 1024,
             top_p: 1,
@@ -75,9 +75,17 @@ async function getOpenAIAnswer(context: string, platform: string, streamB = fals
             }],
         });
 
-        const result = completion.data.choices[0].message?.content || "No results"
+        let result = completion.data.choices[0].message?.content || "No results"
         console.log({ result })
         try {
+            if (result.includes(`\``)) {
+                result = result.replaceAll('\`', '')
+            }
+
+            if(result.includes(`json`)){
+                result = result.replace(`json`, '')
+            }
+            console.log({ result })
             const parsedResult: any = JSON.parse(result)
 
             console.log({ parsedResult })
