@@ -64,7 +64,7 @@ const inputList: {
     },
   ];
 
-export default function Reporpuse() {
+export default function Repurpose() {
   const router = useRouter();
   const inputFileRefF = useRef<HTMLInputElement>(null);
   const [blob, setBlob] = useState<PutBlobResult | null>(null);
@@ -734,7 +734,7 @@ export default function Reporpuse() {
             <div className={styles.form__container}>
               <div className={styles.title__container}>
                 <Text as="h2" fontSize="3xl">
-                  Reporpuse social content
+                  Repurpose social content
                 </Text>
                 <Text>
                   Select a content & choose a platform.
@@ -1140,6 +1140,6 @@ export default function Reporpuse() {
   );
 }
 
-Reporpuse.auth = true
+Repurpose.auth = true
 
 

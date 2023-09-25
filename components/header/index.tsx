@@ -44,9 +44,9 @@ const Header = () => {
           <Button
             size='sm'
             colorScheme="purple"
-            onClick={() => router.push('/reporpuse')}
+            onClick={() => router.push('/repurpose')}
           >
-            Reporpuse
+            Repurpose
           </Button>
         </div>
       )}
