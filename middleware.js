@@ -12,6 +12,7 @@ export const config = {
         "/onboarding",
         "/",
         "/dashboard",
-        "/reporpuse"
+        "/reporpuse",
+        "/repurpose"
     ]
 }
