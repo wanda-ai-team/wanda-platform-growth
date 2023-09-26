@@ -81,9 +81,12 @@ async function getOpenAIAnswer(context: string, platform: string, streamB = fals
             if (result.includes(`\``)) {
                 result = result.replaceAll('\`', '')
             }
-
             if(result.includes(`json`)){
                 result = result.replace(`json`, '')
+            }
+
+            if(result.includes(`markdown`)){
+                result = result.replace(`markdown`, '')
             }
             console.log({ result })
             const parsedResult: any = JSON.parse(result)

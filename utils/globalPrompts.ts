@@ -151,7 +151,7 @@ Here is the output schema:
 {"$defs": {"Item": {"properties": {"item": {"description": "the particular name, item, or entity produced from the research.", "title": "Item", "type": "string"}}, "required": ["item"], "title": "Item", "type": "object"}}, "properties": {"list": {"description": "A list of items and their descriptions.", "items": {"$ref": "#/$defs/Item"}, "title": "List", "type": "array"}}, "required": ["list"]}
 An example of this would be the following:
 {"list":[{"item":"Chicken Eggs"},{"item":"Duck Eggs"},{"item":"Robin Eggs"}]}
-And remember to output the results of this ideation with the correct format, and only return the JSON, don't return anything more!`
+And remember to output the results of this ideation with the correct format, and only return the JSON, don't return anything more, don't put anything before or after the json formatted object!`
     //Based on the previous given information, provide me with 3 to 5 relevant topic ideas so that the business marketing team can write Twitter threads about.
     // This is information regarding the business and its landing page: ${context}. 
     // Based on the previous given information, provide me with 3 to 5 relevant topic ideas so that the business marketing team can write Twitter threads about.
@@ -173,7 +173,7 @@ Here is the output schema:
 {"$defs": {"Item": {"properties": {"item": {"description": "the particular name, item, or entity produced from the research.", "title": "Item", "type": "string"}}, "required": ["item"], "title": "Item", "type": "object"}}, "properties": {"list": {"description": "A list of items and their descriptions.", "items": {"$ref": "#/$defs/Item"}, "title": "List", "type": "array"}}, "required": ["list"]}
 An example of this would be the following:
 {"list":[{"item":"Chicken Eggs"},{"item":"Duck Eggs"},{"item":"Robin Eggs"}]}
-And remember to output the results of this ideation with the correct format, and only return the JSON, don't return anything more!`
+And remember to output the results of this ideation with the correct format, and only return the JSON, don't return anything more, don't put anything before or after the json formatted object!`
 }
 
 function getGenerationToBlogPrompt(context: string, contextuser: string) {
