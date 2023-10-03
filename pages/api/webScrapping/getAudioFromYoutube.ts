@@ -31,6 +31,9 @@ const downloadAudio = async (videoId: string, pathFile: string, res: any) => {
             await createDBEntry("youtubeVideos", { videoId: videoId, audio: resultA[i] });
         }
 
+        console.log("done");
+        console.log(resultA);
+
         return result;
     } catch (e: any) {
         console.log(e);
@@ -45,14 +48,14 @@ export default async function handler(
     try {
         const videoID1 = (<string>req.query.videoID);
 
-        const path = await downloadAudio(videoID1, './youtubeVideos/', res);
-        if (path === undefined || path === null || path === "") {
+        const result = await downloadAudio(videoID1, './youtubeVideos/', res);
+        if (result === undefined || result === null || result === "") {
             return res.status(400).json({
                 success: false,
             });
         } else {
             return res.status(200).json({
-                content: videoID1,
+                content: result,
                 success: true,
             });
         }

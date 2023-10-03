@@ -23,7 +23,7 @@ import { useSession } from "next-auth/react";
 interface OnboardingProps { }
 
 
-const Onboarding: FunctionComponent<OnboardingProps> = () => {
+export default function Onboarding() {
   const [step, setStep] = useState<number>(-1);
   const [siteData, setSiteData] = useState<any>({});
   const { push } = useRouter();
@@ -651,5 +651,4 @@ const Step3: FunctionComponent<Step3Props> = ({
   );
 };
 
-
-export default Onboarding;
+Onboarding.auth = true;

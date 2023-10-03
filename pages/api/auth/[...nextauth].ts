@@ -91,13 +91,11 @@ export const authOptions: NextAuthOptions = {
 
   events: {
     signIn: async (message) => {
-      console.log(message)
       if (message.account !== null) {
         // updateDBEntry("accounts", message.account, ['providerAccountId'], ['=='], [message.account.providerAccountId], 1);
 
         const dbUser = await getUser("email", "==", message.user.email);
         if (dbUser !== null && !dbUser.stripeCustomerId) {
-          console.log("no stripe customer id");
           const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string, {
             apiVersion: "2022-11-15",
           });
@@ -117,7 +115,6 @@ export const authOptions: NextAuthOptions = {
                   uuidv4(),
               };
               await updateUserInfo(bodyN, "email", "==", message.user.email!);
-              console.log("olaaa")
             });
         }
 
@@ -126,14 +123,13 @@ export const authOptions: NextAuthOptions = {
     },
 
     createUser: async ({ user }) => {
-      console.log(user)
 
       const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string, {
         apiVersion: "2022-11-15",
       });
-      var base = new Airtable({ apiKey: process.env.AIRTABLE_API_KEY }).base('appyIJz2lXYjsZvwp');
+      var base = new Airtable({ apiKey: process.env.AIRTABLE_API_KEY }).base('appHgBLNKyJoWyAek');
 
-      base('Table 7').create([
+      base('users').create([
         {
           "fields": {
             "Name": user.name !== null ? user.name as string : "null",
@@ -146,7 +142,6 @@ export const authOptions: NextAuthOptions = {
           return;
         }
         records.forEach(function (record: any) {
-          console.log(record.getId());
         });
       });
 

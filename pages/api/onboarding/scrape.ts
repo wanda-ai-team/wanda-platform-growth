@@ -90,33 +90,3 @@ export default async function handler(
   }
 
 }
-
-// const getOpenAIAnswer = async (context: string) => {
-//   const completion = await openai.createChatCompletion({
-//     model: "gpt-3.5-turbo",
-//     temperature: 0.7,
-//     max_tokens: 1024,
-//     top_p: 1,
-//     frequency_penalty: 0,
-//     presence_penalty: 0,
-//     messages: [{
-//       role: "system", content: "You are a senior marketing expert at a SaaS company. Only respond in JSON format.",
-//     }, {
-//       role: "user", content: `This is the copy of a landing page for a product: ${context}. Write a short description of the product and the target audience.
-// Don't forget to always put product descriptions and target audience.
-// Provide a RFC8259 compliant JSON response following this format without deviation.
-// {"product": "product description", "target_audience": "target audience of the product: ${context}"}`
-//     }],
-//   });
-//   const result = completion.data.choices[0].message?.content || "No results"
-
-
-//   try {
-//     const parsedResult: any = JSON.parse(result)
-
-//     return parsedResult
-//   } catch (error) {
-//     console.log({ error })
-//     return result
-//   }
-// }

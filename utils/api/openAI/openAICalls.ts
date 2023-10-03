@@ -1,5 +1,5 @@
 import { OpenAIStream } from "@/pages/api/llm/gpt3/openAIStream";
-import { getGenerateIdeasX, getGenerateIdeasBlog, getGenerationToBlogPrompt, getGenerationToXPrompt, getLandingPageScrapePrompt, getGenerateTestX, getGenerateTestBlog } from "@/utils/globalPrompts";
+import { getGenerateIdeasX, getGenerateIdeasBlog, getGenerationToBlogPrompt, getGenerationToXPrompt, getLandingPageScrapePrompt, getGenerateTestX, getGenerateTestBlog, getGenerateLandingPage } from "@/utils/globalPrompts";
 import { NextResponse } from "next/server";
 
 import { Configuration, OpenAIApi } from 'openai';
@@ -10,7 +10,6 @@ const configuration = new Configuration({
 const openai = new OpenAIApi(configuration);
 
 async function getOpenAIAnswer(context: string, platform: string, streamB = false, contextuser = "") {
-    console.log({ context, platform, streamB, contextuser })
     let userContent = ``
     let systemContent = ``
 
@@ -35,11 +34,17 @@ async function getOpenAIAnswer(context: string, platform: string, streamB = fals
             userContent = getLandingPageScrapePrompt(context);
             systemContent = `You are a senior marketing expert at a SaaS company. Only respond in JSON format.`
             break;
+        case "landing-page-copy":
+            userContent = getGenerateLandingPage(context, contextuser, context);
+            systemContent = `You are an expert landing page creator.`
+            break;
 
     }
 
     if (streamB) {
 
+        console.log({ userContent })
+        return
         const payload = {
             model: "gpt-3.5-turbo",
             temperature: 0.7,
@@ -60,6 +65,7 @@ async function getOpenAIAnswer(context: string, platform: string, streamB = fals
     else {
 
         console.log(process.env.OPENAI_API_KEY)
+        console.log({ userContent })
 
         const completion = await openai.createChatCompletion({
             model: "gpt-4",
@@ -76,7 +82,6 @@ async function getOpenAIAnswer(context: string, platform: string, streamB = fals
         });
 
         let result = completion.data.choices[0].message?.content || "No results"
-        console.log({ result })
         try {
             if (result.includes(`\``)) {
                 result = result.replaceAll('\`', '')
@@ -88,10 +93,7 @@ async function getOpenAIAnswer(context: string, platform: string, streamB = fals
             if(result.includes(`markdown`)){
                 result = result.replace(`markdown`, '')
             }
-            console.log({ result })
             const parsedResult: any = JSON.parse(result)
-
-            console.log({ parsedResult })
             return parsedResult
         } catch (error) {
             console.log({ error })

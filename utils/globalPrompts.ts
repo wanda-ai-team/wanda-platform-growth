@@ -209,7 +209,7 @@ Please include statistics, personal experience, and fun facts in the thread.
 `
 }
 
- 
+
 function getGenerateTestBlog(context: string, contextuser: string) {
     return `
 Please ignore all previous instructions. 
@@ -291,6 +291,31 @@ Twitter Thread: \n`
     // Twitter Thread: \n`
 }
 
+function getGenerateLandingPage(context: string, businessContext: string, callContext: string) {
+    return `
+Please ignore all previous instructions.
+Please respond only in the english language.
+You are an expert landing page creator.
+Do not self reference.
+Do not explain what you are doing.
+
+Change the given landing page copy content, use the given client call pain points and the given information about the business.
+
+Current landing page copy content: ${context}\n
+
+Client call: ${callContext}\n
+
+Business information: ${businessContext}\n
+
+Mention pain points to grab the attention of the visitor.
+Use the pain points mentioned to increase the click through rate for purchases and opt-ins.
+Please display the structure of the Landing page and include a title tag (between 50-60 characters) and meta description (between 120-130 characters).
+The landing page should have the flow of a story.
+
+.
+    `
+}
+
 export {
     textToInstagramCarrouselTextPrompt,
     textToTwitterThreadPrompt,
@@ -306,5 +331,6 @@ export {
     getGenerateIdeasBlog,
     getLandingPageScrapePrompt,
     getGenerateTestX,
-    getGenerateTestBlog
+    getGenerateTestBlog,
+    getGenerateLandingPage
 };
