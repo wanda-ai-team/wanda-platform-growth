@@ -8,6 +8,8 @@ export default async function handler(
     const { content } = req.body
 
     try {
+        console.log("ola")
+        console.log(process.env.BACKEND_URL + '/llmTools/summarize')
         const response = await axios.post(process.env.BACKEND_URL + '/llmTools/summarize', {
             userPrompt: content,
             systemPrompt: "",

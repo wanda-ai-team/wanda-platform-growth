@@ -75,8 +75,9 @@ const writingStyles = [
 ];
 
 const outputsWithPlatform = [
-    { platform: 'Twitter', outputs: ['Thread'] },
-    { platform: 'Instagram', outputs: ['Carousel', 'Post'] },
+    // { platform: 'Twitter', outputs: ['Thread'] },
+    // { platform: 'Instagram', outputs: ['Carousel', 'Post'] },
+    { platform: 'Landing Page', outputs: ['Copy']}, 
     { platform: 'Linkedin', outputs: ['Post'] },
     { platform: 'Blog', outputs: ['Post', 'Article'] },
     { platform: 'Transcript', outputs: ['Transcript'] },
@@ -84,7 +85,7 @@ const outputsWithPlatform = [
 ];
 
 const platformsToGenerateIdeas = [
-    "Twitter",
+    // "Twitter",
     "Blog",
 ];
 

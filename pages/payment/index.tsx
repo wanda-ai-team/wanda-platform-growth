@@ -77,9 +77,9 @@ export default function Payment() {
                             <div className="self-stretch flex flex-col items-center justify-start gap-[88px]">
                                 <div className="self-stretch flex flex-col items-center justify-between gap-[24px]">
                                     <h1>
-                                        Multiply your content - Today!
+                                        Get better customer insights and multiply your content - Today!
                                     </h1>
-                                    <h4>Start a 14-day free trial — no credit card required</h4>
+                                    <h4>Start a 7-day free trial — no credit card required</h4>
                                 </div>
 
                                 <div id="123" className="self-stretch flex flex-col items-center justify-between gap-[24px]">
@@ -105,10 +105,10 @@ export default function Payment() {
                                                         loading={loading1}
                                                         onclick={() => buyPro("Pro-Month")}
                                                         title={'Pro'}
-                                                        price={'$39'}
+                                                        price={'$19'}
                                                         priceSubtitle={'/month'}
                                                         subtitle={'For Teams scaling their content .'}
-                                                        featuresList={['All Content Outputs', 'All Content Inputs', 'Access to beta features']} buttonText={'Start a 14-day Free Trial'} baseColor={'#f9f9f9'} buttonColor={'buttonMainPurple'} />
+                                                        featuresList={['All Content Outputs', 'All Content Inputs', 'Access to beta features']} buttonText={'Start a 7-day Free Trial'} baseColor={'#f9f9f9'} buttonColor={'buttonMainPurple'} />
                                                     <PriceBlock footnote={undefined} loading={loading2} onclick={buyBeliever} title={'Believer'} price={'Talk with us'} priceSubtitle={''}
                                                         subtitle={'Everything in Pro plan plus...'}
                                                         featuresList={['Build features alongside us', 'Community Calls with the Team', 'Roadmap & Support priority']} buttonText={'Contact Us'} baseColor={'#8F50E2'} buttonColor={'buttonMainWhite'} />
@@ -117,8 +117,8 @@ export default function Payment() {
                                             <TabPanel>
                                                 <SimpleGrid columns={2} spacing={10}>
                                                     <PriceBlock footnote={'No credit card required.'} loading={loading1} onclick={() => buyPro("Pro-Year")} title={'Pro'}
-                                                        price={'$390'} priceSubtitle={'/year'} subtitle={'For Teams scaling their content .'}
-                                                        featuresList={['All Content Outputs', 'All Content Inputs', 'Access to beta features']} buttonText={'Start a 14-day Free Trial'} baseColor={'#f9f9f9'} buttonColor={'buttonMainPurple'} />
+                                                        price={'$190'} priceSubtitle={'/year'} subtitle={'For Teams scaling their content .'}
+                                                        featuresList={['All Content Outputs', 'All Content Inputs', 'Access to beta features']} buttonText={'Start a 7-day Free Trial'} baseColor={'#f9f9f9'} buttonColor={'buttonMainPurple'} />
                                                     <PriceBlock footnote={undefined} loading={loading2} onclick={buyBeliever} title={'Believer'} price={'Talk with us'} priceSubtitle={''}
                                                         subtitle={'Everything in Pro plan plus...'}
                                                         featuresList={['Build features alongside us', 'Community Calls with the Team', 'Roadmap & Support priority']} buttonText={'Contact Us'} baseColor={'#8F50E2'} buttonColor={'buttonMainWhite'} />

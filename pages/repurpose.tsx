@@ -60,7 +60,7 @@ const inputList: {
     },
     {
       key: "podcast",
-      value: "Podcast & Video(File)",
+      value: "Podcast & Video (File)",
     },
   ];
 
@@ -100,6 +100,7 @@ export default function Repurpose() {
 
   const [postingThread, setPostingThread] = useState(false);
   const [wantTranscript, setWantTranscript] = useState(false);
+  const [landingURL, setLandingURL] = useState("");
   const [selectedProject, setSelectedproject] = useState("");
   const [currentStep, setCurrentStep] = useState<"settings" | "result">(
     "settings"
@@ -182,8 +183,39 @@ export default function Repurpose() {
   async function convertSummaryS(
     summaryN: string,
     text: boolean,
-    toneStyle: string
+    toneStyle: string,
+    landingPageURL: string = ""
   ) {
+    let websitescrape: {
+      content?: string;
+      context?: string;
+    }  = {};
+
+    if (landingPageURL !== "") {
+      websitescrape = await fetch("/api/onboarding/scrape", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          url: landingPageURL,
+          businessName: landingPageURL
+        }),
+      })
+        .then((response) => response.json())
+        .then(async ({ data, siteContent, success }: any) => {
+          console.log(data);
+          console.log(success);
+          if (success) {
+            return { context: data.target_audience + " " + data.product, content: siteContent.replace(/(\r\n|\n|\r)/gm, "") };
+          } else {
+            return {}
+          }
+        })
+    }
+    console.log("summaryN")
+    console.log(websitescrape)
+
     const response = await fetch("/api/llm/gpt3/textToThreadStream", {
       method: "POST",
       headers: {
@@ -195,7 +227,9 @@ export default function Repurpose() {
         outputO: outputSelectedO,
         isText: text,
         toneStyle: outputSelectedT,
-        writingStyle: outputSelectedW
+        writingStyle: outputSelectedW,
+        landingPageContent: websitescrape.content !== "" ? websitescrape.content : "",
+        landingPageContext: websitescrape.context !== "" ? websitescrape.context : "",
       }),
     });
     console.log("response")
@@ -552,31 +586,35 @@ export default function Repurpose() {
     }
   };
 
-  const handleConvert = async () => {
+  const handleConvert = async (landingPageURL = "") => {
     setConvertedText("");
     setTwitterThreadTextPerTweet([""]);
+    setLoadingC(true);
     if (outputSelectedI === 'context') {
-      setLoadingC(true);
       const response = await getStoredThreads(selectedProject);
       if (response.success) {
-        convertSummaryS(response.project.content, false, toneStyle);
+        await convertSummaryS(response.project.content, false, toneStyle);
       }
     } else {
       if (outputSelected === "Twitter") {
-        convertSummaryS(summary, false, toneStyle);
+        await convertSummaryS(summary, false, toneStyle);
       } else {
         if (outputSelectedO === "Text") {
-          convertSummaryS(inputText, true, toneStyle);
+          await convertSummaryS(inputText, true, toneStyle);
         } else {
-          convertSummaryS(summary, false, toneStyle);
+          if (outputSelected === "Landing Page") {
+            await convertSummaryS(summary, false, toneStyle, landingPageURL);
+          } else {
+            await convertSummaryS(summary, false, toneStyle);
+          }
         }
       }
     }
+    setLoadingC(false);
     // setCurrentStep("result");
   };
 
   function getTextArea(valueChosen: any) {
-    console.log(valueChosen)
     if (outputSelected === 'Twitter') {
       return getTwitterThread();
     }
@@ -585,7 +623,7 @@ export default function Repurpose() {
       return (
         <>
           <Textarea
-            style={{ height: '500px' }}
+            style={{ height: '100%', marginRight: '1.5%', width: '97%', marginLeft: '1.5%' }}
             value={valueChosen}
             onChange={handleInputChange}
             placeholder='Here is a sample placeholder'
@@ -675,10 +713,13 @@ export default function Repurpose() {
         setTranscript(trans)
         toastDisplay('Transcript done, summarizing...', true);
         const responseS = await getTextSummary(trans, "null");
-        if (responseS.success) {
+        console.log("responseS")
+        console.log(responseS)
+        if (responseS.success && responseS.content !== "Error") {
           setSummary(responseS.content);
           toastDisplay('Summary done', true);
         } else {
+          toastDisplay('Error while doing the summary, please try again', false);
         }
 
 
@@ -737,11 +778,11 @@ export default function Repurpose() {
                   Repurpose social content
                 </Text>
                 <Text>
-                  Select a content & choose a platform.
+                  Repurpose your content to other platforms
                 </Text>
               </div>
               <div className={styles.options}>
-                <Text fontWeight="semibold">Post Content</Text>
+                <Text fontWeight="semibold">Choose input content type:</Text>
                 <div className={styles.radio__group} {...group}>
                   {inputList.map(({ key, value }) => {
                     const radio = getRadioProps({ value: key });
@@ -850,7 +891,7 @@ export default function Repurpose() {
                         colorScheme="purple"
                         onClick={() => youtubeTransformText(inputText)}
                       >
-                        Start analyzes
+                        Start analysis
                       </Button>
                     </>
                   )}
@@ -920,48 +961,52 @@ export default function Repurpose() {
               </div>
 
               <div className={styles.platform__container}>
-                <Text fontWeight="semibold">Select Platform:</Text>
-
                 <div className={styles.options}>
                   <HStack>
-                    <Select
-                      sx={{ backgroundColor: "white" }}
-                      onChange={(e) => {
-                        setOutputSelected(e.target.value);
-                        setOutputSelectedO(outputsWithPlatform.filter(v => v.platform === e.target.value)[0].outputs[0]);
-                      }}
-                      value={outputSelected}
-                    >
-                      {outputsWithPlatform.map((output, index) => (
-                        <option key={index} value={output.platform}>
-                          {output.platform}
-                        </option>
-                      ))}
-                    </Select>
-                    {outputSelected && (outputSelected !== 'Transcript' && outputSelected !== 'Summary') && (
+                    <VStack align={"start"} w={"50%"}>
+                      <Text fontWeight="semibold">Output Platform:</Text>
                       <Select
                         sx={{ backgroundColor: "white" }}
                         onChange={(e) => {
-                          setOutputSelectedO(e.target.value);
+                          setOutputSelected(e.target.value);
+                          setOutputSelectedO(outputsWithPlatform.filter(v => v.platform === e.target.value)[0].outputs[0]);
                         }}
-                        value={outputSelectedO}
+                        value={outputSelected}
                       >
-                        {outputsWithPlatform.filter(
-                          (plat) => plat.platform === outputSelected
-                        )[0] !== undefined ? (
-                          outputsWithPlatform
-                            .filter(
-                              (plat) => plat.platform === outputSelected
-                            )[0]
-                            .outputs.map((output, index) => (
-                              <option key={index} value={output}>
-                                {output}
-                              </option>
-                            ))
-                        ) : (
-                          <></>
-                        )}
+                        {outputsWithPlatform.map((output, index) => (
+                          <option key={index} value={output.platform}>
+                            {output.platform}
+                          </option>
+                        ))}
                       </Select>
+                    </VStack>
+                    {outputSelected && (outputSelected !== 'Transcript' && outputSelected !== 'Summary') && (
+                      <VStack align={"start"} w={"50%"}>
+                      <Text fontWeight="semibold">Output Type:</Text>
+                        <Select
+                          sx={{ backgroundColor: "white" }}
+                          onChange={(e) => {
+                            setOutputSelectedO(e.target.value);
+                          }}
+                          value={outputSelectedO}
+                        >
+                          {outputsWithPlatform.filter(
+                            (plat) => plat.platform === outputSelected
+                          )[0] !== undefined ? (
+                            outputsWithPlatform
+                              .filter(
+                                (plat) => plat.platform === outputSelected
+                              )[0]
+                              .outputs.map((output, index) => (
+                                <option key={index} value={output}>
+                                  {output}
+                                </option>
+                              ))
+                          ) : (
+                            <></>
+                          )}
+                        </Select>
+                      </VStack>
                     )}
                   </HStack>
 
@@ -991,6 +1036,22 @@ export default function Repurpose() {
                     </HStack>
                   )}
 
+                  {outputSelected === "Landing Page" && (
+                    <VStack align={"start"} w={"100%"}>
+                      <Text fontWeight="semibold">Current Landing Page:</Text>
+                      <Input
+                        sx={{ backgroundColor: "white" }}
+                        isDisabled={loadingAPICall}
+                        placeholder={"Current landing page"}
+                        value={landingURL}
+                        onChange={(e) => {
+                          setLandingURL(e.target.value);
+                        }}
+                        type="url"
+                      />
+                    </VStack>
+                  )}
+
                   <Button
                     isDisabled={(
                       (outputSelectedI !== "context" && summary === "")
@@ -998,9 +1059,9 @@ export default function Repurpose() {
                       || (outputSelectedI === "context" && selectedProject === "")
                     )}
                     colorScheme="purple"
-                    onClick={handleConvert}
+                    onClick={() => handleConvert(landingURL)}
                   >
-                    Convert to AI Post
+                    Convert to {outputSelected} {outputSelectedO}
                   </Button>
                 </div>
               </div>
@@ -1009,7 +1070,7 @@ export default function Repurpose() {
             <div className={styles.transcript__summary}>
               <div className={styles.texts}>
                 <span className={styles.summary__header}>
-                  {outputSelected} AI post
+                  {outputSelected} {outputSelectedO}
                 </span>
               </div>
 
@@ -1141,5 +1202,3 @@ export default function Repurpose() {
 }
 
 Repurpose.auth = true
-
-

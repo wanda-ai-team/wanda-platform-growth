@@ -1,12 +1,15 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Center, Spinner } from '@chakra-ui/react';
+import { useSession } from 'next-auth/react';
 
 export default function Home() {
     const [loading, setLoading] = useState<boolean>(true);
+    const session = useSession({ required: true })
     const { push } = useRouter();
 
     async function getUser() {
+        // if (session && session.data && session.data.user.isActive === false) {
         await fetch('/api/user/getUser')
             .then((res) => res.json())
             .then(async (data1) => {
@@ -20,6 +23,7 @@ export default function Home() {
                 push('/dashboard');
                 setLoading(false);
             });
+
     }
 
     useEffect(() => {
@@ -40,3 +44,5 @@ export default function Home() {
         </Center>
     );
 };
+
+Home.auth = true;

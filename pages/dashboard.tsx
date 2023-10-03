@@ -12,9 +12,7 @@ import { getContext } from "@/utils/api/context/contextCalls";
 import streamResponse from "@/utils/common/stream";
 
 
-interface DashboardProps { }
-
-const Dashboard: FunctionComponent<DashboardProps> = () => {
+export default function Dashboard() {
   const [ideas, setIdeas] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [loadingC, setLoadingC] = useState(false);
@@ -59,10 +57,10 @@ const Dashboard: FunctionComponent<DashboardProps> = () => {
       .then((response) => response.json())
       .then(({ data }: any) => {
         console.log(data.list)
-        if(data.list.length > 0) {
+        if (data.list.length > 0) {
           setIdeas(data.list);
         }
-        else{
+        else {
           setIdeas([]);
           toastDisplay('Error while generating, try again', false)
         }
@@ -95,8 +93,8 @@ const Dashboard: FunctionComponent<DashboardProps> = () => {
 
     if (documents.ok) {
       documentContextData = await documents.json();
-    } 
-    
+    }
+
     let documentContextDataF = "";
     if (documentContextData && documentContextData.status !== 500 && documentContextData.documents.length > 0) {
       documentContextData.documents.map((document: any) => {
@@ -181,14 +179,14 @@ const Dashboard: FunctionComponent<DashboardProps> = () => {
                 Generate Ideas
               </Text>
               <Text>
-                Select the platform and ideas will be generated based on your context.
+                Select a platform, generate ideas and generate a draft for your next piece of content.
               </Text>
             </div>
 
           </VStack>
 
           <div className={styles.platform__container}>
-            <Text fontWeight="semibold">Select Platform</Text>
+            <Text fontWeight="semibold">Output Platform:</Text>
             <Select
               sx={{ backgroundColor: "white" }}
               onChange={(e) => { setSelectedPlatform(e.target.value); }} value={selectedPlatform} >
@@ -216,9 +214,18 @@ const Dashboard: FunctionComponent<DashboardProps> = () => {
 
           <div className={styles.platform__container}>
 
-            <Text fontWeight="semibold">{(!loading) ? (
-              'Generated Ideas'
-            ) : 'Generating Ideas'}
+            <Text fontWeight="semibold">
+              {
+                (!loading) ? ('Generated Ideas')
+                  :
+                  'Generating Ideas'
+              }
+            </Text>
+
+            <Text fontWeight="lighter">
+              {
+                (!loading && ideas && ideas.length <= 0) && ('Generated ideas will show up here ...')
+              }
             </Text>
 
 
@@ -280,15 +287,14 @@ const Dashboard: FunctionComponent<DashboardProps> = () => {
           {selectedPlatform === "Twitter"
             ? getTwitterThread()
             :
-
-            <Textarea
-              style={{ marginLeft: '5%', resize: "none", height: "600px", marginRight: '5%', width: '90%' }}
-              value={convertedText}
-              onChange={handleInputChange}
-              variant="filled"
-              placeholder='AI Post will show up here when it is generated'
-              size="sm"
-            />
+            <>
+              <Textarea
+                style={{ height: '100%', marginRight: '1.5%', width: '97%', marginLeft: '1.5%' }}
+                value={convertedText}
+                onChange={handleInputChange}
+                placeholder='Here is a sample placeholder'
+                size='lg' />
+            </>
           }
           {/* {getTextArea(outputSelected === 'Summary' ? summary : outputSelected === 'Transcript' ? transcript : convertedText)} */}
 
@@ -336,5 +342,5 @@ const Dashboard: FunctionComponent<DashboardProps> = () => {
   );
 };
 
-export default Dashboard;
+Dashboard.auth = true;
 

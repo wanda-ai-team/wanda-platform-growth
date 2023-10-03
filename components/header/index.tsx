@@ -34,6 +34,14 @@ const Header = () => {
 
       {!router.pathname.includes('onboarding') && !router.pathname.includes('login') && (
         <div style={{ display: 'flex', gap: '12px', verticalAlign: 'middle' }}>
+        <Button
+          size='sm'
+          colorScheme="purple"
+          isDisabled={true}
+          title="Coming Soon"
+        >
+          Insights
+        </Button>
           <Button
             size='sm'
             colorScheme="purple"
