@@ -44,7 +44,6 @@ async function getOpenAIAnswer(context: string, platform: string, streamB = fals
     if (streamB) {
 
         console.log({ userContent })
-        return
         const payload = {
             model: "gpt-3.5-turbo",
             temperature: 0.7,
