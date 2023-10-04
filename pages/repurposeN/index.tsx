@@ -1,7 +1,7 @@
 
 import RadioTag from "@/components/radio-tag";
 import styles from "@/styles/HomeN.module.css";
-import urlToText from "@/utils/common/transcript/transcript";
+import { urlToText } from "@/utils/common/transcript/transcript";
 import uploadFile from "@/utils/common/upload/upload";
 import {
     Input,
@@ -95,9 +95,11 @@ export default function RepurposeN() {
                         ref={inputFileRef}
                     />
                     <Button colorScheme="purple" onClick={async (e) => {
-                        const response = await uploadFile(e, setLoadingAPICall, inputFileRef, setTranscript)
-                        setTranscript(response.text);
-                        setSpeakers(response.speakers);
+                        const responseO = await uploadFile(setLoadingAPICall, inputFileRef)
+
+                        if (responseO && responseO.upload.ok) {
+                            // setTranscript(responseO.summary);
+                        }
                     }
                     }>
                         Upload

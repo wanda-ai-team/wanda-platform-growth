@@ -90,7 +90,7 @@ export default function Dashboard() {
     });
 
     let documentContextData = null;
-
+    console.log("documents")
     if (documents.ok) {
       documentContextData = await documents.json();
     }
@@ -110,6 +110,7 @@ export default function Dashboard() {
       },
       body: JSON.stringify({ idea: chosenIdeaN, platform: selectedPlatform, email: session?.user.email, documents: documentContextDataF }),
     });
+    console.log("response")
 
     if (!response.ok) {
       toastDisplay('Error while generating, try again', false)

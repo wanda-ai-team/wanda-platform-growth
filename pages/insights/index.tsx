@@ -1,7 +1,7 @@
 
 import RadioTag from "@/components/radio-tag";
 import styles from "@/styles/HomeN.module.css";
-import urlToText from "@/utils/common/transcript/transcript";
+import { urlToText, urlToTranscript } from "@/utils/common/transcript/transcript";
 import uploadFile from "@/utils/common/upload/upload";
 import {
     Input,
@@ -13,10 +13,11 @@ import {
     Button,
     InputRightElement,
     Spinner,
+    Select,
 } from "@chakra-ui/react";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
-type Contents = "context" | "url" | "text" | "file";
+type Contents = "context" | "url" | "text" | "file" | "gong";
 const inputList: {
     key: Contents;
     value: string;
@@ -29,6 +30,10 @@ const inputList: {
             key: "file",
             value: "Video (File)",
         },
+        {
+            key: "gong",
+            value: "Gong calls",
+        },
     ];
 
 export default function Insights() {
@@ -37,14 +42,74 @@ export default function Insights() {
     const [url, setUrl] = useState<string>("");
     const [loadingAPICall, setLoadingAPICall] = useState<boolean>(false);
     const [transcript, setTranscript] = useState<string>("");
+    const [summary, setSummary] = useState<string>("");
+    const [keyphrases, setKeyphrases] = useState<string[]>([]);
+    const [topics, setTopics] = useState<string[]>([]);
     const [speakers, setSpeakers] = useState<any>([]);
     const [outputSelected, setOutputSelected] = useState<string>("");
+
+    const [gongCallsA, setGongCallsA] = useState([]);
+    const [selectedGongCall, setSelectedGongCall] = useState<any>({});
+    const [loadingGongCalls, setLoadingGongCalls] = useState<boolean>(true);
+
     const { getRootProps, getRadioProps } = useRadioGroup({
         name: "content",
         defaultValue: inputList[0].key,
         onChange: (value: Contents) => setOutputSelectedI(value),
     });
     const group = getRootProps();
+
+    async function getCalls() {
+        setLoadingGongCalls(true);
+        console.log('getCalls');
+        await fetch('/api/integrations/gong/getCallByDate')
+            .then(response => response.json())
+            .then(data => {
+                console.log(data);
+                if (data.success) {
+                    setGongCallsA(data.content);
+                    setSelectedGongCall(data.content[0].id);
+                } else {
+                    console.log(data);
+                }
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+            });
+        setLoadingGongCalls(false);
+    }
+
+    async function getCallInformation(callId: string) {
+        setLoadingGongCalls(true);
+        await fetch('/api/integrations/gong/getCallInformationById', {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                callId: [callId],
+            }),
+        })
+            .then(response => response.json())
+            .then(data => {
+                console.log(data);
+                if (data.success) {
+                    console.log(data.content);
+                    setSpeakers(data.content.parties.map((item: any) => item.name));
+                    setTopics(data.content.content.topics.map((item: any) => item.name));
+                } else {
+                    console.log(data);
+                }
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+            });
+        setLoadingGongCalls(false);
+    }
+
+    useEffect(() => {
+        getCalls();
+    }, []);
 
     function urlInput() {
         return (
@@ -85,9 +150,26 @@ export default function Insights() {
                         ref={inputFileRef}
                     />
                     <Button colorScheme="purple" onClick={async (e) => {
-                        const response = await uploadFile(e, setLoadingAPICall, inputFileRef, setTranscript)
-                        setTranscript(response.text);
-                        setSpeakers(response.speakers);
+                        if (inputFileRef && inputFileRef.current && inputFileRef.current.files && inputFileRef.current.files.length > 0) {
+                            const responseO = await uploadFile(setLoadingAPICall, inputFileRef);
+                            if (responseO && responseO.upload.ok) {
+                                console.log(responseO);
+                                const response = await urlToTranscript(url + responseO.url, responseO.fields, true, true, true, true, true);
+                                setTranscript(response.transcript);
+                                setSummary(response.summary);
+                                setKeyphrases(response.auto_highlights_result.results.map((item: any) => item.text))
+
+                                console.log(Object.keys(response.topics))
+                                setTopics(Object.keys(response.topics).map((item: any) => item.split('>')[item.split('>').length - 1]));
+
+
+                                const speakerArr = response.speakers.map((speaker: any) => speaker.speaker);
+                                console.log(speakerArr);
+                                const speakerSet = new Set(speakerArr);
+                                setSpeakers(Array.from(speakerSet));
+                            }
+                            setLoadingAPICall(false);
+                        }
                     }
                     }>
                         Upload
@@ -100,6 +182,30 @@ export default function Insights() {
                 </InputGroup>
             </>
         );
+    }
+
+    function gongCalls() {
+        return (
+            <>
+                <Select
+                    sx={{ backgroundColor: "white" }}
+                    value={selectedGongCall}
+                    onChange={(e) => { setSelectedGongCall(e.target.value); }}
+                >
+                    {gongCallsA.map((call: any, index: number) => (
+                        <option key={index} value={call.id}>
+                            {call.title.substring(0, 75) + ' ...'}
+                        </option>
+                    ))}
+                </Select>
+
+                <Button colorScheme="purple" onClick={async (e) => {
+                    getCallInformation(selectedGongCall);
+                }} >
+                    Get Call Information
+                </Button>
+            </>
+        )
     }
 
     function getTextArea(valueChosen: any) {
@@ -154,6 +260,20 @@ export default function Insights() {
                             outputSelectedI === "file" &&
                             fileInput()
                         }
+                        {
+                            outputSelectedI === "gong" ?
+                                loadingGongCalls ?
+                                    <>
+                                        <Text>
+                                            Loading calls.
+                                        </Text>
+                                        <Progress size='xs' isIndeterminate />
+                                    </>
+                                    :
+                                    gongCalls()
+                                :
+                                <></>
+                        }
                     </div>
                 </div>
 
@@ -166,13 +286,47 @@ export default function Insights() {
             <div className={styles.transcript__summary}>
                 <div className={styles.texts}>
                     <Progress size='xs' isIndeterminate />
+
+                    <Text as="h3" fontSize="xl">
+                        Transcript
+                    </Text>
                     {getTextArea(outputSelected === 'Summary' ? transcript : outputSelected === 'Transcript' ? transcript : transcript)}
-                    {getTextArea(speakers)}
 
+                    <Text as="h3" fontSize="xl">
+                        Brief
+                    </Text>
+                    <Text>
+                        {summary}
+                    </Text>
+
+                    <Text as="h3" fontSize="xl">
+                        Keypoints
+                    </Text>
+                    {keyphrases.map((item: any, index: number) => (
+                        <Text key={index}>
+                            - {item}
+                        </Text>
+                    ))}
+
+                    <Text as="h3" fontSize="xl">
+                        Speakers
+                    </Text>
+                    {speakers.map((item: any, index: number) => (
+                        <Text key={index}>
+                            - {item}
+                        </Text>
+                    ))}
+
+                    <Text as="h3" fontSize="xl">
+                        Topics
+                    </Text>
+                    {topics.map((item: any, index: number) => (
+                        <Text key={index}>
+                            - {item}
+                        </Text>
+                    ))}
+                    {/* {getTextArea(speakers)} */}
                 </div>
-
-
-
             </div>
         </main>
     )

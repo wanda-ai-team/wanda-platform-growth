@@ -8,7 +8,8 @@ const handler = async (req: Request): Promise<Response> => {
 
     try {
         const json = await req.json();
-
+        console.log("json")
+        console.log(json)
         const stream = await getOpenAIAnswer(json.idea, json.platform + '-generation', true, json.documents.page_content)
 
         return stream
