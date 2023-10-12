@@ -34,14 +34,14 @@ const Header = () => {
 
       {!router.pathname.includes('onboarding') && !router.pathname.includes('login') && (
         <div style={{ display: 'flex', gap: '12px', verticalAlign: 'middle' }}>
-        <Button
-          size='sm'
-          colorScheme="purple"
-          isDisabled={true}
-          title="Coming Soon"
-        >
-          Insights
-        </Button>
+          <Button
+            size='sm'
+            colorScheme="purple"
+            isDisabled={true}
+            title="Coming Soon"
+          >
+            Insights
+          </Button>
           <Button
             size='sm'
             colorScheme="purple"
@@ -62,7 +62,7 @@ const Header = () => {
         <Menu>
           {() => (
             <>
-              <a  target="_blank" href="https://app.frill.co/embed/widget/39ae3c1b-25d9-4212-8e67-fc56fb451206">
+              <a target="_blank" href="https://app.frill.co/embed/widget/39ae3c1b-25d9-4212-8e67-fc56fb451206">
                 <Button
                   size='sm'
                   colorScheme="purple"
@@ -85,6 +85,9 @@ const Header = () => {
                 )}
               </MenuButton>
               <MenuList>
+                <MenuItem
+                  onClick={() => router.push('/profile')}
+                >Settings</MenuItem>
 
                 {/* <MenuItem ><Link href="https://billing.stripe.com/p/login/test_eVa02A8e6glT3QI5kk">Subscription</Link></MenuItem> */}
                 <MenuItem onClick={() => signOut()}>Logout</MenuItem>

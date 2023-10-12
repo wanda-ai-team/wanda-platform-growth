@@ -10,7 +10,7 @@ export default async function handler(
     res: NextApiResponse
 ) {
 
-    const URL = process.env.GONG_URL + retrieveCallsByDate + "?fromDateTime=" + "2018-02-18T08:00:00Z" + "&toDateTime=" + "2023-10-03T22:00:00Z";
+    const URL = process.env.GONG_URL + retrieveCallsByDate + "?fromDateTime=" + "2018-02-18T08:00:00Z" + "&toDateTime=" + "2024-12-25T22:00:00Z";
     let data = process.env.GONG_ACCESS_KEY + ":" + process.env.GONG_ACCESS_SECRET;
     let buff = new Buffer(data);
     let base64data = buff.toString('base64');

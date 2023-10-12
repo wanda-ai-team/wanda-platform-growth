@@ -228,8 +228,8 @@ export default function Repurpose() {
         isText: text,
         toneStyle: outputSelectedT,
         writingStyle: outputSelectedW,
-        landingPageContent: websitescrape.content !== "" ? websitescrape.content : "",
-        landingPageContext: websitescrape.context !== "" ? websitescrape.context : "",
+        landingPageContent: websitescrape.content ? websitescrape.content : "",
+        landingPageContext: websitescrape.context ? websitescrape.context : "",
       }),
     });
     console.log("response")
@@ -452,6 +452,10 @@ export default function Repurpose() {
   }
 
   async function summarizeTextAndCreateThread(data: any, url: string, transc: string = "") {
+    console.log("Ola")
+    console.log(data)
+    console.log(url)
+    
     const response = await getTextSummary(data, url);
     setTranscript(transc);
     console.log("Ola111aa")
