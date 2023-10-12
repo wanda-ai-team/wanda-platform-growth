@@ -452,6 +452,10 @@ export default function Repurpose() {
   }
 
   async function summarizeTextAndCreateThread(data: any, url: string, transc: string = "") {
+    console.log("Ola")
+    console.log(data)
+    console.log(url)
+    
     const response = await getTextSummary(data, url);
     setTranscript(transc);
     console.log("Ola111aa")
