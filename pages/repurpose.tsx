@@ -228,8 +228,8 @@ export default function Repurpose() {
         isText: text,
         toneStyle: outputSelectedT,
         writingStyle: outputSelectedW,
-        landingPageContent: websitescrape.content !== "" ? websitescrape.content : "",
-        landingPageContext: websitescrape.context !== "" ? websitescrape.context : "",
+        landingPageContent: websitescrape.content ? websitescrape.content : "",
+        landingPageContext: websitescrape.context ? websitescrape.context : "",
       }),
     });
     console.log("response")

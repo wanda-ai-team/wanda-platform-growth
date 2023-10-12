@@ -22,6 +22,8 @@ const handler = async (req: Request): Promise<Response> => {
         landingPageContent?: string;
     };
     if (!output || !text || !outputO || isText === undefined || toneStyle === undefined || writingStyle === undefined || landingPageContent === undefined || landingPageContext === undefined) {
+        console.log("error");
+        console.log(output, text, outputO, isText, toneStyle, writingStyle, landingPageContent, landingPageContext);
         return new Response('Bad Request', { status: 400 });
     }
     try {
