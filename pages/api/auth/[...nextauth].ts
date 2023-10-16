@@ -71,13 +71,17 @@ export const authOptions: NextAuthOptions = {
       return session;
     },
 
-    jwt: async ({ user, token }) => {
+    jwt: async ({ token, trigger, session, user }) => {
+      if (trigger === "update") {
+        token.isActive = session?.user.isActive;
+        console.log(session)
+        console.log("update");
+      }
       if (user) {
         token.image = user.image;
         token.uid = user.id;
         token.isActive = user.isActive;
         if (user.stripeCustomerId === undefined) {
-
           const dbUser = await getUser("email", "==", user.email);
           if (dbUser !== null && !dbUser.stripeCustomerId) {
             token.stripeCustomerId = dbUser.stripeCustomerId;

@@ -2,12 +2,17 @@ import { Tabs, TabList, Tab, Tooltip, TabPanels, TabPanel, SimpleGrid } from "@c
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import PriceBlock from "../../components/blocks/priceBlock";
+import { getCsrfToken, getSession, useSession } from "next-auth/react";
 
 export default function Payment() {
     const [loading, setLoading] = useState(true);
     const [loading1, setLoading1] = useState(false);
     const [loading2, setLoading2] = useState(false);
     const router = useRouter();
+    const { data: session, status, update } = useSession();
+
+
+
 
     async function getUser() {
         await fetch('/api/user/getUser')
@@ -21,8 +26,9 @@ export default function Payment() {
             }).catch((err) => {
                 setLoading(false);
             });
-            setLoading(false);
+        setLoading(false);
     }
+
 
     useEffect(() => {
         console.log("Olaa")
