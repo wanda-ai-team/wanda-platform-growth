@@ -64,6 +64,9 @@ function Auth({ children }: any) {
         router.push('/payment');
       }
     } else {
+      if(router.pathname === '/payment'){
+        router.push('/');
+      }
       return children
     }
   }
