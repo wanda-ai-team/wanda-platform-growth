@@ -15,6 +15,7 @@ import {
     Spinner,
     Select,
 } from "@chakra-ui/react";
+import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 
 type Contents = "context" | "url" | "text" | "file" | "gong";
@@ -27,17 +28,18 @@ const inputList: {
         //     value: "URL",
         // }, 
         {
-            key: "file",
-            value: "Video (File)",
-        },
-        {
             key: "gong",
             value: "Gong calls",
+        },
+        {
+            key: "file",
+            value: "Video (File)",
         },
     ];
 
 export default function Insights() {
     const inputFileRef = useRef<HTMLInputElement | null>(null);
+    const [gongConnected, setGongConnected] = useState<boolean>(false);
     const [outputSelectedI, setOutputSelectedI] = useState<Contents>(inputList[0].key);
     const [url, setUrl] = useState<string>("");
     const [loadingAPICall, setLoadingAPICall] = useState<boolean>(false);
@@ -62,14 +64,19 @@ export default function Insights() {
     async function getCalls() {
         setLoadingGongCalls(true);
         console.log('getCalls');
-        await fetch('/api/integrations/gong/getCallByDate')
+        await fetch('/api/integrations/gong/getCallByDateWithToken')
             .then(response => response.json())
             .then(data => {
                 console.log(data);
+                setGongConnected(true);
                 if (data.success) {
                     setGongCallsA(data.content);
                     setSelectedGongCall(data.content[0].id);
                 } else {
+                    if (data.content.includes("authorization")) {
+                        console.log('gong not connected');
+                        setGongConnected(false);
+                    }
                     console.log(data);
                 }
             })
@@ -187,23 +194,31 @@ export default function Insights() {
     function gongCalls() {
         return (
             <>
-                <Select
-                    sx={{ backgroundColor: "white" }}
-                    value={selectedGongCall}
-                    onChange={(e) => { setSelectedGongCall(e.target.value); }}
-                >
-                    {gongCallsA.map((call: any, index: number) => (
-                        <option key={index} value={call.id}>
-                            {call.title.substring(0, 75) + ' ...'}
-                        </option>
-                    ))}
-                </Select>
+                {!gongConnected ?
+                    <Text>
+                        Gong account is not connected. Please connect it <Link href="/profile"> here </Link>
+                    </Text>
+                    :
+                    <>
+                        <Select
+                            sx={{ backgroundColor: "white" }}
+                            value={selectedGongCall}
+                            onChange={(e) => { setSelectedGongCall(e.target.value); }}
+                        >
+                            {gongCallsA.map((call: any, index: number) => (
+                                <option key={index} value={call.id}>
+                                    {call.title.substring(0, 75) + ' ...'}
+                                </option>
+                            ))}
+                        </Select>
 
-                <Button colorScheme="purple" onClick={async (e) => {
-                    getCallInformation(selectedGongCall);
-                }} >
-                    Get Call Information
-                </Button>
+                        <Button colorScheme="purple" onClick={async (e) => {
+                            getCallInformation(selectedGongCall);
+                        }} >
+                            Get Call Information
+                        </Button>
+                    </>
+                }
             </>
         )
     }
@@ -265,7 +280,7 @@ export default function Insights() {
                                 loadingGongCalls ?
                                     <>
                                         <Text>
-                                            Loading calls.
+                                            Loading Gong calls.
                                         </Text>
                                         <Progress size='xs' isIndeterminate />
                                     </>
@@ -278,7 +293,7 @@ export default function Insights() {
                 </div>
 
                 <div className={styles.platform__container}>
-                    <Text fontWeight="semibold">Select Platform:</Text>
+                    {/* <Text fontWeight="semibold">Select Platform:</Text> */}
 
                 </div>
             </div>

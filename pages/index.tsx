@@ -14,13 +14,13 @@ export default function Home() {
             .then((res) => res.json())
             .then(async (data1) => {
                 if (data1.content[0].data.context) {
-                    push('/dashboard');
+                    push('/repurpose');
                 } else {
                     push('/onboarding');
                 }
                 setLoading(false);
             }).catch((err) => {
-                push('/dashboard');
+                push('/repurpose');
                 setLoading(false);
             });
 

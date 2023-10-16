@@ -9,9 +9,8 @@ import Header from '@/components/header'
 import { useRouter } from 'next/router'
 import 'react-toastify/dist/ReactToastify.css';
 import { ToastContainer } from "react-toastify";
-//Add custom appProp type then use union to add it
 type CustomAppProps = AppProps & {
-  Component: NextComponentType & { auth?: boolean } // add auth type
+  Component: NextComponentType & { auth?: boolean } 
 }
 
 export default function App({ Component, pageProps: { session, ...pageProps } }: CustomAppProps) {
@@ -24,17 +23,13 @@ export default function App({ Component, pageProps: { session, ...pageProps } }:
           {!router.pathname.includes('login') && !router.pathname.includes('payment') && router.pathname !== "/" &&
             <Header />
           }
-          {/* {false ? (
+          {Component.auth ? (
             <Auth>
               <Component {...pageProps} className='h-[94.5vh]' />
             </Auth>
           ) : (
             <Component {...pageProps} className='h-[94.5vh]' />
-          )} */}
-            <Component {...pageProps} className='h-[94.5vh]' />
-
-
-
+          )}
           <ToastContainer
             position="top-right"
             autoClose={5000}
@@ -47,7 +42,6 @@ export default function App({ Component, pageProps: { session, ...pageProps } }:
             pauseOnHover
             theme="light"
           />
-          {/* Same as */}
           <ToastContainer />
         </ChakraProvider>
       </SessionProvider>
@@ -56,11 +50,8 @@ export default function App({ Component, pageProps: { session, ...pageProps } }:
 }
 
 function Auth({ children }: any) {
-  // if `{required: true }` is supplied, `status` can only be "loading" or "authenticated"
   const router = useRouter();
-  console.log(router.pathname)
   const session = useSession({ required: true })
-  console.log(session)
   if (session && session.status === 'loading') {
     return (
       <div className="p bg-greyscale-grey-70 flex flex-row pt-24 pb-8 box-border items-center justify-center h-[94.5vh]">

@@ -8,10 +8,12 @@ async function updateDBEntry(
   conditionValue: any,
   numberOfConditions: any
 ) {
-  let collectionValue = db.collection(collection);
+  let collectionValue;
+  collectionValue = db.collection(collection);
 
   for (let i = 0; i < numberOfConditions; i++) {
-    collectionValue.where(
+    console.log(condition[i], conditionOperation[i], conditionValue[i]);
+    collectionValue = collectionValue.where(
       condition[i],
       conditionOperation[i],
       conditionValue[i]
@@ -30,6 +32,7 @@ async function updateDBEntry(
         return true;
       } else {
         querySnapshot.forEach(async function (doc) {
+          console.log(doc.id, " => ", doc.data());
           await db
             .collection(collection)
             .doc(doc.id)

@@ -10,6 +10,7 @@ import { width } from "@mui/system";
 import { useSession } from "next-auth/react";
 import { getContext } from "@/utils/api/context/contextCalls";
 import streamResponse from "@/utils/common/stream";
+import { Mixpanel } from "@/utils/mixpanel";
 
 
 export default function Dashboard() {
@@ -46,6 +47,7 @@ export default function Dashboard() {
   };
 
   const getIdeas = async () => {
+    Mixpanel.track("Generate Ideas", { platform: selectedPlatform })
     setLoading(true);
     fetch("/api/llm/gpt3/generateIdeas", {
       method: "POST",
@@ -75,9 +77,11 @@ export default function Dashboard() {
 
   useEffect(() => {
     // getIdeas()
+    Mixpanel.track("Loaded Create Page");
   }, []);
 
   const generateBlogIdea = async (chosenIdeaN: string) => {
+    Mixpanel.track("Generate content from idea", { platform: selectedPlatform, idea: chosenIdeaN })
     setLoadingC(true);
     setNumberOfTweets(1);
     setTwitterThreadTextPerTweet([""]);

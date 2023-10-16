@@ -38,6 +38,9 @@ import { useSession } from 'next-auth/react';
 import { useRouter } from "next/router";
 import toastDisplay from "@/utils/common/toast";
 import { put, type PutBlobResult } from '@vercel/blob';
+import { useChat } from 'ai/react';
+import streamResponse from "@/utils/common/stream";
+import { Mixpanel } from "@/utils/mixpanel";
 
 type Contents = "context" | "url" | "text" | "podcast";
 
@@ -110,8 +113,9 @@ export default function Repurpose() {
   const { getRootProps, getRadioProps } = useRadioGroup({
     name: "content",
     defaultValue: inputList[0].key,
-    onChange: (value: Contents) => setOutputSelectedI(value),
+    onChange: (value: Contents) => { setOutputSelectedI(value); Mixpanel.track("Changed Input Type", { "Input Type": value }) },
   });
+
 
   async function getStoredThreads(selectedProject: string) {
     return await fetch('/api/user/getProjectById', {
@@ -165,6 +169,8 @@ export default function Repurpose() {
   useEffect(() => {
     // getUser();
     getProjects();
+    
+    Mixpanel.track("Loaded Repurpose Page");
   }, []);
 
   async function test1() {
@@ -189,7 +195,7 @@ export default function Repurpose() {
     let websitescrape: {
       content?: string;
       context?: string;
-    }  = {};
+    } = {};
 
     if (landingPageURL !== "") {
       websitescrape = await fetch("/api/onboarding/scrape", {
@@ -213,9 +219,6 @@ export default function Repurpose() {
           }
         })
     }
-    console.log("summaryN")
-    console.log(websitescrape)
-
     const response = await fetch("/api/llm/gpt3/textToThreadStream", {
       method: "POST",
       headers: {
@@ -242,82 +245,9 @@ export default function Repurpose() {
     if (!data) {
       return;
     }
-    console.log("data")
-    console.log(data)
 
-    const reader = data.getReader();
-    const decoder = new TextDecoder();
-    let done = false;
-    let newTweet = false;
-    let index = 0;
-    let tweetThread: string[] = [];
+    await streamResponse(data, setConvertedText, canStopB, stopB, setNumberOfTweets, outputSelected, setTwitterThreadTextPerTweet);
 
-    while (!done) {
-      canStopB.current = true;
-      if (stopB.current) {
-        stopB.current = false;
-        canStopB.current = false;
-        break;
-      }
-      const { value, done: doneReading } = await reader.read();
-      done = doneReading;
-      const chunkValue = decoder.decode(value);
-
-      // if (chunkValue === "\n") {
-      //   if (newTweet) {
-      //     index++;
-      //     setNumberOfTweets(index);
-      //     newTweet = false;
-      //   } else {
-      //     newTweet = true;
-      //   }
-      // }
-
-      // if (chunkValue === "\n\n") {
-      //   index++;
-      //   setNumberOfTweets(index);
-      // }
-
-
-      console.log("chunkValue")
-      console.log(chunkValue)
-
-
-      if (outputSelected === "Twitter") {
-
-        if (/\n/.exec(chunkValue)) {
-          if (chunkValue === "\n" || chunkValue === "\n\n") {
-            console.log("chunkValue333")
-            index++;
-            setNumberOfTweets(index);
-          } else {
-            if (chunkValue.length > 5) {
-              chunkValue.split(/\n/).map((value) => {
-                console.log("value")
-                console.log(value)
-                if (value !== "") {
-                  tweetThread[index] = value;
-                  setTwitterThreadTextPerTweet([...tweetThread]);
-                  index++;
-                  setNumberOfTweets(index);
-                }
-              });
-            }
-          }
-          // Do something, the string contains a line break
-        } else {
-          if (tweetThread[index] !== undefined) {
-            tweetThread[index] = tweetThread[index] + chunkValue;
-          } else {
-            tweetThread[index] = chunkValue;
-          }
-          tweetThread[index] = tweetThread[index].replace("\n", "");
-          setTwitterThreadTextPerTweet([...tweetThread]);
-        }
-      } else {
-        setConvertedText((prev) => prev + chunkValue);
-      }
-    }
 
     canStopB.current = false;
     setLoadingConversion(false);
@@ -367,7 +297,6 @@ export default function Repurpose() {
 
   async function youtubeToThread(youtubeURLN: string, transB = true) {
     let subtitles = await getYoutubeSubtitles(youtubeURLN);
-    console.log("subtitles")
     if (subtitles !== "") {
       console.log("subtitles1")
       let stringF = "";
@@ -455,7 +384,7 @@ export default function Repurpose() {
     console.log("Ola")
     console.log(data)
     console.log(url)
-    
+
     const response = await getTextSummary(data, url);
     setTranscript(transc);
     console.log("Ola111aa")
@@ -591,6 +520,7 @@ export default function Repurpose() {
   };
 
   const handleConvert = async (landingPageURL = "") => {
+    Mixpanel.track("Clicked Convert Button", { "Input Type": outputSelectedI, "Output Type": outputSelected, "Output Type O": outputSelectedO, "Output Tone": outputSelectedT, "Output Writing Style": outputSelectedW, "Landing Page URL": landingPageURL })
     setConvertedText("");
     setTwitterThreadTextPerTweet([""]);
     setLoadingC(true);
@@ -986,7 +916,7 @@ export default function Repurpose() {
                     </VStack>
                     {outputSelected && (outputSelected !== 'Transcript' && outputSelected !== 'Summary') && (
                       <VStack align={"start"} w={"50%"}>
-                      <Text fontWeight="semibold">Output Type:</Text>
+                        <Text fontWeight="semibold">Output Type:</Text>
                         <Select
                           sx={{ backgroundColor: "white" }}
                           onChange={(e) => {
@@ -1160,7 +1090,9 @@ export default function Repurpose() {
 
               <div className={styles.texts}>
                 {outputSelected === "Twitter"
-                  ? getTwitterThread()
+                  ?
+                  <>
+                  </>
                   : outputSelected !== "" && (
                     <Textarea
                       value={convertedText}
@@ -1176,7 +1108,7 @@ export default function Repurpose() {
 
       <footer className={styles.generate__footer}>
         <Button colorScheme='purple' isDisabled={!canStopB.current} onClick={() => stopB.current = true}> Stop Generation </Button>
-        {outputSelected === "Twitter" && (
+        {/* {outputSelected === "Twitter" && (
           <Button
             colorScheme="purple"
             isDisabled={twitterThreadTextPerTweet.length <= 1}
@@ -1184,7 +1116,7 @@ export default function Repurpose() {
           >
             {postingThread ? <Spinner /> : `Publish on ${outputSelected}`}
           </Button>
-        )}
+        )} */}
 
       </footer>
       <ToastContainer

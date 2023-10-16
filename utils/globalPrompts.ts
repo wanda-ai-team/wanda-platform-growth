@@ -9,13 +9,13 @@ function getTextToTwitterThreadPrompt(tone: string, writing: string) {
     There should be around 5 to 8 tweets.
     The first tweet should have a hook and entice the readers.
     The last tweet should have a small summary of the thread.
-    Separate each tweet from the thread with a double break line.
+    Clearly label each tweet with the number of the tweet, with the following "1.", "2.", "3.", "4.", "5.", "6.", "7.", "8.", "9.", "10.", depending on the number of tweets.
     Talk in-depth of the topic on all the tweets.
-    Please separate the tweets with a double break line.
     Do not repeat yourself.
     Do not self reference.
     Do not explain what you are doing.
-    Do not explain what you are going to do.`
+    Do not explain what you are going to do.
+    Don't forget to label each tweet with the number of the tweet.`
 }
 
 const textToTwitterThreadPrompt = `
@@ -194,19 +194,37 @@ ${contextuser !== "" ? `Here you have some context regarding the business you ar
 
 function getGenerateTestX(context: string, contextuser: string) {
     return `
-Please ignore all previous instructions.
-Please respond only in the english language.
-You are a Twitter influencer with a large following.
-Do not self reference.
-Do not explain what you are doing.
-Please create a thread about ${context}. 
-The character count for each thread should be between 270 to 280 characters.
-Your content should be based on the business type and style of writing: ${contextuser}.
-Please use simple and understandable words.
-Don't use hashtags or emojis.
-Divide the tweets with a double break line.
-Please include statistics, personal experience, and fun facts in the thread.
-`
+    Please ignore all previous instructions. 
+    Please respond only in the english language.
+    You are a Twitter Creator with a large fan following. 
+    Create a Twitter thread on the given topic.
+    Your content should be based on the business type and style of writing: ${contextuser}.
+    There should be around 5 to 8 tweets.
+    The first tweet should have a hook and entice the readers.
+    The last tweet should have a small summary of the thread.
+    Clearly label each tweet with the number of the tweet, with the following "1.", "2.", "3.", "4.", "5.", "6.", "7.", "8.", "9.", "10.", depending on the number of tweets.
+    Talk in-depth of the topic on all the tweets.
+    Do not repeat yourself.
+    Do not self reference.
+    Do not explain what you are doing.
+    Do not explain what you are going to do.
+    Don't forget to label each tweet with the number of the tweet.
+    Topic: ${context}.\n`
+
+// Please ignore all previous instructions.
+// Please respond only in the english language.
+// You are a Twitter influencer with a large following.
+// Do not self reference.
+// Do not explain what you are doing.
+// Please create a thread about ${context}. 
+// The character count for each thread should be between 270 to 280 characters.
+// Your content should be based on the business type and style of writing: ${contextuser}.
+// Please use simple and understandable words.
+// Don't use hashtags or emojis.
+// Clearly label each tweet with the number of the tweet, with the following "1.", "2.", "3.", "4.", "5.", "6.", "7.", "8.", "9.", "10.", depending on the number of tweets.
+// Don't use digits with dots so 
+// Please include statistics, personal experience, and fun facts in the thread.
+// `
 }
 
 

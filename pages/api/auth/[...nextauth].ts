@@ -9,6 +9,7 @@ import { v4 as uuidv4 } from "uuid";
 import { updateUserInfo } from "@/utils/api/db/updateUser";
 import { getUser } from "@/utils/api/db/getUser";
 import Airtable from "airtable";
+import { Mixpanel } from "@/utils/mixpanel";
 
 export const authOptions: NextAuthOptions = {
   pages: {
@@ -91,6 +92,7 @@ export const authOptions: NextAuthOptions = {
 
   events: {
     signIn: async (message) => {
+      Mixpanel.track("User SignIn", { "email":  message.user.email !== null ?  message.user.email as string: "" });
       if (message.account !== null) {
         // updateDBEntry("accounts", message.account, ['providerAccountId'], ['=='], [message.account.providerAccountId], 1);
 
@@ -123,6 +125,7 @@ export const authOptions: NextAuthOptions = {
     },
 
     createUser: async ({ user }) => {
+      Mixpanel.track("User Created", { "email": user.email !== null ? user.email as string: "" });
 
       const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string, {
         apiVersion: "2022-11-15",
