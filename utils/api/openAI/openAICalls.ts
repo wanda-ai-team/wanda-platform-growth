@@ -45,18 +45,13 @@ async function getOpenAIAnswer(context: string, platform: string, streamB = fals
 
         console.log({ userContent })
         const payload = {
-            model: "gpt-3.5-turbo",
+            model: "gpt-4",
             temperature: 0.7,
-            max_tokens: 1024,
             top_p: 1,
             frequency_penalty: 0,
             presence_penalty: 0,
-            messages: [{
-                role: "system", content: systemContent
-            }, {
-                role: "user", content: userContent
-            }],
-            stream: streamB,
+            messages: [{ role: "user", content: userContent }],
+            stream: true,
         };
         const stream = await OpenAIStream(payload);
         return new NextResponse(stream);

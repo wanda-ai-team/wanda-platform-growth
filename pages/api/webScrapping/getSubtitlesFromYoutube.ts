@@ -8,8 +8,14 @@ export default async function handler(
     res: NextApiResponse
 ) {
     let videoID1 = (<string>req.query.videoID);
-    videoID1 = videoID1.replace('https://www.youtube.com/watch?v=', '');
-    videoID1 = videoID1.replace('watch?v=', '');
+    if (videoID1.includes("watch")) {
+        videoID1 = videoID1.replace('https://www.youtube.com/watch?v=', '');
+        videoID1 = videoID1.replace('watch?v=', '');
+    } else {
+        if (videoID1.includes("shorts")) {
+            videoID1 = videoID1.replace('https://www.youtube.com/shorts/', '');
+        }
+    }
     try {
         let subtitlesWithPrompt = await YoutubeTranscript.fetchTranscript(videoID1);
         subtitlesWithPrompt.forEach((element: any) => { element.offser = element.offset / 1000; });
@@ -34,7 +40,6 @@ export default async function handler(
             success: true,
         });
     } catch (e: any) {
-        console.log(e);
         return res.status(400).json({
             subtitles: "",
             success: false,

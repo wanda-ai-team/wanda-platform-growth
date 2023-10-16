@@ -31,6 +31,9 @@ export default async function handler(
     apiVersion: "2022-11-15",
   });
 
+  console.log("event.type");
+  console.log(req.query);
+
   // This object will contain the user's data if the user is signed in
   const session = await getSession({ req });
   // Error handling

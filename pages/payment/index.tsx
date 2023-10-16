@@ -2,16 +2,12 @@ import { Tabs, TabList, Tab, Tooltip, TabPanels, TabPanel, SimpleGrid } from "@c
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import PriceBlock from "../../components/blocks/priceBlock";
-import { InlineWidget, PopupButton } from "react-calendly";
-import { useSession } from "next-auth/react";
 
 export default function Payment() {
     const [loading, setLoading] = useState(true);
     const [loading1, setLoading1] = useState(false);
     const [loading2, setLoading2] = useState(false);
     const router = useRouter();
-    const { data: session, status, update } = useSession();
-    // const session = useSession();
 
     async function getUser() {
         await fetch('/api/user/getUser')
@@ -34,7 +30,7 @@ export default function Payment() {
     }, []);
 
     function buyPro(productType: string) {
-        setLoading1(true);
+        setLoading1(false);
         fetch('/api/stripe/create-checkout-session?productId=' + productType)
             .then((res) => res.json())
             .then((data) => {
@@ -135,5 +131,3 @@ export default function Payment() {
         </>
     )
 }
-
-Payment.auth = true;

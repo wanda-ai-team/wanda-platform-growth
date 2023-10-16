@@ -34,13 +34,20 @@ const Header = () => {
 
       {!router.pathname.includes('onboarding') && !router.pathname.includes('login') && (
         <div style={{ display: 'flex', gap: '12px', verticalAlign: 'middle' }}>
-          <Button
+          {/* <Button
             size='sm'
             colorScheme="purple"
             isDisabled={true}
             title="Coming Soon"
           >
             Insights
+          </Button> */}
+          <Button
+            size='sm'
+            colorScheme="purple"
+            onClick={() => router.push('/repurpose')}
+          >
+            Repurpose
           </Button>
           <Button
             size='sm'
@@ -48,13 +55,6 @@ const Header = () => {
             onClick={() => router.push('/dashboard')}
           >
             Create
-          </Button>
-          <Button
-            size='sm'
-            colorScheme="purple"
-            onClick={() => router.push('/repurpose')}
-          >
-            Repurpose
           </Button>
         </div>
       )}

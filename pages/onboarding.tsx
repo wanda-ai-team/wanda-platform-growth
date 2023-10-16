@@ -19,6 +19,7 @@ import toastDisplay from "@/utils/common/toast";
 import sleep from "@/utils/common/utils";
 import { embedText } from "@/utils/api/backend/backendCalls";
 import { useSession } from "next-auth/react";
+import { Mixpanel } from "@/utils/mixpanel";
 
 interface OnboardingProps { }
 
@@ -635,6 +636,8 @@ const Step3: FunctionComponent<Step3Props> = ({
 
   useEffect(() => {
     changer()
+    
+    Mixpanel.track("Loaded Onboarding Page");
   });
 
   return (
