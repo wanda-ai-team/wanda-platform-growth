@@ -19,6 +19,7 @@ export default function StripeSession() {
         };
         
         const a = await update(newSession);
+        console.log(a)
         router.push('/');
     }
 

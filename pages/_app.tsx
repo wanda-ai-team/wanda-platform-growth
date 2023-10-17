@@ -10,11 +10,15 @@ import { useRouter } from 'next/router'
 import 'react-toastify/dist/ReactToastify.css';
 import { ToastContainer } from "react-toastify";
 type CustomAppProps = AppProps & {
-  Component: NextComponentType & { auth?: boolean }
-}
+  Component: NextComponentType & { auth?: boolean, user?: boolean }
+} & { userIsActive?: boolean }
 
-export default function App({ Component, pageProps: { session, ...pageProps } }: CustomAppProps) {
+
+export default function App({ Component, pageProps: { session, ...pageProps }, userIsActive }: CustomAppProps) {
   const router = useRouter();
+  console.log("pageProps")
+  console.log(userIsActive)
+  console.log(Component)
 
   return (
     <Provider store={store}>
@@ -59,17 +63,31 @@ function Auth({ children }: any) {
     );
   }
   else {
-    if (session && session.data && session.data.user.isActive === false) {
+    // if (session && session.data && session.data.user.isActive === false) {
 
-      if (router.pathname !== '/payment') {
-        router.push('/payment');
-      }
-    } else {
-      if (router.pathname === '/payment') {
-        router.push('/');
-      }
-      return children
-    }
+    //   if (router.pathname !== '/payment') {
+    //     router.push('/');
+    //   }
+    // } else {
+    //   if (router.pathname === '/payment') {
+    //     router.push('/');
+    //   }
+    //   return children
+    // }
   }
 
+}
+
+export async function getServerSideProps() {
+  const session = useSession({ required: true })
+  let userIsActive = false;
+
+  if (session && session.data && session.data.user.isActive === false) {
+    userIsActive = false;
+  } else {
+    userIsActive = true;
+  }
+  console.log("userIsActive")
+  console.log(userIsActive)
+  return { props: { userIsActive } };
 }
