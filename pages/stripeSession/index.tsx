@@ -10,6 +10,7 @@ export default function StripeSession() {
     const router = useRouter();
 
     async function updateSession() {
+        console.log(session)
         const newSession = {
             ...session,
             user: {

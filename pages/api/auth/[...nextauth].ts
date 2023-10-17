@@ -54,6 +54,37 @@ export const authOptions: NextAuthOptions = {
         : process.env.FIREBASE_APP_ID as string,
   }),
   callbacks: {
+
+    jwt: async ({ token, trigger, session, user }) => {
+      if (trigger === "update") {
+        token.isActive = session?.user.isActive;
+        console.log(session)
+        console.log("update");
+      }
+      if (user) {
+        token.image = user.image;
+        token.uid = user.id;
+        if (user.isActive === false) {
+          const dbUser = await getUser("email", "==", user.email);
+          console.log(dbUser);
+          token.isActive = dbUser!.isActive;
+        } else {
+
+          token.isActive = user.isActive;
+        }
+        if (user.stripeCustomerId === undefined) {
+          const dbUser = await getUser("email", "==", user.email);
+          if (dbUser !== null && !dbUser.stripeCustomerId) {
+            token.stripeCustomerId = dbUser.stripeCustomerId;
+          }
+        } else {
+          token.stripeCustomerId = user.stripeCustomerId;
+        }
+      }
+      return token;
+    },
+
+
     session: async ({ session, token }) => {
       if (session?.user) {
         session.user.id = token.uid as string;
@@ -71,32 +102,10 @@ export const authOptions: NextAuthOptions = {
       return session;
     },
 
-    jwt: async ({ token, trigger, session, user }) => {
-      if (trigger === "update") {
-        token.isActive = session?.user.isActive;
-        console.log(session)
-        console.log("update");
-      }
-      if (user) {
-        token.image = user.image;
-        token.uid = user.id;
-        token.isActive = user.isActive;
-        if (user.stripeCustomerId === undefined) {
-          const dbUser = await getUser("email", "==", user.email);
-          if (dbUser !== null && !dbUser.stripeCustomerId) {
-            token.stripeCustomerId = dbUser.stripeCustomerId;
-          }
-        } else {
-          token.stripeCustomerId = user.stripeCustomerId;
-        }
-      }
-      return token;
-    },
   },
-
   events: {
     signIn: async (message) => {
-      Mixpanel.track("User SignIn", { "email":  message.user.email !== null ?  message.user.email as string: "" });
+      Mixpanel.track("User SignIn", { "email": message.user.email !== null ? message.user.email as string : "" });
       if (message.account !== null) {
         // updateDBEntry("accounts", message.account, ['providerAccountId'], ['=='], [message.account.providerAccountId], 1);
 
@@ -129,7 +138,7 @@ export const authOptions: NextAuthOptions = {
     },
 
     createUser: async ({ user }) => {
-      Mixpanel.track("User Created", { "email": user.email !== null ? user.email as string: "" });
+      Mixpanel.track("User Created", { "email": user.email !== null ? user.email as string : "" });
 
       const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string, {
         apiVersion: "2022-11-15",

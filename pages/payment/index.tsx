@@ -9,10 +9,6 @@ export default function Payment() {
     const [loading1, setLoading1] = useState(false);
     const [loading2, setLoading2] = useState(false);
     const router = useRouter();
-    const { data: session, status, update } = useSession();
-
-
-
 
     async function getUser() {
         await fetch('/api/user/getUser')
