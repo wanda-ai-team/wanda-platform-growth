@@ -3,6 +3,7 @@ const documentCollection = "documents";
 const automationCollection = "autoRepos";
 const customPromptsCollection = "customPrompts";
 
+
 const toneList = [
     "Default",
     "Authoritative",
@@ -75,11 +76,17 @@ const writingStyles = [
 
 const outputsWithPlatform = [
     { platform: 'Twitter', outputs: ['Thread'] },
-    { platform: 'Instagram', outputs: ['Carousel', 'Post'] },
+    // { platform: 'Instagram', outputs: ['Carousel', 'Post'] },
+    { platform: 'Landing Page', outputs: ['Copy']}, 
     { platform: 'Linkedin', outputs: ['Post'] },
     { platform: 'Blog', outputs: ['Post', 'Article'] },
     { platform: 'Transcript', outputs: ['Transcript'] },
     { platform: 'Summary', outputs: ['Summary'] }
+];
+
+const platformsToGenerateIdeas = [
+    "Twitter",
+    "Blog",
 ];
 
 export {
@@ -88,5 +95,6 @@ export {
     customPromptsCollection,
     toneList,
     writingStyles,
-    outputsWithPlatform
+    outputsWithPlatform,
+    platformsToGenerateIdeas
 }

@@ -40,7 +40,10 @@ export default async function handler(
     // Handle the event
     switch (event.type) {
       // Handle successful subscription creation
-      case "customer.subscription.created": {
+      case "customer.subscription.created": 
+      case "invoice.payment_succeeded": {
+        console.log("customer.subscription.created");
+        console.log(event.data.object);
         const subscription = event.data.object as Stripe.Subscription;
 
         const bodyN = {

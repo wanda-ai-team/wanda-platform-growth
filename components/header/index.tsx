@@ -13,10 +13,12 @@ import styles from "@/styles/Header.module.css";
 import { signOut, useSession } from "next-auth/react";
 import { PopupModal } from "react-calendly";
 import { useState } from "react";
+import { useRouter } from "next/router";
 
 const Header = () => {
   const { data: session } = useSession();
   const [isOpen, setIsOpen] = useState(false);
+  const router = useRouter();
 
   return (
     <header className={styles.navbar__container}>
@@ -30,17 +32,44 @@ const Header = () => {
         />
       </Link>
 
+      {!router.pathname.includes('onboarding') && !router.pathname.includes('login') && (
+        <div style={{ display: 'flex', gap: '12px', verticalAlign: 'middle' }}>
+          {/* <Button
+            size='sm'
+            colorScheme="purple"
+            isDisabled={true}
+            title="Coming Soon"
+          >
+            Insights
+          </Button> */}
+          <Button
+            size='sm'
+            colorScheme="purple"
+            onClick={() => router.push('/repurpose')}
+          >
+            Repurpose
+          </Button>
+          <Button
+            size='sm'
+            colorScheme="purple"
+            onClick={() => router.push('/dashboard')}
+          >
+            Create
+          </Button>
+        </div>
+      )}
       <div style={{ display: 'flex', gap: '12px', verticalAlign: 'middle' }}>
         <Menu>
           {() => (
             <>
-              <Button
-                size='sm'
-                colorScheme="purple"
-                onClick={() => setIsOpen(true)}
-              >
-                Feedback
-              </Button>
+              <a target="_blank" href="https://app.frill.co/embed/widget/39ae3c1b-25d9-4212-8e67-fc56fb451206">
+                <Button
+                  size='sm'
+                  colorScheme="purple"
+                >
+                  Feedback
+                </Button>
+              </a>
               <MenuButton>
                 {session?.user?.name && (
                   <button className={styles.dropdown__trigger}>
@@ -51,15 +80,16 @@ const Header = () => {
                         borderRadius: "10px",
                       }}
                     />
-                    <Text fontSize="sm" fontWeight="semibold">
-                      {session.user.name}
-                    </Text>
+                    {session.user.name}
                   </button>
                 )}
               </MenuButton>
               <MenuList>
+                <MenuItem
+                  onClick={() => router.push('/profile')}
+                >Settings</MenuItem>
 
-                <MenuItem ><Link href="https://billing.stripe.com/p/login/test_eVa02A8e6glT3QI5kk">Subscription</Link></MenuItem>
+                {/* <MenuItem ><Link href="https://billing.stripe.com/p/login/test_eVa02A8e6glT3QI5kk">Subscription</Link></MenuItem> */}
                 <MenuItem onClick={() => signOut()}>Logout</MenuItem>
               </MenuList>
             </>

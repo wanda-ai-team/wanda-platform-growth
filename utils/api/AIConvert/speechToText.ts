@@ -1,6 +1,6 @@
 async function speechToText(videoContent: any) {
     console.log("speechToText");
-    return await fetch('/api/llm/whisper/speechToText',
+    return await fetch('/api/llm/whisper/speechToTextAAI',
         {
             method: 'POST',
             body: JSON.stringify({

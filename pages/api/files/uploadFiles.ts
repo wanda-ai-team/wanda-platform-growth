@@ -1,17 +1,14 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
 import type { NextApiRequest, NextApiResponse } from 'next'
-import fetch, {
-    FormData,
-    File,
-} from 'node-fetch'
 import fs from 'fs';
 import formidable from "formidable";
 import mime from 'mime';
+import e from 'express';
 
 export const config = {
     api: {
         bodyParser: false,
-        sizeLimit: '50mb',
+        sizeLimit: '2000mb',
     },
 };
 
@@ -27,12 +24,12 @@ export default async function handler(
         resultBody = { status: 'ok', message: 'Files were uploaded successfully' };
 
     const files = await new Promise<ProcessedFiles | undefined>((resolve, reject) => {
-        const customOptions = {maxFileSize: 300 * 1024 * 1024 };
+        const customOptions = { maxFileSize: 300 * 1024 * 1024 };
 
         const form = new formidable.IncomingForm(customOptions);
         const files: ProcessedFiles = [];
         console.log("ola")
-        form.on('file',  (field, file: any) => {
+        form.on('file', (field, file: any) => {
             files.push([field, file]);
         })
         form.on('end', () => resolve(files));
@@ -68,32 +65,57 @@ export default async function handler(
         // console.log(data.fields)
         let rawData = fs.readFileSync((files[0][1] as any).filepath)
         let buff = Buffer.from(rawData); // Node.js Buffer
-        buff = buff.subarray(0, 240000)
-        console.log(buff)
+        let count = 1;
+        let data2 = "";
+        let value = buff.length / 25000000;
+        console.log(value)
 
-        var audioBlob = new Blob([buff], { type: 'audio/mp3' });
-        console.log(audioBlob)
+        if (value > 1) {
+            do {
+                let buffN = buff.subarray(count * 25000000, ((value - count >= 1) ? count + 1 : (value)) * 25000000)
+                console.log(count * 25000000)
+                console.log(((value - count >= 1) ? count + 1 : (value)) * 25000000)
+                const httpbin = 'https://api.openai.com/v1/audio/transcriptions'
+                const formData = new FormData()
+                const formData1 = new Headers()
+
+                const abc = await new File([buffN], 'abc.mp3', { type: 'audio/mp3' });
+                console.log(abc)
+
+                formData1.set('Authorization', "Bearer " + process.env.OPENAI_API_KEY);
+                formData.set('model', 'whisper-1');
+                formData.set('file', abc);
+
+                const response = await fetch(httpbin, { method: 'POST', body: formData, headers: formData1 });
+                const resW = await response.json();
+                data2 += (resW as { text: '' }).text;
+                count++;
+                console.log(resW)
+            } while (value > count)
+        } else {
+            let buffN = buff.subarray(0, (value) * 25000000)
+
+            const httpbin = 'https://api.openai.com/v1/audio/transcriptions'
+            const formData = new FormData()
+            const formData1 = new Headers()
+
+            const abc = new File([buffN], 'abc.mp3', { type: 'audio/mp3' });
+
+            formData1.set('Authorization', "Bearer " + process.env.OPENAI_API_KEY);
+            formData.set('model', 'whisper-1');
+            formData.set('file', abc);
+
+            const response = await fetch(httpbin, { method: 'POST', body: formData, headers: formData1 });
+            const resW = await response.json();
+            data2 += (resW as { text: '' }).text;
+        }
+
 
         // const fileB = data.files..on('finish', function () {
         //     //get a blob you can do whatever you like with
         //     return stream.toBlob('application/pdf');
         //    });
 
-        let data2 = "";
-        const httpbin = 'https://api.openai.com/v1/audio/transcriptions'
-        const formData = new FormData()
-        const formData1 = new Headers()
-
-        const abc = new File([buff], 'abc.mp3', { type: 'audio/mp3' });
-
-        formData1.set('Authorization', "Bearer " + process.env.OPENAI_API_KEY);
-        formData.set('model', 'whisper-1');
-        formData.set('file', abc);
-
-        const response = await fetch(httpbin, { method: 'POST', body: formData, headers: formData1 });
-        const resW = await response.json();
-        console.log(resW);
-        data2 = (resW as { text: '' }).text;
 
         if (data2 === undefined || data2 === null || data2 === "") {
             return res.status(400).json({

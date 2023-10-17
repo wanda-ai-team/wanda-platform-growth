@@ -29,16 +29,15 @@ export default async function handler(
             url = url.replace("https://", "");
         }
         /** Load the summarization chain. */
-        let resSummarization;
         console.log("Loading summarization chain...");
         try {
             let summary = [];
             if (newF) {
-
                 if (url !== "null") {
                     summary = await getDBEntry("summaries", ["url"], ["=="], [url], 1);
-                }
-                if (summary.length > 0) {
+                } 
+
+                if (summary.length > 0 && summary[0].data.summary !== "Error") {
                     return res.status(200).json({
                         name: "",
                         content: summary[0].data.summary,
@@ -55,7 +54,6 @@ export default async function handler(
 
             }
             else {
-                console.log(text)
                 createDBEntry("summaries", { url: url, summary: text })
 
                 return res.status(200).json({

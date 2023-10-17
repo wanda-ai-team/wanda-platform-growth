@@ -1,5 +1,7 @@
 import NextAuth, { NextAuthOptions } from "next-auth";
 import TwitterProvider from "next-auth/providers/twitter";
+import GoogleProvider from "next-auth/providers/google";
+
 import { FirestoreAdapter } from "@next-auth/firebase-adapter";
 import updateDBEntry from "@/utils/api/db/updateDBEntry";
 import Stripe from "stripe";
@@ -7,21 +9,22 @@ import { v4 as uuidv4 } from "uuid";
 import { updateUserInfo } from "@/utils/api/db/updateUser";
 import { getUser } from "@/utils/api/db/getUser";
 import Airtable from "airtable";
+import { Mixpanel } from "@/utils/mixpanel";
 
 export const authOptions: NextAuthOptions = {
   pages: {
     signIn: "/login",
   },
   providers: [
-    TwitterProvider({
-      clientId: process.env.TWITTER_CLIENT_ID as string,
-      clientSecret: process.env.TWITTER_CLIENT_SECRET as string,
+    GoogleProvider({
+      clientId: process.env.GOOGLE_ID as string,
+      clientSecret: process.env.GOOGLE_SECRET as string,
       allowDangerousEmailAccountLinking: true,
       authorization: {
         params: {
-          scope: "users.read tweet.read tweet.write offline.access like.read list.read",
-        },
-      },
+          scope: "https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/drive"
+        }
+      }
     }),
   ],
   adapter: FirestoreAdapter({
@@ -50,8 +53,38 @@ export const authOptions: NextAuthOptions = {
         ? ""
         : process.env.FIREBASE_APP_ID as string,
   }),
-
   callbacks: {
+
+    jwt: async ({ token, trigger, session, user }) => {
+      if (trigger === "update") {
+        token.isActive = session?.user.isActive;
+        console.log(session)
+        console.log("update");
+      }
+      if (user) {
+        token.image = user.image;
+        token.uid = user.id;
+        if (user.isActive === false) {
+          const dbUser = await getUser("email", "==", user.email);
+          console.log(dbUser);
+          token.isActive = dbUser!.isActive;
+        } else {
+
+          token.isActive = user.isActive;
+        }
+        if (user.stripeCustomerId === undefined) {
+          const dbUser = await getUser("email", "==", user.email);
+          if (dbUser !== null && !dbUser.stripeCustomerId) {
+            token.stripeCustomerId = dbUser.stripeCustomerId;
+          }
+        } else {
+          token.stripeCustomerId = user.stripeCustomerId;
+        }
+      }
+      return token;
+    },
+
+
     session: async ({ session, token }) => {
       if (session?.user) {
         session.user.id = token.uid as string;
@@ -69,34 +102,15 @@ export const authOptions: NextAuthOptions = {
       return session;
     },
 
-    jwt: async ({ user, token }) => {
-      if (user) {
-        token.image = user.image;
-        token.uid = user.id;
-        token.isActive = user.isActive;
-        if (user.stripeCustomerId === undefined) {
-
-          const dbUser = await getUser("email", "==", user.email);
-          if (dbUser !== null && !dbUser.stripeCustomerId) {
-            token.stripeCustomerId = dbUser.stripeCustomerId;
-          }
-        } else {
-          token.stripeCustomerId = user.stripeCustomerId;
-        }
-      }
-      return token;
-    },
   },
-
   events: {
     signIn: async (message) => {
-      console.log(message)
+      Mixpanel.track("User SignIn", { "email": message.user.email !== null ? message.user.email as string : "" });
       if (message.account !== null) {
         // updateDBEntry("accounts", message.account, ['providerAccountId'], ['=='], [message.account.providerAccountId], 1);
 
         const dbUser = await getUser("email", "==", message.user.email);
         if (dbUser !== null && !dbUser.stripeCustomerId) {
-          console.log("no stripe customer id");
           const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string, {
             apiVersion: "2022-11-15",
           });
@@ -116,7 +130,6 @@ export const authOptions: NextAuthOptions = {
                   uuidv4(),
               };
               await updateUserInfo(bodyN, "email", "==", message.user.email!);
-              console.log("olaaa")
             });
         }
 
@@ -125,14 +138,14 @@ export const authOptions: NextAuthOptions = {
     },
 
     createUser: async ({ user }) => {
-      console.log(user)
+      Mixpanel.track("User Created", { "email": user.email !== null ? user.email as string : "" });
 
       const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string, {
         apiVersion: "2022-11-15",
       });
-      var base = new Airtable({ apiKey: process.env.AIRTABLE_API_KEY }).base('appyIJz2lXYjsZvwp');
+      var base = new Airtable({ apiKey: process.env.AIRTABLE_API_KEY }).base('appHgBLNKyJoWyAek');
 
-      base('Table 7').create([
+      base('users').create([
         {
           "fields": {
             "Name": user.name !== null ? user.name as string : "null",
@@ -145,7 +158,6 @@ export const authOptions: NextAuthOptions = {
           return;
         }
         records.forEach(function (record: any) {
-          console.log(record.getId());
         });
       });
 

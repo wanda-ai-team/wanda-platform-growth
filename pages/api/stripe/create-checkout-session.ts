@@ -31,6 +31,9 @@ export default async function handler(
     apiVersion: "2022-11-15",
   });
 
+  console.log("event.type");
+  console.log(req.query);
+
   // This object will contain the user's data if the user is signed in
   const session = await getSession({ req });
   // Error handling
@@ -90,7 +93,7 @@ export default async function handler(
     allow_promotion_codes: true,
     // {CHECKOUT_SESSION_ID} is a string literal which the Stripe SDK will replace; do not manually change it or replace it with a variable!
     success_url:
-      (process.env.ENV_URL as string) + `/?session_id={CHECKOUT_SESSION_ID}`,
+      (process.env.ENV_URL as string) + `/stripeSession/?session_id={CHECKOUT_SESSION_ID}`,
     cancel_url: (process.env.ENV_URL as string) + "/payment",
     subscription_data: subscription_data as any,
     payment_method_collection:

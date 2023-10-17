@@ -1,33 +1,35 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
+import axios from "axios";
+
 import { OpenAIStream } from "./openAIStream";
-import { getTextToBlogPostPrompt, getTextToInstagramCarrouselTextPrompt, getTextToLinkedInPostPrompt, getTextToTwitterThreadPrompt, textToTwitterThreadPrompt } from "@/utils/globalPrompts";
+import { getGenerateLandingPage, getTextToBlogPostPrompt, getTextToInstagramCarrouselTextPrompt, getTextToLinkedInPostPrompt, getTextToTwitterThreadPrompt, textToTwitterThreadPrompt } from "@/utils/globalPrompts";
+import { load } from "cheerio";
 
 
 export const config = {
     runtime: "edge",
 };
 
-
-
 const handler = async (req: Request): Promise<Response> => {
-    let { text, output, outputO, isText, toneStyle, writingStyle } = (await req.json()) as {
+    let { text, output, outputO, isText, toneStyle, writingStyle, landingPageContext, landingPageContent } = (await req.json()) as {
         text?: string;
         output?: string;
         outputO?: string;
         isText?: boolean;
         toneStyle?: string;
         writingStyle?: string;
+        landingPageContext?: string;
+        landingPageContent?: string;
     };
-    if (!output || !text || !outputO || isText === undefined || toneStyle === undefined || writingStyle === undefined) {
+    if (!output || !text || !outputO || isText === undefined || toneStyle === undefined || writingStyle === undefined || landingPageContent === undefined || landingPageContext === undefined) {
+        console.log("error");
+        console.log(output, text, outputO, isText, toneStyle, writingStyle, landingPageContent, landingPageContext);
         return new Response('Bad Request', { status: 400 });
     }
     try {
         output = output.toLowerCase();
         outputO = outputO.toLowerCase();
         let basePromptPrefix = "";
-        console.log(text)
-        console.log(output)
-        console.log(outputO)
         switch (output) {
             case "twitter":
                 if (outputO === "thread") {
@@ -54,7 +56,6 @@ Instagram Carousel:\n`;
                 break;
             case "linkedin":
                 if (outputO === "post") {
-                    console.log("linkedin post");
                     basePromptPrefix =
                         getTextToLinkedInPostPrompt(toneStyle, writingStyle) + `
 Summary: ${text}\n
@@ -74,23 +75,29 @@ Blog Post:\n`;
 Summary: ${text}\n
 Blog Post:\n`;
                 }
-                console.log(basePromptPrefix);
+                break;
+            case "landing page":
+                    basePromptPrefix =
+                        getGenerateLandingPage(landingPageContent, landingPageContext, text);
+                
                 break;
             default:
                 break;
         }
 
+
         const payload = {
             model: "gpt-4",
-            // model: "text-davinci-003",
-            // prompt: basePromptPrefix,
-            messages: [{ role: "user", content: basePromptPrefix }],
             temperature: 0.7,
+            top_p: 1,
+            frequency_penalty: 0,
+            presence_penalty: 0,
+            messages: [{ role: "user", content: basePromptPrefix }],
             stream: true,
-            n: 1,
         };
 
         const stream = await OpenAIStream(payload);
+        console.log(stream);
         return new Response(stream);
         // return res.status(200).send(stream);
         // // return new Response(stream).status(200);

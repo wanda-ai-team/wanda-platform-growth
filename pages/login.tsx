@@ -62,7 +62,7 @@ export default function Login({ providers }: InferGetServerSidePropsType<typeof 
             <div>
               {Object.values(providers).map((provider: any) => (
                 <div key={provider.name}>
-                  <button className={styles.providerButton} onClick={() => popupCenter("/twitter-signin", "Sample Sign In")}>
+                  <button className={styles.providerButton} onClick={() => popupCenter("/google-signin", "Sample Sign In")}>
                     {provider.name === 'Google' &&
                       <Image
                         className="pr-1 align-middle"
@@ -71,7 +71,7 @@ export default function Login({ providers }: InferGetServerSidePropsType<typeof 
                         height={24}
                         src="/assets/icons/googleLogin.png"
                       />}
-                    Sign in with Twitter
+                    Sign in
                   </button>
                 </div>
               ))}

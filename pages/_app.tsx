@@ -4,22 +4,47 @@ import { ChakraProvider } from '@chakra-ui/react'
 import { Provider } from 'react-redux'
 import { store } from '@/utils/api/autogpt/redux/store'
 import { SessionProvider, useSession } from "next-auth/react"
-import { useRouter } from 'next/router'
 import { NextComponentType } from 'next'
-import getDBEntry from '@/utils/api/db/getDBEntry'
-import { getUser } from '@/utils/api/db/getUser'
-
-//Add custom appProp type then use union to add it
+import Header from '@/components/header'
+import { useRouter } from 'next/router'
+import 'react-toastify/dist/ReactToastify.css';
+import { ToastContainer } from "react-toastify";
 type CustomAppProps = AppProps & {
-  Component: NextComponentType & { auth?: boolean } // add auth type
+  Component: NextComponentType & { auth?: boolean }
 }
 
+
 export default function App({ Component, pageProps: { session, ...pageProps } }: CustomAppProps) {
+  const router = useRouter();
+
+
   return (
     <Provider store={store}>
       <SessionProvider session={session} >
         <ChakraProvider>
-          <Component {...pageProps} />
+          {!router.pathname.includes('login') && !router.pathname.includes('payment') && router.pathname !== "/" &&
+            <Header />
+          }
+          {Component.auth ? (
+            <Auth>
+              <Component {...pageProps} className='h-[94.5vh]' />
+            </Auth>
+          ) : (
+            <Component {...pageProps} className='h-[94.5vh]' />
+          )}
+          <ToastContainer
+            position="top-right"
+            autoClose={5000}
+            hideProgressBar={false}
+            newestOnTop={false}
+            closeOnClick
+            rtl={false}
+            pauseOnFocusLoss
+            draggable
+            pauseOnHover
+            theme="light"
+          />
+          <ToastContainer />
         </ChakraProvider>
       </SessionProvider>
     </Provider>
@@ -27,10 +52,8 @@ export default function App({ Component, pageProps: { session, ...pageProps } }:
 }
 
 function Auth({ children }: any) {
-  // if `{required: true }` is supplied, `status` can only be "loading" or "authenticated"
   const router = useRouter();
   const session = useSession({ required: true })
-
   if (session && session.status === 'loading') {
     return (
       <div className="p bg-greyscale-grey-70 flex flex-row pt-24 pb-8 box-border items-center justify-center h-[94.5vh]">
@@ -38,20 +61,30 @@ function Auth({ children }: any) {
     );
   }
   else {
-
-    if (session && session.data && session.data.user.isActive === false) {
-
+    if ((session && session.data && session.data.user.isActive === false) && !router.pathname.includes('stripeSession')) {
       if (router.pathname !== '/payment') {
-        console.log("olaaaa")
         router.push('/payment');
-        // return children
-      } else {
-        console.log("olaaaa")
-        return children
       }
     } else {
+      if (router.pathname === '/payment') {
+        router.push('/');
+      }
       return children
     }
   }
 
 }
+
+// export async function getServerSideProps() {
+//   const session = useSession({ required: true })
+//   let userIsActive = false;
+
+//   if (session && session.data && session.data.user.isActive === false) {
+//     userIsActive = false;
+//   } else {
+//     userIsActive = true;
+//   }
+//   console.log("userIsActive")
+//   console.log(userIsActive)
+//   return { props: { userIsActive } };
+// }

@@ -9,6 +9,10 @@ export const config = {
         "/documentGeneration",
         "/payment",
         "/documentGeneration/:repos*",
-        "/"
+        "/onboarding",
+        "/",
+        "/dashboard",
+        "/reporpuse",
+        "/repurpose"
     ]
 }
