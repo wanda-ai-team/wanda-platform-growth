@@ -10,9 +10,6 @@ import getDBEntry from '@/utils/api/db/getDBEntry';
 import updateDBEntryArray from '@/utils/api/db/updateDBEntryArray';
 import { getOpenAIAnswer } from '@/utils/api/openAI/openAICalls';
 
-export const config = {
-  runtime: "edge",
-};
 export const maxDuration = 300;
 
 export default async function handler(
