@@ -11,7 +11,7 @@ import updateDBEntryArray from '@/utils/api/db/updateDBEntryArray';
 import { getOpenAIAnswer } from '@/utils/api/openAI/openAICalls';
 
 export const maxDuration = 300;
-
+export const dynamic = 'force-dynamic';
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
