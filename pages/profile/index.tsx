@@ -61,7 +61,7 @@ export default function Profile() {
 
                     <Divider orientation="horizontal" />
 
-                    <Text as="h2" fontSize="2xl">
+                    {/* <Text as="h2" fontSize="2xl">
                         Slack Bot
                     </Text>
                     <Text as="h2" fontSize="m">
@@ -73,7 +73,7 @@ export default function Profile() {
 
                             {slackBot !== "" ? "Reconnect" : "Add"} bot to Slack
                         </Button>
-                    </a>
+                    </a> */}
                 </div>
             </div>
         </main>

@@ -1,6 +1,4 @@
 async function getTextSummary(dataF: any, url: string) {
-    console.log("ola")
-    console.log(dataF)
     return await fetch('/api/llm/gpt3/textToSummary', {
         method: 'POST',
         body: JSON.stringify({
@@ -10,7 +8,8 @@ async function getTextSummary(dataF: any, url: string) {
         })
     }).then((res) => res.json())
         .then(async (data) => {
-            console.log(data)
+            console.log("dataF")
+            console.log(dataF)
             if (data.success === false) {
                 return await fetch('/api/backend/summarizeText',
                     {
@@ -26,7 +25,6 @@ async function getTextSummary(dataF: any, url: string) {
                         })
                     }).then((res) => res.json())
                     .then(async (data) => {
-                        console.log(data)
                         if (!data || !data.content || data.success === false) {
                             return { content: "Error", success: false };
                         }
