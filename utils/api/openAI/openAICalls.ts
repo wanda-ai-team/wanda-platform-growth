@@ -1,8 +1,12 @@
 import { OpenAIStream } from "@/pages/api/llm/gpt3/openAIStream";
 import { getGenerateIdeasX, getGenerateIdeasBlog, getGenerationToBlogPrompt, getGenerationToXPrompt, getLandingPageScrapePrompt, getGenerateTestX, getGenerateTestBlog, getGenerateLandingPage } from "@/utils/globalPrompts";
 import { NextResponse } from "next/server";
-
 import { Configuration, OpenAIApi } from 'openai';
+
+export const config = {
+    runtime: "edge",
+};
+
 const configuration = new Configuration({
     apiKey: process.env.OPENAI_API_KEY,
 });
@@ -58,40 +62,43 @@ async function getOpenAIAnswer(context: string, platform: string, streamB = fals
     }
     else {
 
-        console.log(process.env.OPENAI_API_KEY)
-        console.log({ userContent })
 
-        const completion = await openai.createChatCompletion({
-            model: "gpt-4",
-            temperature: 0.7,
-            max_tokens: 1024,
-            top_p: 1,
-            frequency_penalty: 0,
-            presence_penalty: 0,
-            messages: [{
-                role: "system", content: systemContent,
-            }, {
-                role: "user", content: userContent
-            }],
-        });
-
-        let result = completion.data.choices[0].message?.content || "No results"
         try {
-            if (result.includes(`\``)) {
-                result = result.replaceAll('\`', '')
-            }
-            if(result.includes(`json`)){
-                result = result.replace(`json`, '')
-            }
+            const completion = await openai.createChatCompletion({
+                model: "gpt-4",
+                temperature: 0.7,
+                max_tokens: 1024,
+                top_p: 1,
+                frequency_penalty: 0,
+                presence_penalty: 0,
+                messages: [{
+                    role: "system", content: systemContent,
+                }, {
+                    role: "user", content: userContent
+                }],
+            });
 
-            if(result.includes(`markdown`)){
-                result = result.replace(`markdown`, '')
+            let result = completion.data.choices[0].message?.content || "No results"
+            try {
+                if (result.includes(`\``)) {
+                    result = result.replaceAll('\`', '')
+                }
+                if (result.includes(`json`)) {
+                    result = result.replace(`json`, '')
+                }
+
+                if (result.includes(`markdown`)) {
+                    result = result.replace(`markdown`, '')
+                }
+                const parsedResult: any = JSON.parse(result)
+                return parsedResult
+            } catch (error) {
+                console.log({ error })
+                return result
             }
-            const parsedResult: any = JSON.parse(result)
-            return parsedResult
         } catch (error) {
             console.log({ error })
-            return result
+            return null
         }
     }
 }

@@ -71,7 +71,7 @@ export default async function handler(
         payingUserId: session.user.id,
       },
       trial_settings: { end_behavior: { missing_payment_method: "cancel" } },
-      trial_period_days: 14,
+      trial_period_days: 7,
     };
   }
 

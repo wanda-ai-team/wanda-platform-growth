@@ -19,6 +19,9 @@ import {
   HStack,
   VStack,
   Progress,
+  RadioGroup,
+  Radio,
+  Link,
 } from "@chakra-ui/react";
 import TwitterThread from "@/components/text/twitterThread/twitterThreadN";
 import { getSubtitlesFromYoutube } from "@/utils/api/video/getSubtitlesFromYoutube";
@@ -43,6 +46,7 @@ import streamResponse from "@/utils/common/stream";
 import { Mixpanel } from "@/utils/mixpanel";
 
 type Contents = "context" | "url" | "text" | "podcast";
+type ContentsAV = "gong" | "file";
 
 const inputList: {
   key: Contents;
@@ -63,9 +67,24 @@ const inputList: {
     },
     {
       key: "podcast",
-      value: "Podcast & Video (File)",
+      value: "Video & Audio",
     },
   ];
+
+const inputListaudioVideo: {
+  key: ContentsAV;
+  value: string;
+}[] = [
+    {
+      key: "gong",
+      value: "Gong Calls"
+    },
+    {
+      key: "file",
+      value: "File",
+    },
+  ];
+
 
 export default function Repurpose() {
   const router = useRouter();
@@ -95,6 +114,10 @@ export default function Repurpose() {
     inputList[0].key
   );
 
+  const [outputSelectedAudioVideo, setOutputSelectedAudioVideo] = useState<ContentsAV>(
+    inputListaudioVideo[0].key
+  );
+
   const [outputSelected, setOutputSelected] = useState(outputsWithPlatform[0].platform);
   const [outputSelectedO, setOutputSelectedO] = useState(outputsWithPlatform[0].outputs[0]);
 
@@ -109,13 +132,6 @@ export default function Repurpose() {
     "settings"
   );
   const inputFileRef = useRef<HTMLInputElement | null>(null);
-
-  const { getRootProps, getRadioProps } = useRadioGroup({
-    name: "content",
-    defaultValue: inputList[0].key,
-    onChange: (value: Contents) => { setOutputSelectedI(value); Mixpanel.track("Changed Input Type", { "Input Type": value }) },
-  });
-
 
   async function getStoredThreads(selectedProject: string) {
     return await fetch('/api/user/getProjectById', {
@@ -134,18 +150,8 @@ export default function Repurpose() {
         return err;
       })
   }
-
-  const group = getRootProps();
-
-  async function getUser() {
-    await fetch('/api/user/getUser')
-      .then((res) => res.json())
-      .then(async (data1) => {
-        // if (data1.content[0].data.isActive === false) {
-        //   router.push('/payment');
-        // }
-      }).catch((err) => {
-      });
+  async function getCallsGongInit() {
+    await getCalls();
   }
 
   async function getProjects() {
@@ -169,7 +175,8 @@ export default function Repurpose() {
   useEffect(() => {
     // getUser();
     getProjects();
-    
+    getCallsGongInit()
+
     Mixpanel.track("Loaded Repurpose Page");
   }, []);
 
@@ -387,8 +394,6 @@ export default function Repurpose() {
 
     const response = await getTextSummary(data, url);
     setTranscript(transc);
-    console.log("Ola111aa")
-    console.log(response)
     if (response.success) {
       setSummary(response.content);
 
@@ -547,6 +552,153 @@ export default function Repurpose() {
     setLoadingC(false);
     // setCurrentStep("result");
   };
+
+  const [gongCallsA, setGongCallsA] = useState([]);
+  const [selectedGongCall, setSelectedGongCall] = useState<any>({});
+  const [loadingGongCalls, setLoadingGongCalls] = useState<boolean>(true);
+  const [gongConnected, setGongConnected] = useState<boolean>(false);
+  async function getCalls() {
+    setLoadingGongCalls(true);
+    console.log('getCalls');
+    await fetch('/api/integrations/gong/getCallByDateWithToken')
+      .then(response => response.json())
+      .then(data => {
+        console.log(data);
+        setGongConnected(true);
+        if (data.success) {
+          setGongCallsA(data.content);
+          setSelectedGongCall(data.content[0].id);
+        } else {
+          if (data.content.includes("authorization")) {
+            console.log('gong not connected');
+            setGongConnected(false);
+          }
+          console.log(data);
+        }
+      })
+      .catch((error) => {
+        console.error('Error:', error);
+      });
+    setLoadingGongCalls(false);
+  }
+
+
+  async function getCallInformation(callId: string) {
+    setLoadingGongCalls(true);
+    await fetch('/api/integrations/gong/getCallTranscriptById', {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        callId: [callId],
+      }),
+    })
+      .then(response => response.json())
+      .then(async data => {
+        console.log(data);
+        if (data.success) {
+          await summarizeTextAndCreateThread(data.content, callId, data.content);
+          console.log(data.content);
+        } else {
+          console.log(data);
+        }
+      })
+      .catch((error) => {
+        console.error('Error:', error);
+      });
+    setLoadingGongCalls(false);
+  }
+
+  function gongCalls() {
+    return (
+      <>
+        {!gongConnected ?
+          <Text>
+            Gong account is not connected. Please connect it <Link href="/profile"> here </Link>
+          </Text>
+          :
+          <>
+            <Select
+              sx={{ backgroundColor: "white" }}
+              value={selectedGongCall}
+              onChange={(e) => { setSelectedGongCall(e.target.value); }}
+            >
+              {gongCallsA.map((call: any, index: number) => (
+                <option key={index} value={call.id}>
+                  {call.title.substring(0, 75) + ' ...'}
+                </option>
+              ))}
+            </Select>
+
+            <Button colorScheme="purple" onClick={async (e) => {
+              getCallInformation(selectedGongCall);
+            }} >
+              Get Call Summary
+            </Button>
+          </>
+        }
+      </>
+    )
+  }
+
+  // Step 2: Use the `useRadioGroup` hook to control a group of custom radios.
+  function AudioVideoRadioGroup() {
+    const { getRootProps, getRadioProps } = useRadioGroup({
+      name: "contentAV",
+      defaultValue: inputListaudioVideo[0].key,
+      onChange: async (value: ContentsAV) => { setOutputSelectedAudioVideo(value); Mixpanel.track("Changed Input Type", { "Input Type": value }) },
+    })
+
+    const group = getRootProps()
+
+    if (outputSelectedI === "podcast") {
+      return (
+        <div className={styles.radio__group} {...group}>
+          {inputListaudioVideo.map(({ key, value }) => {
+            const radioV = getRadioProps({ value: key });
+            return (
+              <RadioTag
+                key={key}
+                {...radioV}
+              >
+                {value}
+              </RadioTag>
+            );
+          })}
+        </div>
+      )
+    }
+    return (
+      <>
+      </>
+    )
+  }
+  function InputRadioGroup() {
+    const { getRootProps, getRadioProps } = useRadioGroup({
+      name: "content",
+      defaultValue: inputList[0].key,
+      onChange: (value: Contents) => { setOutputSelectedI(value); Mixpanel.track("Changed Input Type", { "Input Type": value }) },
+    })
+
+    const group = getRootProps()
+
+    return (
+      <div className={styles.radio__group} {...group}>
+        {inputList.map(({ key, value }) => {
+          const radio = getRadioProps({ value: key });
+          return (
+            <RadioTag
+              key={key}
+              {...radio}
+            >
+              {value}
+            </RadioTag>
+          );
+        })}
+      </div>
+    )
+  }
 
   function getTextArea(valueChosen: any) {
     if (outputSelected === 'Twitter') {
@@ -717,19 +869,7 @@ export default function Repurpose() {
               </div>
               <div className={styles.options}>
                 <Text fontWeight="semibold">Choose input content type:</Text>
-                <div className={styles.radio__group} {...group}>
-                  {inputList.map(({ key, value }) => {
-                    const radio = getRadioProps({ value: key });
-                    return (
-                      <RadioTag
-                        key={key}
-                        {...radio}
-                      >
-                        {value}
-                      </RadioTag>
-                    );
-                  })}
-                </div>
+                {InputRadioGroup()}
               </div>
               <div className={styles.inputs}>
                 <div className={styles.links}>
@@ -869,26 +1009,38 @@ export default function Repurpose() {
                     <Progress size='xs' isIndeterminate />
                   )}
 
+                  {AudioVideoRadioGroup()}
                   {outputSelectedI === "podcast" && (
                     <>
-
-
-                      <InputGroup>
-                        <input
-                          type="file"
-                          name="myfile"
-                          accept="audio/*,video/*"
-                          ref={inputFileRef}
-                        />
-                        <Button colorScheme="purple" onClick={(e) => uploadPhoto(e)}>
-                          Upload
-                        </Button>
-                        {loadingAPICall && (
-                          <InputRightElement>
-                            <Spinner color="#8F50E2" />
-                          </InputRightElement>
-                        )}
-                      </InputGroup>
+                      {outputSelectedAudioVideo === "gong" && (
+                        loadingGongCalls ?
+                          <>
+                            <Text>
+                              Loading Gong calls.
+                            </Text>
+                            <Progress size='xs' isIndeterminate />
+                          </>
+                          :
+                          gongCalls()
+                      )}
+                      {outputSelectedAudioVideo === "file" && (
+                        <InputGroup>
+                          <input
+                            type="file"
+                            name="myfile"
+                            accept="audio/*,video/*"
+                            ref={inputFileRef}
+                          />
+                          <Button colorScheme="purple" onClick={(e) => uploadPhoto(e)}>
+                            Upload
+                          </Button>
+                          {loadingAPICall && (
+                            <InputRightElement>
+                              <Spinner color="#8F50E2" />
+                            </InputRightElement>
+                          )}
+                        </InputGroup>
+                      )}
                     </>
                   )}
                 </div>
@@ -897,7 +1049,7 @@ export default function Repurpose() {
               <div className={styles.platform__container}>
                 <div className={styles.options}>
                   <HStack>
-                    <VStack align={"start"} w={"50%"}>
+                    <VStack align={"start"} w={outputSelected !== "Summary" && outputSelected !== "Transcript" ? "50%" : "100%"}>
                       <Text fontWeight="semibold">Output Platform:</Text>
                       <Select
                         sx={{ backgroundColor: "white" }}
@@ -986,17 +1138,19 @@ export default function Repurpose() {
                     </VStack>
                   )}
 
-                  <Button
-                    isDisabled={(
-                      (outputSelectedI !== "context" && summary === "")
-                      || canStopB.current
-                      || (outputSelectedI === "context" && selectedProject === "")
-                    )}
-                    colorScheme="purple"
-                    onClick={() => handleConvert(landingURL)}
-                  >
-                    Convert to {outputSelected} {outputSelectedO}
-                  </Button>
+                  {outputSelected !== "Summary" && outputSelected !== "Transcript" && (
+                    <Button
+                      isDisabled={(
+                        (outputSelectedI !== "context" && summary === "")
+                        || canStopB.current
+                        || (outputSelectedI === "context" && selectedProject === "")
+                      )}
+                      colorScheme="purple"
+                      onClick={() => handleConvert(landingURL)}
+                    >
+                      Convert to {outputSelected} {outputSelectedO}
+                    </Button>
+                  )}
                 </div>
               </div>
             </div>
