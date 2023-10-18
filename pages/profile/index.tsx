@@ -6,11 +6,11 @@ export default function Profile() {
     const [gongUser, setGongUser] = useState("");
     const [slackBot, setSlackBot] = useState("");
     const client_id = "oty4etue"
-    const redirect_uri = "http://localhost:3000/auth/gong"
+    const redirect_uri = process.env.NEXT_PUBLIC_URL + "/auth/gong"
     const gongURL = "https://app.gong.io/oauth2/authorize?client_id=" + client_id + "&response_type=code&scope=api:calls:create%20api:calls:read:basic&redirect_uri=" + redirect_uri + "&state=296bc9a0-a2a2-4a57"
 
     const slack_client_id = "4964233382976.6053595309088"
-    const slack_redirect_uri = "https://localhost:3000/auth/slack"
+    const slack_redirect_uri = process.env.NEXT_PUBLIC_URL + "/auth/slack"
     const slackBotURL = "https://slack.com/oauth/v2/authorize?scope=incoming-webhook,commands&client_id=" + slack_client_id + "&redirect_uri=" + slack_redirect_uri
 
     async function getUser() {
