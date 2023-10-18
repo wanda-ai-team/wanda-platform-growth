@@ -2,8 +2,6 @@
 import axios from 'axios';
 import { load } from 'cheerio';
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { Configuration, OpenAIApi } from "openai";
-import { getSession } from "next-auth/react"
 import { getServerSession } from 'next-auth';
 import createDBEntry from '@/utils/api/db/createDBEntry';
 import updateDBEntry from '@/utils/api/db/updateDBEntry';
@@ -12,18 +10,16 @@ import getDBEntry from '@/utils/api/db/getDBEntry';
 import updateDBEntryArray from '@/utils/api/db/updateDBEntryArray';
 import { getOpenAIAnswer } from '@/utils/api/openAI/openAICalls';
 
-const configuration = new Configuration({
-  apiKey: process.env.OPENAI_API_KEY,
-});
-
-const openai = new OpenAIApi(configuration);
+export const config = {
+  runtime: "edge",
+};
+export const maxDuration = 300;
 
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
   const session = await getServerSession(req, res, authOptions)
-  console.log("olaaaa")
   // Error handling
 
   if (!session?.user) {
