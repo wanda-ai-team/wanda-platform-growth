@@ -15,7 +15,8 @@ import {
     Spinner,
     Select,
 } from "@chakra-ui/react";
-import Link from "next/link";
+import { Link } from '@chakra-ui/react'
+
 import { useEffect, useRef, useState } from "react";
 
 type Contents = "context" | "url" | "text" | "file" | "gong";
@@ -196,7 +197,7 @@ export default function Insights() {
             <>
                 {!gongConnected ?
                     <Text>
-                        Gong account is not connected. Please connect it <Link href="/profile"> here </Link>
+                        Gong account is not connected. <Link color='teal.500' href="/profile"> Please connect it here </Link>
                     </Text>
                     :
                     <>
