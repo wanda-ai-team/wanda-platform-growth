@@ -9,6 +9,7 @@ import Header from '@/components/header'
 import { useRouter } from 'next/router'
 import 'react-toastify/dist/ReactToastify.css';
 import { ToastContainer } from "react-toastify";
+import { pagesWithoutHeader } from '@/utils/globalVariables'
 type CustomAppProps = AppProps & {
   Component: NextComponentType & { auth?: boolean }
 }
@@ -22,7 +23,7 @@ export default function App({ Component, pageProps: { session, ...pageProps } }:
     <Provider store={store}>
       <SessionProvider session={session} >
         <ChakraProvider>
-          {!router.pathname.includes('login') && !router.pathname.includes('payment') && router.pathname !== "/" &&
+          {!pagesWithoutHeader.includes(router.pathname) && router.pathname !== "/" &&
             <Header />
           }
           {Component.auth ? (

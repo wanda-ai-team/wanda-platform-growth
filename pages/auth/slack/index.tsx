@@ -24,7 +24,7 @@ export default function GongAuth() {
         const { code } = router.query;
         const { state } = router.query;
         if (code !== undefined && state !== undefined) {
-            generateCustomerToken(code, state);
+            // generateCustomerToken(code, state);
         }
     }, [router])
     return (

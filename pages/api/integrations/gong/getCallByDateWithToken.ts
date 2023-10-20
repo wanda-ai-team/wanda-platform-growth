@@ -48,10 +48,11 @@ export default async function handler(
         headers,
     }).then((response) => response.json())
         .then((data) => {
-            let callsData = {}
+            let callsData = []
             console.log(data);
             if (data.calls.length > 0) {
-                callsData = data.calls.map((call: any) => { return { title: call.title, id: call.id, meetingUrl: call.meetingUrl } })
+                callsData = data.calls.map((call: any) => { return { title: call.title, id: call.id, meetingUrl: call.meetingUrl, started: call.started } })
+                callsData = callsData.sort((a: any, b: any) => { return new Date(b.started).getTime() - new Date(a.started).getTime() })
             } else {
                 console.log("No data found");
             }

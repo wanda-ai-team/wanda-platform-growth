@@ -1,10 +1,5 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
-import deleteDBEntry from "@/utils/api/db/deleteDBEntry";
-import getDBEntry from "@/utils/api/db/getDBEntry";
 import updateDBEntry from "@/utils/api/db/updateDBEntry";
-import { generateCustomerToken, retrieveCallsByDate } from "@/utils/common/integrations/integrationsURLs";
-import axios from "axios";
-import { Console } from "console";
 import type { NextApiRequest, NextApiResponse } from "next";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../../auth/[...nextauth]";
@@ -12,7 +7,7 @@ import { authOptions } from "../../auth/[...nextauth]";
 export default async function handler(
     req: NextApiRequest,
     res: NextApiResponse
-) {        
+) {
     const session = await getServerSession(req, res, authOptions)
     // Error handling
 
@@ -24,7 +19,7 @@ export default async function handler(
             },
         });
     }
-    
+
     const { code } = req.body;
     if (!code) {
         return new Response('Bad Request', { status: 400 });
@@ -53,9 +48,13 @@ export default async function handler(
         headers,
     }).then((response) => response.json())
         .then(async (data) => {
-            const currentSeconds = (new Date().getTime() / 1000) + data.expires_in;
-            await updateDBEntry("users", { gongAccessToken: data.access_token, gongRefreshToken: data.refresh_token, expiration: currentSeconds }, ['email'], '==', [session.user.email], 1);
-            return data;
+            console.log(data);
+            if (data.access_token !== undefined && data.refresh_token !== undefined && data.expires_in !== undefined) {
+                const currentSeconds = (new Date().getTime() / 1000) + data.expires_in;
+                await updateDBEntry("users", { gongAccessToken: data.access_token, gongRefreshToken: data.refresh_token, expiration: currentSeconds }, ['email'], '==', [session.user.email], 1);
+                return data;
+            }
+            return null
         })
 
     if (Object.keys(response).length > 0) {

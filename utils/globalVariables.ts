@@ -89,6 +89,14 @@ const platformsToGenerateIdeas = [
     "Blog",
 ];
 
+const pagesWithoutHeader = [
+    "/login",
+    "/signup",
+    "/payment",
+    "/auth/gong",
+    "/auth/slack",
+];
+
 export {
     userCollection,
     automationCollection,
@@ -96,5 +104,6 @@ export {
     toneList,
     writingStyles,
     outputsWithPlatform,
+    pagesWithoutHeader,
     platformsToGenerateIdeas
 }
