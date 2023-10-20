@@ -19,7 +19,7 @@ export default async function handler(
             const URL = process.env.GONG_URL + retrieveCallsByDate + "?fromDateTime=" + lastDate + "&toDateTime=" + "2024-12-25T22:00:00Z";
             
             let data = currentUser.data.gongAccessToken + ":" + currentUser.data.gongAccessSecret;
-            let buff = new Buffer(data);
+            let buff = Buffer.from(data);
             let base64data = buff.toString('base64');
             const headers = {
                 authorization: "Basic " + base64data,
