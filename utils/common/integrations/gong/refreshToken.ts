@@ -27,9 +27,13 @@ async function refreshToken(email: string) {
         headers,
     }).then((response) => response.json())
         .then(async (data) => {
-            const currentSeconds = (new Date().getTime() / 1000) + data.expires_in;
-            await updateDBEntry("users", { gongAccessToken: data.access_token, gongRefreshToken: data.refresh_token, expiration: currentSeconds }, ['email'], ['=='], [email], 1);
-            return data;
+            if (data.access_token !== undefined && data.refresh_token !== undefined && data.expires_in !== undefined) {
+
+                const currentSeconds = (new Date().getTime() / 1000) + data.expires_in;
+                await updateDBEntry("users", { gongAccessToken: data.access_token, gongRefreshToken: data.refresh_token, expiration: currentSeconds }, ['email'], ['=='], [email], 1);
+                return data;
+            }
+            return null
         });
     return response;
 }
