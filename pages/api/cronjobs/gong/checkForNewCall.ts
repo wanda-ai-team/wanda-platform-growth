@@ -17,7 +17,7 @@ export default async function handler(
         if(currentUser.data.gongAccessToken !== undefined && currentUser.data.gongAccessToken !== "" && currentUser.data.gongAccessSecret !== "" && currentUser.data.gongAccessSecret !== ""){
             let lastDate = currentUser.data.lastGongCallDate !== undefined ? currentUser.data.lastGongCallDate : "2018-02-18T08:00:00Z";
             const URL = process.env.GONG_URL + retrieveCallsByDate + "?fromDateTime=" + lastDate + "&toDateTime=" + "2024-12-25T22:00:00Z";
-            
+            console.log(URL);
             let data = currentUser.data.gongAccessToken + ":" + currentUser.data.gongAccessSecret;
             let buff = Buffer.from(data);
             let base64data = buff.toString('base64');
@@ -33,12 +33,17 @@ export default async function handler(
             }).then((response) => response.json())
                 .then(async (data) => {
                     console.log("data");
+                    console.log(data);
                     console.log(data.calls);
                     let lastDate = data.calls[data.calls.length - 1].started
                     console.log(lastDate);
                     // await updateDBEntry("users", { lastGongCallDate: lastDate }, ['email'], '==', [currentUser.data.email], 1);
                     
                 })
+                .catch((error) => {
+                    console.log(error);
+                }
+                );
         }
     }
 
