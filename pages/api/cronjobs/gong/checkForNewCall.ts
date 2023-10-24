@@ -16,13 +16,14 @@ export default async function handler(
 
     for (let index = 0; index < allUsers.length; index++) {
         const currentUser = allUsers[index];
-        console.log("currentUser");
-        console.log(currentUser);
-        if(currentUser.data.gongAccessToken !== undefined && currentUser.data.gongAccessToken !== ""){
-            if(await checkIfTokenNeedsRefresh(currentUser.data.email)){
+        console.log(index)
+        if (currentUser.data.gongAccessToken !== undefined && currentUser.data.gongAccessToken !== "") {
+            if (await checkIfTokenNeedsRefresh(currentUser.data.email)) {
                 await refreshToken(currentUser.data.email);
             }
             let lastDate = currentUser.data.lastGongCallDate !== undefined ? currentUser.data.lastGongCallDate : "2018-02-18T08:00:00Z";
+            
+            lastDate = "2023-10-20T06:50:31.174851-07:01"
             const URL = process.env.GONG_URL + retrieveCallsByDate + "?fromDateTime=" + lastDate + "&toDateTime=" + "2024-12-25T22:00:00Z";
             const headers = {
                 authorization: "Bearer " + currentUser.data.gongAccessToken,
@@ -34,13 +35,14 @@ export default async function handler(
                 headers,
             }).then((response) => response.json())
                 .then(async (data) => {
-                    console.log("data");
-                    console.log(data);
-                    console.log(data.calls);
-                    let lastDate = data.calls[data.calls.length - 1].started
-                    console.log(lastDate);
+                    if(data.calls === undefined){
+                        return
+                    }
+                    let callsData = data.calls.sort((a: any, b: any) => { return new Date(b.started).getTime() - new Date(a.started).getTime() })
+                    callsData = callsData.filter((call: any) => { return call.started > lastDate })
+                    let lastDateF = callsData[0].started
                     // await updateDBEntry("users", { lastGongCallDate: lastDate }, ['email'], '==', [currentUser.data.email], 1);
-                    
+
                 })
                 .catch((error) => {
                     console.log(error);

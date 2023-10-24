@@ -13,22 +13,17 @@ export default async function handler(
 
         // Initialize
         const web = new WebClient(token);
-        let filteredUsers: any[] = [];
+        let filteredChannels: any[] = [];
 
         await (async () => {
-            let users = await web.users.list();
-            if (users && users.members) {
-                filteredUsers = users.members.filter((user) => {
-                    return user.is_bot === false;
-                })
-                filteredUsers = filteredUsers.map((user: any) => { return { id: user.id, name: user.name } });
+            let channels = await web.conversations.list();
+            if (channels && channels.channels) {
+                filteredChannels = channels.channels.map((channel: any) => { return { id: channel.id, name: channel.name } });
             }
         })();
 
-
-        res.status(200).json({ content: filteredUsers, success: true });
+        res.status(200).json({ content: filteredChannels, success: true });
     } catch (error) {
-        console.log(error)
         res.status(200).json({ content: error, success: false });
     }
 }

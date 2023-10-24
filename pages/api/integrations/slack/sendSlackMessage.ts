@@ -1,41 +1,60 @@
 
 import type { NextApiRequest, NextApiResponse } from "next";
 import { WebClient } from '@slack/web-api';
+import { list } from "@vercel/blob";
 
 export default async function handler(
     req: NextApiRequest,
     res: NextApiResponse
 ) {
 
-    // Read a token from the environment variables
-    const token = "xoxb-4964233382976-6058732941347-whrbzEIRpHhx5CZk2hsS18ki";
+    try {
+        // Read a token from the environment variables
+        const token = process.env.SLACK_TOKEN;
 
-    // Initialize
-    const web = new WebClient(token);
+        // Initialize
+        const web = new WebClient(token);
 
-    const conversationId = 'C061MT4UL05';
+        const { channelId } = req.body;
+        const { message } = req.body;
+        const { create } = req.body;
+        const { listOfUsers } = req.body;
+        const { channelName } = req.body;
+        let newChannelId = "";
+        let newChannel = null;
+        if (create) {
+            newChannel = await web.conversations.create({
+                name: channelName
+            });
 
-    (async () => {
-        const users = await web.users.list();
-        console.log('Users: ', users);
+        }
 
-        const result1 = await await web.chat.postMessage({
-            channel: "U05S2RBMMQC",
-            text: 'Olá Berna, sou o teu bot favorito',
-        });
+        if (newChannel && newChannel.channel && newChannel.channel.id) {
+            newChannelId = newChannel.channel.id;
+        } else {
+            newChannelId = channelId.value
+        }
+
+        if (listOfUsers.length > 0) {
+            await web.conversations.invite({
+                users: listOfUsers,
+                channel: newChannelId
+            })
+        }
+
+        (async () => {
+
+            await web.chat.postMessage({
+                channel: newChannelId,
+                text: message,
+            });
+
+        })();
 
 
-        // console.log('Conversation created: ', result);
-    })();
-
-    // (async () => {
-    //     const result = await web.chat.postMessage({
-    //         text: req.body.businessInfo,
-    //         channel: conversationId,
-    //     });
-    //     console.log(`Successfully send message ${result.ts} in conversation ${conversationId}`);
-    // })();
-
-
-    res.status(200).json({ content: "No data found", success: false });
+        res.status(200).json({ content: "No data found", success: false });
+    } catch (error) {
+        console.log(error)
+        res.status(200).json({ content: error, success: false });
+    }
 }

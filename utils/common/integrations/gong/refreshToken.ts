@@ -2,8 +2,6 @@ import getDBEntry from "@/utils/api/db/getDBEntry";
 import updateDBEntry from "@/utils/api/db/updateDBEntry";
 
 async function refreshToken(email: string) {
-    console.log("Refreshing token");
-    console.log(email);
     const user = await getDBEntry("users", ["email"], ["=="], [email], 1);
     const refreshToken = user[0].data.gongRefreshToken;
 
