@@ -32,7 +32,6 @@ async function updateDBEntry(
         return true;
       } else {
         querySnapshot.forEach(async function (doc) {
-          console.log(doc.id, " => ", doc.data());
           await db
             .collection(collection)
             .doc(doc.id)
