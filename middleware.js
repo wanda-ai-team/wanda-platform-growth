@@ -13,6 +13,7 @@ export const config = {
         "/",
         "/dashboard",
         "/reporpuse",
-        "/repurpose"
+        "/repurpose",
+        "/insights"
     ]
 }

@@ -17,6 +17,7 @@ export default async function handler(
     const session = await getServerSession(req, res, authOptions)
     // Error handling
 
+    console.log("error");
     if (!session?.user || !session?.user?.email) {
         return res.status(401).json({
             error: {
