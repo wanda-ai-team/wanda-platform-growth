@@ -32,7 +32,7 @@ export default async function handler(
         "&redirect_uri=" + process.env.GONG_REDIRECT_URI;
 
     let data = process.env.GONG_ID + ":" + process.env.GONG_SECRET;
-    let buff = new Buffer(data);
+    let buff = Buffer.from(data);
     let base64data = buff.toString('base64');
 
     // Set the headers for the request, including the API token and content type
@@ -56,8 +56,12 @@ export default async function handler(
             }
             return null
         })
+        .catch((error) => {
+            console.log(error);
+            return null;
+        })
 
-    if (Object.keys(response).length > 0) {
+    if (response && Object.keys(response).length > 0) {
         res.status(200).json({ content: response, success: true });
     }
     else {
