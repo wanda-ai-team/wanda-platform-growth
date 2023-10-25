@@ -20,7 +20,10 @@ export default async function handler(
         console.log(req.body);
         
         console.log(req.body.payload);
-        console.log(req.body.payload.type);
+        console.log(JSON.parse(req.body.payload))
+        
+        console.log(JSON.parse(req.body.payload).type)
+        console.log(req.body.payload.get("type"));
 
         switch (req.body.payload.type) {
             case "message_action":
