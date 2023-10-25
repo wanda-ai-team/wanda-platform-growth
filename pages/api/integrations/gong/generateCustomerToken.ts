@@ -37,6 +37,11 @@ export default async function handler(
         let buff = Buffer.from(data);
         let base64data = buff.toString('base64');
 
+        console.log("values")
+        console.log(process.env.GONG_ID);
+        console.log(process.env.GONG_SECRET);
+        console.log(code);
+
         // Set the headers for the request, including the API token and content type
         const headers = {
             authorization: "Basic " + base64data,
