@@ -25,7 +25,7 @@ export default async function handler(
         let messageC = JSON.parse(req.body.payload)
 
         switch (messageC.type) {
-            case "message_action":
+            case "block_actions":
                 console.log("message_action");
                 
                 console.log(messageC.message.blocks[2].text.text);
@@ -38,7 +38,7 @@ export default async function handler(
                 });
                 console.log(response);
                 break
-            case "block_actions":
+            case "message_action":
                 // const responseOpenAI = await openAICall(false, "userContent", "systemContent");
                 (async () => {
                     const response = await web.chat.postMessage({
