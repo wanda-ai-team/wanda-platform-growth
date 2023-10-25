@@ -16,6 +16,12 @@ export default async function handler(
         // Initialize
         const web = new WebClient(token);
 
+        console.log("sendSlackMessage");
+        console.log(req.body);
+        
+        console.log(req.body.payload);
+        console.log(req.body.payload.type);
+
         switch (req.body.payload.type) {
             case "message_action":
                 console.log("message_action");
