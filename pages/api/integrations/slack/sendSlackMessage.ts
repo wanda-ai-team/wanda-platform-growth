@@ -36,10 +36,14 @@ export default async function handler(
         }
 
         if (listOfUsers.length > 0) {
-            await web.conversations.invite({
-                users: listOfUsers,
-                channel: newChannelId
-            })
+            try {
+                await web.conversations.invite({
+                    users: listOfUsers,
+                    channel: newChannelId
+                })
+            } catch (e) {
+                console.log(e);
+            }
         }
 
         message = JSON.parse(message);
@@ -47,9 +51,7 @@ export default async function handler(
         message.channel = newChannelId;
 
         (async () => {
-
             await web.chat.postMessage(message);
-
         })();
 
 
