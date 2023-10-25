@@ -42,6 +42,11 @@ async function getOpenAIAnswer(context: string, platform: string, streamB = fals
 
     }
 
+    return await openAICall(streamB, userContent, systemContent)
+}
+
+async function openAICall(streamB: boolean, userContent: string, systemContent: string) {
+
     if (streamB) {
 
         console.log({ userContent })
@@ -101,5 +106,6 @@ async function getOpenAIAnswer(context: string, platform: string, streamB = fals
 }
 
 export {
-    getOpenAIAnswer
+    getOpenAIAnswer,
+    openAICall
 };
