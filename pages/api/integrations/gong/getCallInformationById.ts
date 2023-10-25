@@ -1,7 +1,7 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
 import deleteDBEntry from "@/utils/api/db/deleteDBEntry";
 import getDBEntry from "@/utils/api/db/getDBEntry";
-import { retrieveCallInformationById, retrieveCallsByDate } from "@/utils/common/integrations/integrationsURLs";
+import { retreiveCallTranscript, retrieveCallInformationById, retrieveCallsByDate } from "@/utils/common/integrations/integrationsURLs";
 import axios from "axios";
 import type { NextApiRequest, NextApiResponse } from "next";
 
@@ -10,9 +10,10 @@ export default async function handler(
     res: NextApiResponse
 ) {
 
-    const { callIds } = req.body
+    const { callId } = req.body
 
     const URL = process.env.GONG_URL + retrieveCallInformationById;
+    const URLTranscript = process.env.GONG_URL + retreiveCallTranscript;
     let data = process.env.GONG_ACCESS_KEY + ":" + process.env.GONG_ACCESS_SECRET;
     let buff = new Buffer(data);
     let base64data = buff.toString('base64');
@@ -23,9 +24,9 @@ export default async function handler(
         "content-type": "application/json",
     };
 
-    const body = {
+    let body = {
         "filter": {
-            "callIds": callIds
+            "callIds": callId
         },
 
         "contentSelector": {
@@ -36,10 +37,10 @@ export default async function handler(
             "exposedFields": {
                 "parties": true,
                 "content": {
-                    "structure": false,
+                    "structure": true,
                     "topics": true,
-                    "trackers": false,
-                    "trackerOccurrences": false,
+                    "trackers": true,
+                    "trackerOccurrences": true,
                     "pointsOfInterest": true
                 },
                 "interaction": {
@@ -64,12 +65,35 @@ export default async function handler(
     }).then((response) => response.json())
         .then((data) => {
             if (data.calls.length > 0) {
+                console.log(JSON.stringify(data.calls[0]))
                 return data.calls[0]
             } else {
                 return null
             }
         })
 
+    console.log(callId)
+    const body2 = {
+        "filter": {
+            "callIds": callId
+        },
+    }
+    const transcriptR = await fetch(URLTranscript, {
+        method: "POST",
+        body: JSON.stringify(body2),
+        headers,
+    }).then((response) => response.json())
+        .then((data) => {
+            console.log(data)
+            if (data.callTranscripts.length > 0) {
+                return data.callTranscripts[0].transcript
+            } else {
+                return null
+            }
+        })
+    let transcript = transcriptR.map((item: any) => item.sentences.map((sentence: any) => sentence.text))
+    transcript = transcript.join(" ")
+    response.transcript = transcript
     if (response !== null) {
         res.status(200).json({ content: response, success: true });
     }

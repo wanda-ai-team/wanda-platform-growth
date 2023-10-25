@@ -615,7 +615,7 @@ export default function Repurpose() {
       <>
         {!gongConnected ?
           <Text>
-            Gong account is not connected. Please connect it <Link href="/profile"> here </Link>
+            Gong account is not connected. <Link color='teal.500' href="/profile"> Please connect it here </Link>
           </Text>
           :
           <>

@@ -2,8 +2,6 @@ import getDBEntry from "@/utils/api/db/getDBEntry";
 import updateDBEntry from "@/utils/api/db/updateDBEntry";
 
 async function refreshToken(email: string) {
-    console.log("Refreshing token");
-    console.log(email);
     const user = await getDBEntry("users", ["email"], ["=="], [email], 1);
     const refreshToken = user[0].data.gongRefreshToken;
 
@@ -27,9 +25,13 @@ async function refreshToken(email: string) {
         headers,
     }).then((response) => response.json())
         .then(async (data) => {
-            const currentSeconds = (new Date().getTime() / 1000) + data.expires_in;
-            await updateDBEntry("users", { gongAccessToken: data.access_token, gongRefreshToken: data.refresh_token, expiration: currentSeconds }, ['email'], ['=='], [email], 1);
-            return data;
+            if (data.access_token !== undefined && data.refresh_token !== undefined && data.expires_in !== undefined) {
+
+                const currentSeconds = (new Date().getTime() / 1000) + data.expires_in;
+                await updateDBEntry("users", { gongAccessToken: data.access_token, gongRefreshToken: data.refresh_token, expiration: currentSeconds }, ['email'], ['=='], [email], 1);
+                return data;
+            }
+            return null
         });
     return response;
 }

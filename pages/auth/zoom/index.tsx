@@ -5,38 +5,28 @@ import { useRouter } from "next/router";
 import { useEffect } from "react";
 import { toast } from "react-toastify";
 
-export default function SlackAuth() {
+export default function ZoomAuth() {
     const router = useRouter();
 
     async function generateCustomerToken(code: any, state: any) {
-        await fetch("/api/integrations/slack/generateCustomerToken", {
+        await fetch("/api/integrations/gong/generateCustomerToken", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
             },
             body: JSON.stringify({ code: code, state: state }),
-        }).then((res) => res.json())
-            .then((data) => {
-                if (data.success) {
-                    toastDisplay("Slack connected successfully", true)
-                    // router.push("/profile");
-                }
-            }
-            ).catch((err) => {
-                console.log(err)
-                toastDisplay("Error with Slack", false)
-                // router.push("/profile");
-            });
-
+        });
+        toastDisplay("Gong connected successfully", true)
+        router.push("/profile");
     }
 
     useEffect(() => {
-        const { code } = router.query;
-        const { state } = router.query;
         console.log(router.query)
-        if (code !== undefined && state !== undefined) {
-            generateCustomerToken(code, state);
-        }
+        // const { code } = router.query;
+        // const { state } = router.query;
+        // if (code !== undefined && state !== undefined) {
+        //     // generateCustomerToken(code, state);
+        // }
     }, [router])
     return (
         <>
@@ -52,4 +42,4 @@ export default function SlackAuth() {
     )
 }
 
-SlackAuth.auth = true;
+ZoomAuth.auth = true;

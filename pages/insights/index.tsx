@@ -1,6 +1,8 @@
 
+import ModalComponent from "@/components/modal/Modal";
 import RadioTag from "@/components/radio-tag";
 import styles from "@/styles/HomeN.module.css";
+import { getListOfChannels, getListOfUsers, sendMessageToChannel } from "@/utils/api/integrations/slack";
 import { urlToText, urlToTranscript } from "@/utils/common/transcript/transcript";
 import uploadFile from "@/utils/common/upload/upload";
 import {
@@ -13,10 +15,23 @@ import {
     Button,
     InputRightElement,
     Spinner,
-    Select,
+    useDisclosure,
+    HStack,
+    VStack,
+    FormControl,
+    FormErrorMessage,
 } from "@chakra-ui/react";
-import Link from "next/link";
+import { Link } from '@chakra-ui/react'
+import {
+    AsyncCreatableSelect,
+    AsyncSelect,
+    CreatableSelect,
+    Select,
+} from "chakra-react-select";
+import { Message, Blocks, Elements } from 'slack-block-builder';
+
 import { useEffect, useRef, useState } from "react";
+import { isError } from "util";
 
 type Contents = "context" | "url" | "text" | "file" | "gong";
 const inputList: {
@@ -49,11 +64,18 @@ export default function Insights() {
     const [topics, setTopics] = useState<string[]>([]);
     const [speakers, setSpeakers] = useState<any>([]);
     const [outputSelected, setOutputSelected] = useState<string>("");
+    const [loadingSlack, setLoadingSlack] = useState<boolean>(true);
+    const [slackUsers, setSlackUsers] = useState<any>([]);
+    const [slackChannels, setSlackChannels] = useState<any>([]);
+    const [selectedChannel, setSelectedChannel] = useState<any>("");
+    const [channelName, setChannelName] = useState<string>("");
+    const [selectedSlackUsers, setSelectedSlackUsers] = useState<any>([]);
 
+    const isError = slackChannels.find((item: any) => item.label === channelName) || channelName === "";
     const [gongCallsA, setGongCallsA] = useState([]);
     const [selectedGongCall, setSelectedGongCall] = useState<any>({});
     const [loadingGongCalls, setLoadingGongCalls] = useState<boolean>(true);
-
+    const { isOpen, onOpen, onClose } = useDisclosure()
     const { getRootProps, getRadioProps } = useRadioGroup({
         name: "content",
         defaultValue: inputList[0].key,
@@ -73,7 +95,8 @@ export default function Insights() {
                     setGongCallsA(data.content);
                     setSelectedGongCall(data.content[0].id);
                 } else {
-                    if (data.content.includes("authorization")) {
+                    console.log(data);
+                    if (data && data.content && data.content.includes("authorization")) {
                         console.log('gong not connected');
                         setGongConnected(false);
                     }
@@ -86,7 +109,8 @@ export default function Insights() {
         setLoadingGongCalls(false);
     }
 
-    async function getCallInformation(callId: string) {
+    async function getCallInformation(callId: any) {
+        console.log(callId.value);
         setLoadingGongCalls(true);
         await fetch('/api/integrations/gong/getCallInformationById', {
             method: "POST",
@@ -94,16 +118,31 @@ export default function Insights() {
                 "Content-Type": "application/json",
             },
             body: JSON.stringify({
-                callId: [callId],
+                callId: [callId.value],
             }),
         })
             .then(response => response.json())
-            .then(data => {
+            .then(async data => {
                 console.log(data);
                 if (data.success) {
                     console.log(data.content);
-                    setSpeakers(data.content.parties.map((item: any) => item.name));
+                    const response = await urlToTranscript(data.content.media.audioUrl, true, true, true, true, true);
+                    setTranscript(data.content.transcript);
                     setTopics(data.content.content.topics.map((item: any) => item.name));
+
+                    setKeyphrases(response.auto_highlights_result.results.map((item: any) => item.text))
+
+                    setSummary(response.summary);
+
+                    console.log(Object.keys(response.topics))
+                    setTopics(Object.keys(response.topics).map((item: any) => item.split('>')[item.split('>').length - 1]));
+
+
+                    const speakerArr = response.speakers.map((speaker: any) => speaker.speaker);
+                    console.log(speakerArr);
+                    const speakerSet = new Set(speakerArr);
+                    setSpeakers(Array.from(speakerSet));
+
                 } else {
                     console.log(data);
                 }
@@ -114,8 +153,22 @@ export default function Insights() {
         setLoadingGongCalls(false);
     }
 
+    async function getSlackInfo() {
+        setLoadingSlack(true)
+        let users = await getListOfUsers();
+        let channels = await getListOfChannels();
+        users = users.map((item: any) => ({ label: item.name, value: item.id }));
+        setSlackUsers(users);
+        channels = channels.map((item: any) => ({ label: item.name, value: item.id }));
+        const nChannels = [{ label: 'Create new', value: 'create' }].concat(channels);
+        setSlackChannels(nChannels);
+        setSelectedChannel(nChannels[0]);
+        setLoadingSlack(false)
+    }
+
     useEffect(() => {
         getCalls();
+        getSlackInfo();
     }, []);
 
     function urlInput() {
@@ -159,9 +212,10 @@ export default function Insights() {
                     <Button colorScheme="purple" onClick={async (e) => {
                         if (inputFileRef && inputFileRef.current && inputFileRef.current.files && inputFileRef.current.files.length > 0) {
                             const responseO = await uploadFile(setLoadingAPICall, inputFileRef);
-                            if (responseO && responseO.upload.ok) {
+                            if (responseO && responseO.upload.ok && responseO.fields.success_action_status) {
                                 console.log(responseO);
-                                const response = await urlToTranscript(url + responseO.url, responseO.fields, true, true, true, true, true);
+
+                                const response = await urlToTranscript(url + responseO.url, true, true, true, true, true);
                                 setTranscript(response.transcript);
                                 setSummary(response.summary);
                                 setKeyphrases(response.auto_highlights_result.results.map((item: any) => item.text))
@@ -174,6 +228,8 @@ export default function Insights() {
                                 console.log(speakerArr);
                                 const speakerSet = new Set(speakerArr);
                                 setSpeakers(Array.from(speakerSet));
+                            } else {
+                                console.error('Upload failed.');
                             }
                             setLoadingAPICall(false);
                         }
@@ -196,23 +252,17 @@ export default function Insights() {
             <>
                 {!gongConnected ?
                     <Text>
-                        Gong account is not connected. Please connect it <Link href="/profile"> here </Link>
+                        Gong account is not connected. <Link color='teal.500' href="/profile"> Please connect it here </Link>
                     </Text>
                     :
                     <>
                         <Select
-                            sx={{ backgroundColor: "white" }}
                             value={selectedGongCall}
-                            onChange={(e) => { setSelectedGongCall(e.target.value); }}
-                        >
-                            {gongCallsA.map((call: any, index: number) => (
-                                <option key={index} value={call.id}>
-                                    {call.title.substring(0, 75) + ' ...'}
-                                </option>
-                            ))}
-                        </Select>
+                            onChange={(e) => { console.log(e); setSelectedGongCall(e); }}
+                            options={gongCallsA.map((call: any, index: number) => ({ label: call.title.substring(0, 75) + ' ...', value: call.id, title: call.title }))}
+                        />
 
-                        <Button colorScheme="purple" onClick={async (e) => {
+                        <Button isDisabled={!selectedGongCall.value} colorScheme="purple" onClick={async (e) => {
                             getCallInformation(selectedGongCall);
                         }} >
                             Get Call Information
@@ -230,11 +280,81 @@ export default function Insights() {
                     <Textarea
                         style={{ height: '500px' }}
                         value={valueChosen}
-                        // onChange={handleInputChange}
+                        onChange={(e) => setTranscript(e.target.value)}
                         placeholder='Here is a sample placeholder'
                         size='lg' />
                 </>
             )
+        }
+    }
+
+    function slackModalContent() {
+        return (
+            <VStack spacing={4}
+                align='stretch'>
+                <Text as="h2" fontSize="l">
+                    Channel
+                </Text>
+                <Select
+                    colorScheme="purple"
+                    options={slackChannels}
+                    value={selectedChannel}
+                    onChange={(e) => { setSelectedChannel(e); }}
+                    isMulti={false}
+                />
+                {selectedChannel.value === "create" &&
+                    <>
+                        <Text as="h4" fontSize="sm">
+                            Channel name
+                        </Text>
+                        <FormControl isInvalid={isError}>
+                            <Input isInvalid={slackChannels.find((item: any) => item.label === channelName)}
+                                value={channelName} onChange={(e) => setChannelName(e.target.value.replace(" ", "-").toLowerCase())} placeholder='example-name' />
+                            {isError &&
+                                <FormErrorMessage>{channelName === "" ? "Channel name can't be empty" : "Channel name already exists."}</FormErrorMessage>
+                            }
+                        </FormControl>
+                    </>}
+                <Text as="h2" fontSize="l">
+                    Invite people to channel
+                </Text>
+                <Select
+                    colorScheme="purple"
+                    options={slackUsers}
+                    value={selectedSlackUsers}
+                    onChange={(e) => { setSelectedSlackUsers(e); }}
+                    isMulti={true}
+                /></VStack>
+        )
+    }
+
+    function sendMessageToChannelT(message: string, channelId: any, selectedGongCall: any, selectedSlackUsers: any, channelName: string) {
+        console.log(selectedSlackUsers);
+        console.log("awd")
+        if (message && message.length > 0) {
+            let listOfUsers = ""
+            if (selectedSlackUsers.length > 0) {
+                listOfUsers = selectedSlackUsers.map((item: any) => item.value).join(",");
+            }
+            message = "Insights from meeting -> "
+                + selectedGongCall.title
+                + "\n>" + "*Topics*"
+                + "\n>- " + topics.join("\n>- ")
+            console.log(channelId);
+            const messageF = Message({ channel: channelId, text: "Example" })
+                .blocks(
+                    Blocks.Section({ text: 'One does not simply walk into Slack and click a button.' }),
+                    Blocks.Section({ text: 'At least that\'s what my friend Slackomir said :crossed_swords:' }),
+                    Blocks.Divider(),
+                    Blocks.Actions()
+                        .elements(
+                            Elements.Button({ text: 'Sure One Does', actionId: 'gotClicked' })
+                                .danger(),
+                            Elements.Button({ text: 'One Does Not', actionId: 'scaredyCat' })
+                                .primary()))
+                .asUser()
+                .buildToJSON();
+            sendMessageToChannel(messageF, channelId, channelId.value === "create", listOfUsers, channelName);
         }
     }
 
@@ -294,6 +414,17 @@ export default function Insights() {
 
                 <div className={styles.platform__container}>
                     {/* <Text fontWeight="semibold">Select Platform:</Text> */}
+                    <Button isDisabled={loadingSlack || transcript.length <= 0} colorScheme="purple" onClick={onOpen} >
+                        {
+                            loadingSlack ? "Loading Slack ..." : "Send to slack"
+                        }
+
+                    </Button>
+                    <ModalComponent isOpen={isOpen} onClose={onClose} title={"Slack Notification"} content={slackModalContent()} buttonText={"Send to Slack"}
+                        buttonClickT={() => { sendMessageToChannelT(topics.join(" "), selectedChannel, selectedGongCall, selectedSlackUsers, channelName); onClose() }}
+                        buttonDisabled={(selectedChannel.value === "create"
+                            ? (slackChannels.find((item: any) => item.label === channelName) && channelName !== "")
+                            : !selectedChannel)} />
 
                 </div>
             </div>
