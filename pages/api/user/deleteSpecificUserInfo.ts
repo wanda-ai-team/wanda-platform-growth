@@ -34,12 +34,8 @@ export default async function handler(
 
         await updateDBEntry("users", updateObj, ['email'], '==', [session.user.email], 1);
 
-        const user = await getDBEntry("users", ["email"], ["=="], [session.user.email], 1);
-
-        const response = user[0].data[info];
-
         return res.status(200).json({
-            content: response.slice(0, 10).concat("......"),
+            content: "success",
             success: true,
         });
     } catch (e: any) {

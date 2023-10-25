@@ -16,7 +16,7 @@ export default async function handler(
         const web = new WebClient(token);
 
         const { channelId } = req.body;
-        const { message } = req.body;
+        let { message } = req.body;
         const { create } = req.body;
         const { listOfUsers } = req.body;
         const { channelName } = req.body;
@@ -42,12 +42,13 @@ export default async function handler(
             })
         }
 
+        message = JSON.parse(message);
+
+        message.channel = newChannelId;
+
         (async () => {
 
-            await web.chat.postMessage({
-                channel: newChannelId,
-                text: message,
-            });
+            await web.chat.postMessage(message);
 
         })();
 

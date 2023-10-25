@@ -28,6 +28,7 @@ import {
     CreatableSelect,
     Select,
 } from "chakra-react-select";
+import { Message, Blocks, Elements } from 'slack-block-builder';
 
 import { useEffect, useRef, useState } from "react";
 import { isError } from "util";
@@ -121,13 +122,27 @@ export default function Insights() {
             }),
         })
             .then(response => response.json())
-            .then(data => {
+            .then(async data => {
                 console.log(data);
                 if (data.success) {
                     console.log(data.content);
+                    const response = await urlToTranscript(data.content.media.audioUrl, true, true, true, true, true);
                     setTranscript(data.content.transcript);
-                    setSpeakers(data.content.parties.map((item: any) => item.name));
                     setTopics(data.content.content.topics.map((item: any) => item.name));
+
+                    setKeyphrases(response.auto_highlights_result.results.map((item: any) => item.text))
+
+                    setSummary(response.summary);
+
+                    console.log(Object.keys(response.topics))
+                    setTopics(Object.keys(response.topics).map((item: any) => item.split('>')[item.split('>').length - 1]));
+
+
+                    const speakerArr = response.speakers.map((speaker: any) => speaker.speaker);
+                    console.log(speakerArr);
+                    const speakerSet = new Set(speakerArr);
+                    setSpeakers(Array.from(speakerSet));
+
                 } else {
                     console.log(data);
                 }
@@ -197,9 +212,10 @@ export default function Insights() {
                     <Button colorScheme="purple" onClick={async (e) => {
                         if (inputFileRef && inputFileRef.current && inputFileRef.current.files && inputFileRef.current.files.length > 0) {
                             const responseO = await uploadFile(setLoadingAPICall, inputFileRef);
-                            if (responseO && responseO.upload.ok) {
+                            if (responseO && responseO.upload.ok && responseO.fields.success_action_status) {
                                 console.log(responseO);
-                                const response = await urlToTranscript(url + responseO.url, responseO.fields, true, true, true, true, true);
+
+                                const response = await urlToTranscript(url + responseO.url, true, true, true, true, true);
                                 setTranscript(response.transcript);
                                 setSummary(response.summary);
                                 setKeyphrases(response.auto_highlights_result.results.map((item: any) => item.text))
@@ -212,6 +228,8 @@ export default function Insights() {
                                 console.log(speakerArr);
                                 const speakerSet = new Set(speakerArr);
                                 setSpeakers(Array.from(speakerSet));
+                            } else {
+                                console.error('Upload failed.');
                             }
                             setLoadingAPICall(false);
                         }
@@ -323,7 +341,20 @@ export default function Insights() {
                 + "\n>" + "*Topics*"
                 + "\n>- " + topics.join("\n>- ")
             console.log(channelId);
-            sendMessageToChannel(message, channelId, channelId.value === "create", listOfUsers, channelName);
+            const messageF = Message({ channel: channelId, text: "Example" })
+                .blocks(
+                    Blocks.Section({ text: 'One does not simply walk into Slack and click a button.' }),
+                    Blocks.Section({ text: 'At least that\'s what my friend Slackomir said :crossed_swords:' }),
+                    Blocks.Divider(),
+                    Blocks.Actions()
+                        .elements(
+                            Elements.Button({ text: 'Sure One Does', actionId: 'gotClicked' })
+                                .danger(),
+                            Elements.Button({ text: 'One Does Not', actionId: 'scaredyCat' })
+                                .primary()))
+                .asUser()
+                .buildToJSON();
+            sendMessageToChannel(messageF, channelId, channelId.value === "create", listOfUsers, channelName);
         }
     }
 

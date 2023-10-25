@@ -37,10 +37,10 @@ export default async function handler(
             "exposedFields": {
                 "parties": true,
                 "content": {
-                    "structure": false,
+                    "structure": true,
                     "topics": true,
-                    "trackers": false,
-                    "trackerOccurrences": false,
+                    "trackers": true,
+                    "trackerOccurrences": true,
                     "pointsOfInterest": true
                 },
                 "interaction": {
@@ -65,6 +65,7 @@ export default async function handler(
     }).then((response) => response.json())
         .then((data) => {
             if (data.calls.length > 0) {
+                console.log(JSON.stringify(data.calls[0]))
                 return data.calls[0]
             } else {
                 return null
