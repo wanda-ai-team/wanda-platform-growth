@@ -4,10 +4,6 @@ import getDBEntry from "@/utils/api/db/getDBEntry";
 import axios from "axios";
 import type { NextApiRequest, NextApiResponse } from "next";
 
-export const config = {
-    runtime: "edge",
-};
-
 const handler = async (req: Request): Promise<Response> => {
     let { url, speakers = false, key_phrases = false, summary = false, sentiment_analysis = false, iab_categories = false } = (await req.json()) as {
         url?: string;
