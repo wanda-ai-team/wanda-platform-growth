@@ -22,16 +22,15 @@ export default async function handler(
         console.log(req.body.payload);
         console.log(JSON.parse(req.body.payload))
         
-        console.log(JSON.parse(req.body.payload).type)
-        console.log(req.body.payload.get("type"));
+        let messageC = JSON.parse(req.body.payload)
 
-        switch (req.body.payload.type) {
+        switch (messageC.type) {
             case "message_action":
                 console.log("message_action");
                 
-                console.log(req.body.payload.message.blocks[2].text.text);
-                console.log(req.body.payload.message.blocks);
-                const responseOpenAI = await openAICall(false, "Create me a study case based on the give topics that were talked about during the client meeting\n Topics:" + req.body.payload.message.blocks[2].text.text, "You are a professional customer success manager");
+                console.log(messageC.message.blocks[2].text.text);
+                console.log(messageC.message.blocks);
+                const responseOpenAI = await openAICall(false, "Create me a study case based on the give topics that were talked about during the client meeting\n Topics:" + messageC.message.blocks[2].text.text, "You are a professional customer success manager");
                 console.log(responseOpenAI);
                 const response = await web.chat.postMessage({
                     channel: "C061MT4UL05",
