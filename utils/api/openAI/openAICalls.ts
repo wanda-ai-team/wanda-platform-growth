@@ -92,7 +92,8 @@ async function openAICall(streamB: boolean, userContent: string, systemContent: 
                 if (result.includes(`markdown`)) {
                     result = result.replace(`markdown`, '')
                 }
-                const parsedResult: any = JSON.parse(result)
+                console.log(typeof result)
+                const parsedResult: any = JSON.parse(result) ? JSON.parse(result) : result
                 return parsedResult
             } catch (error) {
                 console.log({ error })
