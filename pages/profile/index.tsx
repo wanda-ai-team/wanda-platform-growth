@@ -6,7 +6,7 @@ export default function Profile() {
     const [userLoadingGong, setUserLoadingGong] = useState(true);
     const [gongUser, setGongUser] = useState("");
     const [slackBot, setSlackBot] = useState("");
-    const client_id = "oty4etue"
+    const client_id = process.env.NEXT_PUBLIC_GONG_ID
     const redirect_uri = process.env.NEXT_PUBLIC_URL + "/auth/gong"
     const gongURL = "https://app.gong.io/oauth2/authorize?client_id=" + client_id + "&response_type=code&scope=api:calls:create%20api:calls:read:basic&redirect_uri=" + redirect_uri + "&state=296bc9a0-a2a2-4a57"
 
