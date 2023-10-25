@@ -23,10 +23,27 @@ export default async function handler(
         let newChannelId = "";
         let newChannel = null;
         if (create) {
-            newChannel = await web.conversations.create({
-                name: channelName
-            });
+            try {
+                newChannel = await web.conversations.create({
+                    name: channelName
+                });
+            } catch (e) {
+                console.log(e);
+            }
 
+        }else{
+            try {
+                const currentChannel = await web.conversations.info({
+                    channel: channelId.value
+                });
+                if(currentChannel && currentChannel.channel && !currentChannel.channel.is_member){
+                    await web.conversations.join({
+                        channel: channelId.value
+                    });
+                }
+            } catch (e) {
+                console.log(e);
+            }
         }
 
         if (newChannel && newChannel.channel && newChannel.channel.id) {
@@ -51,7 +68,8 @@ export default async function handler(
         message.channel = newChannelId;
 
         (async () => {
-            await web.chat.postMessage(message);
+            const response = await web.chat.postMessage(message);
+            console.log(response);
         })();
 
 
