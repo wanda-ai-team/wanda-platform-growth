@@ -126,7 +126,7 @@ export default function Insights() {
                 console.log(data);
                 if (data.success) {
                     console.log(data.content);
-                    // const response = await urlToTranscript(data.content.media.audioUrl, true, true, true, true, true);
+                    const response = await urlToTranscript(data.content.media.audioUrl, true, true, true, true, true);
                     setTranscript(data.content.transcript);
                     setTopics(data.content.content.topics.map((item: any) => item.name));
 

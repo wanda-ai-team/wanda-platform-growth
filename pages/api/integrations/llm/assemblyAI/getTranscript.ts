@@ -19,9 +19,7 @@ const handler = async (req: Request): Promise<Response> => {
     };
 
 
-    let transcribe: any = {};
-    transcribe = await transcribeAudio(url, speakers, key_phrases, summary, sentiment_analysis, iab_categories)
-    return new Response(transcribe, {
+    return new Response(await transcribeAudio(url, speakers, key_phrases, summary, sentiment_analysis, iab_categories), {
         headers: { "Content-Type": "text/html; charset=utf-8" },
     });
 
@@ -70,7 +68,6 @@ async function transcribeAudio(audio_url = "", speakers: boolean, key_phrases: b
             headers: headers
         })
         const transcriptionResult = await pollingResponse.json()
-        console.log(transcriptionResult)
 
         if (transcriptionResult.status === 'completed') {
             // print the results
