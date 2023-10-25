@@ -16,28 +16,31 @@ export default async function handler(
         // Initialize
         const web = new WebClient(token);
 
-        // switch (req.body.type) {
-        //     case "url_verification":
-        //         res.status(200).json({ content: req.body.challenge, success: true });
-        //         return;
-        //     case "event_callback":
-        //         break;
-        //     default:
-        //         res.status(200).json({ content: "No data found", success: false });
-        //         return;
-        // }
-
-        console.log("sendSlackMessage");
-        console.log(req.body);
-
-        const responseOpenAI = await openAICall(false, "userContent", "systemContent");
-        (async () => {
-            const response = await web.chat.postMessage({
-                channel: "C061MT4UL05",
-                text: responseOpenAI,
-            });
-            console.log(response);
-        })();
+        switch (req.body.payload.type) {
+            case "message_action":
+                console.log("message_action");
+                
+                console.log(req.body.payload.message.blocks[2].text.text);
+                console.log(req.body.payload.message.blocks);
+                const responseOpenAI = await openAICall(false, "Create me a study case based on the give topics that were talked about during the client meeting\n Topics:" + req.body.payload.message.blocks[2].text.text, "You are a professional customer success manager");
+                console.log(responseOpenAI);
+                const response = await web.chat.postMessage({
+                    channel: "C061MT4UL05",
+                    text: responseOpenAI,
+                });
+                console.log(response);
+                break
+            case "block_actions":
+                // const responseOpenAI = await openAICall(false, "userContent", "systemContent");
+                (async () => {
+                    const response = await web.chat.postMessage({
+                        channel: "C061MT4UL05",
+                        text: "Hello there",
+                    });
+                    console.log(response);
+                })();
+                break
+        }
 
 
         res.status(200).json({ content: "No data found", success: false });
