@@ -11,11 +11,10 @@ export async function urlToText(url: string, transB = false, outputSelectedI = "
   }
 }
 
-export async function urlToTranscript(url: string, fields: any, speakers: boolean, key_phrases: boolean, summary: boolean, sentiment_analysis: boolean, iab_categories: boolean) {
+export async function urlToTranscript(url: string, speakers: boolean, key_phrases: boolean, summary: boolean, sentiment_analysis: boolean, iab_categories: boolean) {
   let URLF = url;
   toastDisplay('Upload done, transcribing..', true);
 
-  if (fields.success_action_status === '201') {
     const decoder = new TextDecoder();
     const response = await fetch("/api/integrations/llm/assemblyAI/getTranscript", {
       method: "POST",
@@ -59,9 +58,7 @@ export async function urlToTranscript(url: string, fields: any, speakers: boolea
     // setLoadingAPICall(false);
 
     // console.log('Uploaded successfully!');
-  } else {
-    console.error('Upload failed.');
-  }
+ 
 }
 async function youtubeToThread(url: string, transB = true, setTranscript: ((arg0: string) => void), setLoadingAPICall: ((arg0: boolean) => void)) {
   let subtitles = await getYoutubeSubtitles(url, setLoadingAPICall);
