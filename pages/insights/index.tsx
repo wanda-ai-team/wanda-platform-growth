@@ -336,7 +336,7 @@ export default function Insights() {
             if (selectedSlackUsers.length > 0) {
                 listOfUsers = selectedSlackUsers.map((item: any) => item.value).join(",");
             }
-            message =  "\n>" + "*Topics*"
+            message = "\n>" + "*Topics*"
                 + "\n>- " + topics.join("\n>- ")
             console.log(channelId);
             const messageF = Message({ channel: channelId, text: "Meeting insights" })
@@ -347,7 +347,11 @@ export default function Insights() {
                     Blocks.Divider(),
                     Blocks.Actions()
                         .elements(
-                            Elements.Button({ text: 'Create piece of content', actionId: 'scaredyCat' })
+                            Elements.Button({ text: 'Create case study', actionId: 'scaredyCat' })
+                                .primary(),
+                            Elements.Button({ text: 'Update CRM', actionId: 'gotClicked' })
+                                .primary(),
+                            Elements.Button({ text: 'Write follow up email', actionId: 'gotClicked1' })
                                 .primary()))
                 .asUser()
                 .buildToJSON();
