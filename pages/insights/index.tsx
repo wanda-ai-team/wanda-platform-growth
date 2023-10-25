@@ -336,21 +336,18 @@ export default function Insights() {
             if (selectedSlackUsers.length > 0) {
                 listOfUsers = selectedSlackUsers.map((item: any) => item.value).join(",");
             }
-            message = "Insights from meeting -> "
-                + selectedGongCall.title
-                + "\n>" + "*Topics*"
+            message =  "\n>" + "*Topics*"
                 + "\n>- " + topics.join("\n>- ")
             console.log(channelId);
-            const messageF = Message({ channel: channelId, text: "Example" })
+            const messageF = Message({ channel: channelId, text: "Meeting insights" })
                 .blocks(
-                    Blocks.Section({ text: 'One does not simply walk into Slack and click a button.' }),
-                    Blocks.Section({ text: 'At least that\'s what my friend Slackomir said :crossed_swords:' }),
+                    Blocks.Section({ text: 'Meeting Insights for meeting ' + selectedGongCall.title }),
+                    Blocks.Divider(),
+                    Blocks.Section({ text: message }),
                     Blocks.Divider(),
                     Blocks.Actions()
                         .elements(
-                            Elements.Button({ text: 'Sure One Does', actionId: 'gotClicked' })
-                                .danger(),
-                            Elements.Button({ text: 'One Does Not', actionId: 'scaredyCat' })
+                            Elements.Button({ text: 'Create piece of content', actionId: 'scaredyCat' })
                                 .primary()))
                 .asUser()
                 .buildToJSON();
