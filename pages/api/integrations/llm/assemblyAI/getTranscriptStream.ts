@@ -65,30 +65,61 @@ async function transcribeAudio(audio_url = "", speakers: boolean, key_phrases: b
     const encoder = new TextEncoder();
     // Poll the transcription API until the transcript is ready
     let result;
-    while (true) {
-        const pollingResponse = await fetch(pollingEndpoint, {
-            headers: headers
-        })
-        const transcriptionResult = await pollingResponse.json()
-        console.log(transcriptionResult)
+    const readableStream = new ReadableStream({
+        async start(controller) {
+            while (true) {
+                // The start method is where you'll add the stream's content
+                // Queue the encoded content into the stream
+                // Prevent more content from being
+                // added to the stream
 
-        if (transcriptionResult.status === 'completed') {
-            // print the results
-            result = transcriptionResult
-            break
-        } else if (transcriptionResult.status === 'error') {
-            throw new Error(`Transcription failed: ${transcriptionResult.error}`)
-        } else {
-            await new Promise((resolve) => setTimeout(resolve, 3000))
-        }
-    }
-    return JSON.stringify({
-        auto_highlights_result: result.auto_highlights_result,
-        transcript: result.text,
-        summary: result.summary,
-        sentiment_analysis: result.sentiment_analysis_results,
-        speakers: result.utterances,
-        topics: result.iab_categories_result.summary
+                const pollingResponse = await fetch(pollingEndpoint, {
+                    headers: headers
+                })
+                const transcriptionResult = await pollingResponse.json()
+                
+                controller.enqueue(encoder.encode(transcriptionResult));
+                console.log(transcriptionResult)
+
+                if (transcriptionResult.status === 'completed') {
+                    // print the results
+                    result = transcriptionResult
+                    break
+                } else if (transcriptionResult.status === 'error') {
+                    throw new Error(`Transcription failed: ${transcriptionResult.error}`)
+                } else {
+                    await new Promise((resolve) => setTimeout(resolve, 3000))
+                }
+            }
+            
+            controller.close();
+
+        },
+
+    });
+    // TextDecoders can decode streams of
+    // encoded content. You'll use this to
+    // transform the streamed content before
+    // it's read by the client
+    const decoder = new TextDecoder();
+    // TransformStreams can transform a stream's chunks
+    // before they're read in the client
+    const transformStream = new TransformStream({
+        transform(chunk, controller) {
+            // Decode the content, so it can be transformed
+            const text = decoder.decode(chunk);
+            // Make the text uppercase, then encode it and
+            // add it back to the stream
+            controller.enqueue(encoder.encode(text.toUpperCase()));
+        },
+    });
+
+    // Finally, send the streamed response. Result:
+    // "STREAM ME!" will be displayed in the client
+    return new Response(readableStream.pipeThrough(transformStream), {
+        headers: {
+            'Content-Type': 'text/html; charset=utf-8',
+        },
     });
 }
 
