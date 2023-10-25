@@ -126,22 +126,22 @@ export default function Insights() {
                 console.log(data);
                 if (data.success) {
                     console.log(data.content);
-                    const response = await urlToTranscript(data.content.media.audioUrl, true, true, true, true, true);
+                    // const response = await urlToTranscript(data.content.media.audioUrl, true, true, true, true, true);
                     setTranscript(data.content.transcript);
                     setTopics(data.content.content.topics.map((item: any) => item.name));
 
-                    setKeyphrases(response.auto_highlights_result.results.map((item: any) => item.text))
+                    // setKeyphrases(response.auto_highlights_result.results.map((item: any) => item.text))
 
-                    setSummary(response.summary);
+                    // setSummary(response.summary);
 
-                    console.log(Object.keys(response.topics))
-                    setTopics(Object.keys(response.topics).map((item: any) => item.split('>')[item.split('>').length - 1]));
+                    // console.log(Object.keys(response.topics))
+                    // setTopics(Object.keys(response.topics).map((item: any) => item.split('>')[item.split('>').length - 1]));
 
 
-                    const speakerArr = response.speakers.map((speaker: any) => speaker.speaker);
-                    console.log(speakerArr);
-                    const speakerSet = new Set(speakerArr);
-                    setSpeakers(Array.from(speakerSet));
+                    // const speakerArr = response.speakers.map((speaker: any) => speaker.speaker);
+                    // console.log(speakerArr);
+                    // const speakerSet = new Set(speakerArr);
+                    // setSpeakers(Array.from(speakerSet));
 
                 } else {
                     console.log(data);
