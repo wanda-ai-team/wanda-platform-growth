@@ -25,14 +25,18 @@ export default async function handler(
                     channel: messageC.container.channel_id,
                     text: "Loading case study response ...",
                 });
-                const responseOpenAI = await openAICall(false, "Create me a study case based on the give topics that were talked about during the client meeting\n Topics:" + messageC.message.blocks[2].text.text, "You are a professional customer success manager");
 
 
-                // createDBEntry("useCases", { content: responseOpenAI, title: "Case Study", type: "caseStudy" })
+                const responseOpenAI = await openAICall(false, "Create me a study case based on the give topics that were talked about during the client meeting\n Topics:"
+                    + messageC.message.blocks[2].text.text,
+                    "You are a professional customer success manager");
+
+
+                const newUseCase = await createDBEntry("useCases", { content: responseOpenAI, title: "Case Study", type: "caseStudy", meetingTitle: messageC.message.blocks[0].text.text })
 
                 const response = await web.chat.postMessage({
                     channel: messageC.container.channel_id,
-                    text: responseOpenAI,
+                    text: "<@" + messageC.user.id + "> The use case was created and can be found here: " + process.env.NEXT_PUBLIC_URL + "/slack/casestudy/" + newUseCase.id,
                 });
 
                 break
