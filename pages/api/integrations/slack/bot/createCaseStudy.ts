@@ -1,8 +1,8 @@
 
 import type { NextApiRequest, NextApiResponse } from "next";
 import { WebClient } from '@slack/web-api';
-import { list } from "@vercel/blob";
 import { openAICall } from "@/utils/api/openAI/openAICalls";
+import createDBEntry from "@/utils/api/db/createDBEntry";
 
 export default async function handler(
     req: NextApiRequest,
@@ -15,13 +15,8 @@ export default async function handler(
 
         // Initialize
         const web = new WebClient(token);
-
-        console.log("sendSlackMessage");
-        console.log(req.body);
-        
-        console.log(req.body.payload);
         console.log(JSON.parse(req.body.payload))
-        
+
         let messageC = JSON.parse(req.body.payload)
 
         switch (messageC.type) {
@@ -31,12 +26,15 @@ export default async function handler(
                     text: "Loading case study response ...",
                 });
                 const responseOpenAI = await openAICall(false, "Create me a study case based on the give topics that were talked about during the client meeting\n Topics:" + messageC.message.blocks[2].text.text, "You are a professional customer success manager");
-                console.log(responseOpenAI);
+
+
+                // createDBEntry("useCases", { content: responseOpenAI, title: "Case Study", type: "caseStudy" })
+
                 const response = await web.chat.postMessage({
                     channel: messageC.container.channel_id,
                     text: responseOpenAI,
                 });
-                console.log(response);
+
                 break
             case "message_action":
                 // const responseOpenAI = await openAICall(false, "userContent", "systemContent");
@@ -50,8 +48,7 @@ export default async function handler(
                 break
         }
 
-
-        res.status(200).json({ content: "No data found", success: false });
+        res.status(200).json({ content: "Bot correctly answered", success: false });
     } catch (error) {
         console.log(error)
         res.status(200).json({ content: error, success: false });
