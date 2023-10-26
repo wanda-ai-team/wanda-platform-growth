@@ -2,7 +2,8 @@ import { NextApiRequest, NextApiResponse } from "next";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../auth/[...nextauth]";
 import getDBEntry from "@/utils/api/db/getDBEntry";
-import getDBEntryById from "@/utils/api/db/getDBEntryById";
+import updateDBEntry from "@/utils/api/db/updateDBEntry";
+import updateDBEntryByID from "@/utils/api/db/updateDBEntryByID";
 
 export default async function handler(
     req: NextApiRequest,
@@ -21,21 +22,19 @@ export default async function handler(
             res.status(400).end();
             return;
         }
-
         const { collection } = req.body;
+        const { updateBody } = req.body;
         const { id } = req.body;
 
-        if (collection === undefined || id === undefined) {
+        if (collection === undefined || id === undefined ||  updateBody === undefined) {
             console.log("Missing query error");
             return res.status(400).json({
                 content: "",
                 success: false,
             });
         }
+        const dbEntry = await updateDBEntryByID(collection, updateBody, id);
 
-
-        const dbEntry = await getDBEntryById(collection, id);
-        // const dbEntry = await getDBEntry(collection as string, condition as any[], conditionOperation as any[], conditionValue as any[], parseInt(numberOfConditions as string));
         return res.status(200).json({
             content: dbEntry,
             success: true,
