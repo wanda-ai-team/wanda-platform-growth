@@ -2,6 +2,7 @@ import { toast } from "react-toastify";
 import { getSubtitlesFromYoutube } from "@/utils/api/video/getSubtitlesFromYoutube";
 import toastDisplay from "../toast";
 import { getAudioFromYoutube } from "@/utils/api/video/getAudioFromYoutube";
+import { POSTApiCall } from "@/utils/api/commonAPICall";
 
 export async function urlToText(url: string, transB = false, outputSelectedI = "url", setTranscript: ((arg0: string) => void), setLoadingAPICall: ((arg0: boolean) => void)) {
 
@@ -11,54 +12,66 @@ export async function urlToText(url: string, transB = false, outputSelectedI = "
   }
 }
 
-export async function urlToTranscript(url: string, speakers: boolean, key_phrases: boolean, summary: boolean, sentiment_analysis: boolean, iab_categories: boolean) {
+export async function urlToTranscript(url: string, speakers: boolean, key_phrases: boolean, summary: boolean, sentiment_analysis: boolean, iab_categories: boolean, messageToast: string) {
   let URLF = url;
-  toastDisplay('Upload done, transcribing..', true);
+  toastDisplay(messageToast, true);
 
-    const decoder = new TextDecoder();
-    const response = await fetch("/api/integrations/llm/assemblyAI/getTranscript", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        url: URLF,
-        speakers: speakers,
-        key_phrases: key_phrases,
-        summary: summary,
-        sentiment_analysis: sentiment_analysis,
-        iab_categories: iab_categories,
-      }),
-    })
-    let done = false;
-    console.log(response)
-    const test = await response.json();
-    console.log(test)
-    return test;
-    // if (response === undefined) return;
-    // const reader = response?.body?.getReader();
-    // let trans = "";
-    // while (!done) {
-    //   if (reader === undefined) return;
-    //   const { value, done: doneReading } = await reader?.read();
+  const decoder = new TextDecoder();
+  const response = await fetch("/api/integrations/llm/assemblyAI/getTranscript", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      url: URLF,
+      speakers: speakers,
+      key_phrases: key_phrases,
+      summary: summary,
+      sentiment_analysis: sentiment_analysis,
+      iab_categories: iab_categories,
+    }),
+  })
 
-    //   done = doneReading;
-    //   if (value && decoder.decode(value) !== "processing") {
 
-    //     const data = decoder.decode(value);
-    //     // Do something with data
-    //     trans += data;
-    //   };
+  let old = await response.json();
+  let test: any = {};
 
-    // }
+  if (old) {
+    do {
+      console.log("waiting")
+      console.log(old.transcriptId)
+      await new Promise((resolve) => setTimeout(resolve, 3000));
+      test = await POSTApiCall("/api/integrations/llm/assemblyAI/getTranscriptCompleted", {
+        transcriptId: old.transcriptId
+      })
+      console.log(test.processing)
+    } while (test.processing)
+  }
+  return test;
+  // if (response === undefined) return;
+  // const reader = response?.body?.getReader();
+  // let trans = "";
+  // while (!done) {
+  //   if (reader === undefined) return;
+  //   const { value, done: doneReading } = await reader?.read();
 
-    // setTranscript(trans)
-    // toastDisplay('Transcript done, summarizing...', true);
+  //   done = doneReading;
+  //   if (value && decoder.decode(value) !== "processing") {
 
-    // setLoadingAPICall(false);
+  //     const data = decoder.decode(value);
+  //     // Do something with data
+  //     trans += data;
+  //   };
 
-    // console.log('Uploaded successfully!');
- 
+  // }
+
+  // setTranscript(trans)
+  // toastDisplay('Transcript done, summarizing...', true);
+
+  // setLoadingAPICall(false);
+
+  // console.log('Uploaded successfully!');
+
 }
 async function youtubeToThread(url: string, transB = true, setTranscript: ((arg0: string) => void), setLoadingAPICall: ((arg0: boolean) => void)) {
   let subtitles = await getYoutubeSubtitles(url, setLoadingAPICall);
