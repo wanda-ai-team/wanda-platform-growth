@@ -26,14 +26,14 @@ export default async function handler(
 
         switch (messageC.type) {
             case "block_actions":
-                console.log("message_action");
-                
-                console.log(messageC.message.blocks[2].text.text);
-                console.log(messageC.message.blocks);
+                await web.chat.postMessage({
+                    channel: messageC.container.channel_id,
+                    text: "Loading case study response ...",
+                });
                 const responseOpenAI = await openAICall(false, "Create me a study case based on the give topics that were talked about during the client meeting\n Topics:" + messageC.message.blocks[2].text.text, "You are a professional customer success manager");
                 console.log(responseOpenAI);
                 const response = await web.chat.postMessage({
-                    channel: "C061MT4UL05",
+                    channel: messageC.container.channel_id,
                     text: responseOpenAI,
                 });
                 console.log(response);
@@ -42,7 +42,7 @@ export default async function handler(
                 // const responseOpenAI = await openAICall(false, "userContent", "systemContent");
                 (async () => {
                     const response = await web.chat.postMessage({
-                        channel: "C061MT4UL05",
+                        channel: messageC.container.channel_id,
                         text: "Hello there",
                     });
                     console.log(response);
