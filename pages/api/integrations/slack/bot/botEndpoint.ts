@@ -3,7 +3,7 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import { WebClient } from '@slack/web-api';
 import { openAICall } from "@/utils/api/openAI/openAICalls";
 import createDBEntry from "@/utils/api/db/createDBEntry";
-import { createCaseStudyURL, createPieceOfContentModal } from "@/utils/api/integrations/slack/bot";
+import { createCaseStudyURL, createPieceOfContent, createPieceOfContentModal } from "@/utils/api/integrations/slack/bot";
 
 export default async function handler(
     req: NextApiRequest,
@@ -21,6 +21,14 @@ export default async function handler(
         let messageC = JSON.parse(req.body.payload)
 
         switch (messageC.type) {
+            case "view_submission":
+
+                switch (messageC.view.title.text) {
+                    case "Repurpose":
+                        await createPieceOfContent(web, messageC);
+                        break;
+                }
+                break
             case "block_actions":
                 switch (messageC.actions[0].action_id) {
                     case "createCaseStudy":
