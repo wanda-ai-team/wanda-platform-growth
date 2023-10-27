@@ -24,12 +24,15 @@ async function createCaseStudyURL(web: WebClient, messageC: any) {
 
 
 async function createPieceOfContent(web: WebClient, messageC: any) {
+    console.log(messageC.view.state.values)
+    console.log(messageC.view.state.values.target_channel)
+    console.log(messageC.view.state.values.target_channel.target_select)
+    console.log(messageC.view.state.values.target_channel.target_select.selected_conversation)
     await web.chat.postMessage({
-        channel: messageC.container.channel_id,
+        channel: messageC.view.state.values.target_channel.target_select.selected_conversation,
         text: "Creating piece of content, loading ...",
     });
 
-    console.log(messageC.view.blocks)
     // const responseOpenAI = await openAICall(false, "Create me a " +  messageC.view.blocks[0] + " based on the give topics that were talked about during the client meeting\n Topics:"
     //     + messageC.message.blocks[2].text.text,
     //     "You are a professional customer success manager");
