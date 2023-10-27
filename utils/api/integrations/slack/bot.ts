@@ -38,7 +38,7 @@ async function createPieceOfContentModal(web: WebClient, trigger_id: string) {
                                 })))
             ).buildToJSON();
         console.log(modal)
-        web.views.open({
+        await web.views.open({
             trigger_id: trigger_id,
             view: JSON.parse(modal)
         });
