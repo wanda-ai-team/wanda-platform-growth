@@ -22,12 +22,31 @@ async function createCaseStudyURL(web: WebClient, messageC: any) {
     });
 }
 
+
+async function createPieceOfContent(web: WebClient, messageC: any) {
+    await web.chat.postMessage({
+        channel: messageC.container.channel_id,
+        text: "Creating piece of content, loading ...",
+    });
+
+    console.log(messageC.view.blocks)
+    // const responseOpenAI = await openAICall(false, "Create me a " +  messageC.view.blocks[0] + " based on the give topics that were talked about during the client meeting\n Topics:"
+    //     + messageC.message.blocks[2].text.text,
+    //     "You are a professional customer success manager");
+
+    // const newUseCase = await createDBEntry("useCases", { content: responseOpenAI, title: "Case Study", type: "caseStudy", meetingTitle: messageC.message.blocks[0].text.text });
+
+    // const response = await web.chat.postMessage({
+    //     channel: messageC.container.channel_id,
+    //     text: "<@" + messageC.user.id + "> The use case was created and can be found here: " + process.env.NEXT_PUBLIC_URL + "/slack/casestudy/" + newUseCase.id,
+    // });
+}
+
 async function createPieceOfContentModal(web: WebClient, trigger_id: string) {
     try {
-        const modal = Modal({ title: 'PizzaMate', submit: 'Get Fed' })
+        const modal = Modal({ title: 'Repurpose', submit: 'Repurpose' })
             .blocks(
                 Blocks.Section({ text: 'Let\' repurpose this piece of content!' }),
-                Blocks.Section({ text: 'Hurray for corporate pizza! Let\'s get you fed and happy :pizza:' }),
                 Blocks.Input({ label: 'What\s the output platform?' })
                     .element(
                         Elements.StaticSelect({ placeholder: 'Choose output platform...' })
@@ -49,5 +68,6 @@ async function createPieceOfContentModal(web: WebClient, trigger_id: string) {
 
 export {
     createCaseStudyURL,
-    createPieceOfContentModal
+    createPieceOfContentModal,
+    createPieceOfContent
 };
