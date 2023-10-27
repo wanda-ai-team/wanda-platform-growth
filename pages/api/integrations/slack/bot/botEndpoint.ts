@@ -22,7 +22,6 @@ export default async function handler(
 
         switch (messageC.type) {
             case "view_submission":
-
                 switch (messageC.view.title.text) {
                     case "Repurpose":
                         await createPieceOfContent(web, messageC);
