@@ -27,7 +27,7 @@ export default async function handler(
                         await createCaseStudyURL(web, messageC);
                         break;
                     case "createPieceOfContent":
-                        await createPieceOfContentModal(web);
+                        await createPieceOfContentModal(web, messageC.trigger_id);
                         break;
                 }
 

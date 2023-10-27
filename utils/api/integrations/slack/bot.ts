@@ -22,26 +22,29 @@ async function createCaseStudyURL(web: WebClient, messageC: any) {
     });
 }
 
-async function createPieceOfContentModal(web: WebClient) {
-    const modal = Modal({ title: 'PizzaMate', submit: 'Get Fed' })
-        .blocks(
-            Blocks.Section({ text: 'Let\' repurpose this piece of content!' }),
-            Blocks.Section({ text: 'Hurray for corporate pizza! Let\'s get you fed and happy :pizza:' }),
-            Blocks.Input({ label: 'What\s the output platform?' })
-                .element(
-                    Elements.StaticSelect({ placeholder: 'Choose output platform...' })
-                        .actionId('item')
-                        .options(
-                            slackModalOutputPlatform.map((platform) => {
-                                return Bits.Option({ text: platform.platform, value: platform.platform })
-                            })))
-        ).buildToJSON();
-    const trigger = 'VALID_TRIGGER_ID';
-    web.views.open({
-        trigger_id: trigger,
-        view: JSON.parse(modal)
-    });
-
+async function createPieceOfContentModal(web: WebClient, trigger_id: string) {
+    try {
+        const modal = Modal({ title: 'PizzaMate', submit: 'Get Fed' })
+            .blocks(
+                Blocks.Section({ text: 'Let\' repurpose this piece of content!' }),
+                Blocks.Section({ text: 'Hurray for corporate pizza! Let\'s get you fed and happy :pizza:' }),
+                Blocks.Input({ label: 'What\s the output platform?' })
+                    .element(
+                        Elements.StaticSelect({ placeholder: 'Choose output platform...' })
+                            .actionId('item')
+                            .options(
+                                slackModalOutputPlatform.map((platform) => {
+                                    return Bits.Option({ text: platform.platform, value: platform.platform })
+                                })))
+            ).buildToJSON();
+        console.log(modal)
+        web.views.open({
+            trigger_id: trigger_id,
+            view: JSON.parse(modal)
+        });
+    } catch (error) {
+        console.log(error)
+    }
 }
 
 export {
