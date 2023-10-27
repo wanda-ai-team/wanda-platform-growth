@@ -16,22 +16,18 @@ import {
     InputRightElement,
     Spinner,
     useDisclosure,
-    HStack,
     VStack,
     FormControl,
     FormErrorMessage,
 } from "@chakra-ui/react";
 import { Link } from '@chakra-ui/react'
 import {
-    AsyncCreatableSelect,
-    AsyncSelect,
-    CreatableSelect,
     Select,
 } from "chakra-react-select";
 import { Message, Blocks, Elements } from 'slack-block-builder';
 
 import { useEffect, useRef, useState } from "react";
-import { isError } from "util";
+import { POSTApiCall } from "@/utils/api/commonAPICall";
 
 type Contents = "context" | "url" | "text" | "file" | "gong";
 const inputList: {
@@ -68,6 +64,7 @@ export default function Insights() {
     const [slackUsers, setSlackUsers] = useState<any>([]);
     const [slackChannels, setSlackChannels] = useState<any>([]);
     const [selectedChannel, setSelectedChannel] = useState<any>("");
+    const [callId, setCallId] = useState<string>("");
     const [channelName, setChannelName] = useState<string>("");
     const [selectedSlackUsers, setSelectedSlackUsers] = useState<any>([]);
 
@@ -128,21 +125,41 @@ export default function Insights() {
                 if (data.success) {
                     console.log(data.content);
                     setTranscript(data.content.transcript);
-                    const response = await urlToTranscript(data.content.media.audioUrl, true, true, true, true, true, 'Transcribed, getting insights..');
-                    setTopics(data.content.content.topics.map((item: any) => item.name));
+                    // const response = await urlToTranscript(data.content.media.audioUrl, true, true, true, true, true, 'Transcribed, getting insights..');
+                    // setCallId(data.content.metaData.id);
+                    // setTopics(data.content.content.topics.map((item: any) => item.name));
 
-                    setKeyphrases(response.auto_highlights_result.results.map((item: any) => item.text))
+                    // setKeyphrases(response.auto_highlights_result.results.map((item: any) => item.text))
 
-                    setSummary(response.summary);
+                    // setSummary(response.summary);
 
-                    console.log(Object.keys(response.topics))
-                    setTopics(Object.keys(response.topics).map((item: any) => item.split('>')[item.split('>').length - 1]));
+                    // console.log(Object.keys(response.topics))
+                    // setTopics(Object.keys(response.topics).map((item: any) => item.split('>')[item.split('>').length - 1]));
 
 
-                    const speakerArr = response.speakers.map((speaker: any) => speaker.speaker);
-                    console.log(speakerArr);
-                    const speakerSet = new Set(speakerArr);
-                    setSpeakers(Array.from(speakerSet));
+                    // const speakerArr = response.speakers.map((speaker: any) => speaker.speaker);
+                    // console.log(speakerArr);
+                    // const speakerSet = new Set(speakerArr);
+                    // setSpeakers(Array.from(speakerSet));
+
+                    // await POSTApiCall('/api/db/addOrCreateDBEntry',
+                    //     {
+                    //         collection: 'gongCalls',
+                    //         numberOfConditions: 1,
+                    //         condition: ['callId'],
+                    //         conditionValue: [data.content.metaData.id],
+                    //         conditionOperation: ['=='],
+                    //         body: {
+                    //             callId: data.content.metaData.id,
+                    //             title: data.content.metaData.title,
+                    //             transcript: data.content.transcript,
+                    //             summary: response.summary,
+                    //             keyphrases: response.auto_highlights_result.results.map((item: any) => item.text),
+                    //             topics: Object.keys(response.topics).map((item: any) => item.split('>')[item.split('>').length - 1]),
+                    //             speakers: Array.from(speakerSet),
+                    //             date: new Date().toISOString(),
+                    //         },
+                    //     })
 
                 } else {
                     console.log(data);
@@ -330,6 +347,8 @@ export default function Insights() {
     }
 
     function sendMessageToChannelT(message: string, channelId: any, selectedGongCall: any, selectedSlackUsers: any, channelName: string) {
+        console.log(selectedGongCall)
+        console.log('Meeting Insights for meeting ' + selectedGongCall.title + " id_"+ selectedGongCall.value);
         if (message && message.length > 0) {
             let listOfUsers = ""
             if (selectedSlackUsers.length > 0) {
@@ -340,7 +359,7 @@ export default function Insights() {
             console.log(channelId);
             const messageF = Message({ channel: channelId, text: "Meeting insights" })
                 .blocks(
-                    Blocks.Section({ text: 'Meeting Insights for meeting ' + selectedGongCall.title }),
+                    Blocks.Section({ text: 'Meeting Insights for meeting ' + selectedGongCall.title + " id_"+ selectedGongCall.value }),
                     Blocks.Divider(),
                     Blocks.Section({ text: message }),
                     Blocks.Divider(),
@@ -351,6 +370,8 @@ export default function Insights() {
                             Elements.Button({ text: 'Update CRM', actionId: 'gotClicked' })
                                 .primary(),
                             Elements.Button({ text: 'Write follow up email', actionId: 'gotClicked1' })
+                                .primary(),
+                            Elements.Button({ text: 'Create piece of content', actionId: 'createPieceOfContent' })
                                 .primary()))
                 .asUser()
                 .buildToJSON();
