@@ -121,13 +121,13 @@ export default function Insights() {
         })
             .then(response => response.json())
             .then(async data => {
-                console.log(data);
                 if (data.success) {
+                    console.log("data.content");
                     console.log(data.content);
                     setTranscript(data.content.transcript);
                     // const response = await urlToTranscript(data.content.media.audioUrl, true, true, true, true, true, 'Transcribed, getting insights..');
                     // setCallId(data.content.metaData.id);
-                    // setTopics(data.content.content.topics.map((item: any) => item.name));
+                    setTopics(data.content.content.topics.map((item: any) => item.name));
 
                     // setKeyphrases(response.auto_highlights_result.results.map((item: any) => item.text))
 
