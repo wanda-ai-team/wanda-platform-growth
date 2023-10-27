@@ -3,6 +3,7 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import { WebClient } from '@slack/web-api';
 import { openAICall } from "@/utils/api/openAI/openAICalls";
 import createDBEntry from "@/utils/api/db/createDBEntry";
+import { createCaseStudyURL, createPieceOfContentModal } from "@/utils/api/integrations/slack/bot";
 
 export default async function handler(
     req: NextApiRequest,
@@ -21,23 +22,15 @@ export default async function handler(
 
         switch (messageC.type) {
             case "block_actions":
-                await web.chat.postMessage({
-                    channel: messageC.container.channel_id,
-                    text: "Loading case study response ...",
-                });
+                switch (messageC.actions[0].action_id) {
+                    case "createCaseStudy":
+                        await createCaseStudyURL(web, messageC);
+                        break;
+                    case "createPieceOfContent":
+                        await createPieceOfContentModal(web);
+                        break;
+                }
 
-
-                const responseOpenAI = await openAICall(false, "Create me a study case based on the give topics that were talked about during the client meeting\n Topics:"
-                    + messageC.message.blocks[2].text.text,
-                    "You are a professional customer success manager");
-
-
-                const newUseCase = await createDBEntry("useCases", { content: responseOpenAI, title: "Case Study", type: "caseStudy", meetingTitle: messageC.message.blocks[0].text.text })
-
-                const response = await web.chat.postMessage({
-                    channel: messageC.container.channel_id,
-                    text: "<@" + messageC.user.id + "> The use case was created and can be found here: " + process.env.NEXT_PUBLIC_URL + "/slack/casestudy/" + newUseCase.id,
-                });
 
                 break
             case "message_action":
@@ -58,3 +51,4 @@ export default async function handler(
         res.status(200).json({ content: error, success: false });
     }
 }
+
