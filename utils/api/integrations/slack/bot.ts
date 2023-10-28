@@ -45,9 +45,9 @@ async function createPieceOfContent(web: WebClient, messageC: any) {
     // });
 }
 
-async function createPieceOfContentModal(web: WebClient, trigger_id: string) {
+async function createPieceOfContentModal(web: WebClient, trigger_id: string, channel_id: string) {
     try {
-        const modal = Modal({ title: 'Repurpose', submit: 'Repurpose' })
+        const modal = Modal({ title: 'Repurpose', submit: 'Repurpose', privateMetaData: channel_id })
             .blocks(
                 Blocks.Section({ text: 'Let\' repurpose this piece of content!' }),
                 Blocks.Input({ label: 'What\s the output platform?' })
