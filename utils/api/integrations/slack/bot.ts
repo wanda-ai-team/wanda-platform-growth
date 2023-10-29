@@ -28,9 +28,11 @@ async function createPieceOfContent(web: WebClient, messageC: any) {
     console.log(messageC.view.state.values)
     console.log(Object.values(messageC.view.state.values))
     console.log(Object.values(messageC.view.state.values)[0])
-    console.log(Object.values(messageC.view.state.values)[0])
-    console.log(JSON.parse(messageC.view.state.values))
-    console.log(messageC.view.state.values.target_channel)
+    
+    let value: any = {};
+    value = (Object.values(messageC.view.state.values)[0])
+    let fValue = value.item.selected_option.value
+    console.log(fValue)
 
 
     await web.chat.postMessage({
