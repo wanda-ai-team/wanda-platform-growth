@@ -26,7 +26,9 @@ async function createCaseStudyURL(web: WebClient, messageC: any) {
 async function createPieceOfContent(web: WebClient, messageC: any) {
     
     console.log(messageC.view.state.values)
-    console.log(messageC.view.state.values.get("WQ/sr").item.selected_option[0])
+    console.log(Object.values(messageC.view.state.values))
+    console.log(Object.values(messageC.view.state.values)[0])
+    console.log(Object.values(messageC.view.state.values)[0])
     console.log(JSON.parse(messageC.view.state.values))
     console.log(messageC.view.state.values.target_channel)
 
