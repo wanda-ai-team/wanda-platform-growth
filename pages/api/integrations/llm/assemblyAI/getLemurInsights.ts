@@ -83,8 +83,11 @@ async function transcribeAudio(audio_url = "") {
 
         responseData = await response1.json();
 
+        console.log(responseData)
+
+
         return JSON.stringify({
-            response: responseData.response[0].answer.split("\n\n"),
+            response: responseData.response[0] !== undefined ? responseData.response[0].answer.split("\n\n") !== undefined ? responseData.response[0].answer.split("\n\n") : responseData.response[0].answer : "No answer found",
         });
     } catch (error) {
         console.log(error);
