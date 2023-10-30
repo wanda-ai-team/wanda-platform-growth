@@ -3,7 +3,7 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import { WebClient } from '@slack/web-api';
 import { openAICall } from "@/utils/api/openAI/openAICalls";
 import createDBEntry from "@/utils/api/db/createDBEntry";
-import { createCaseStudyURL, createPieceOfContent, createPieceOfContentModal } from "@/utils/api/integrations/slack/bot";
+import { createCaseStudyURL, createFollowUpEmail, createPieceOfContent, createPieceOfContentModal } from "@/utils/api/integrations/slack/bot";
 
 export default async function handler(
     req: NextApiRequest,
@@ -35,6 +35,9 @@ export default async function handler(
                         break;
                     case "createPieceOfContent":
                         await createPieceOfContentModal(web, messageC.trigger_id, messageC);
+                        break;
+                    case "followUpEmail":
+                        await createFollowUpEmail(web, messageC);
                         break;
                 }
 

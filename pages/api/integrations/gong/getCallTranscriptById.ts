@@ -33,7 +33,6 @@ export default async function handler(
         headers,
     }).then((response) => response.json())
         .then((data) => {
-            console.log(data)
             if (data.callTranscripts.length > 0) {
                 return data.callTranscripts[0].transcript
             } else {
@@ -43,7 +42,6 @@ export default async function handler(
 
     let transcript = response.map((item: any) => item.sentences.map((sentence: any) => sentence.text))
     transcript = transcript.join(" ")
-    console.log(transcript)
 
 
 

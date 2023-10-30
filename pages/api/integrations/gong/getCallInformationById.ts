@@ -65,14 +65,12 @@ export default async function handler(
     }).then((response) => response.json())
         .then((data) => {
             if (data.calls.length > 0) {
-                console.log(JSON.stringify(data.calls[0]))
                 return data.calls[0]
             } else {
                 return null
             }
         })
 
-    console.log(callId)
     const body2 = {
         "filter": {
             "callIds": callId
@@ -84,7 +82,6 @@ export default async function handler(
         headers,
     }).then((response) => response.json())
         .then((data) => {
-            console.log(data)
             if (data.callTranscripts.length > 0) {
                 return data.callTranscripts[0].transcript
             } else {

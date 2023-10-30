@@ -28,14 +28,12 @@ export default async function handler(
         headers,
     }).then((response) => response.json())
         .then((data) => {
-            console.log(data.calls);
             let callsData = {}
             if (data.calls.length > 0) {
                 callsData = data.calls.map((call: any) => { return { title: call.title, id: call.id, meetingUrl: call.meetingUrl } })
             } else {
                 console.log("No data found");
             }
-            console.log(callsData);
             return callsData;
         })
 
