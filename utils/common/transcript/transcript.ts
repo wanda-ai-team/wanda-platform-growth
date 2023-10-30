@@ -12,6 +12,13 @@ export async function urlToText(url: string, transB = false, outputSelectedI = "
   }
 }
 
+export async function getLemurInsights(url: string) {
+  const response = await POSTApiCall("/api/integrations/llm/assemblyAI/getLemurInsights", {
+    url: url
+  })
+  return response;
+}
+
 export async function urlToTranscript(url: string, speakers: boolean, key_phrases: boolean, summary: boolean, sentiment_analysis: boolean, iab_categories: boolean, messageToast: string) {
   let URLF = url;
   toastDisplay(messageToast, true);

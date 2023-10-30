@@ -25,10 +25,6 @@ async function createCaseStudyURL(web: WebClient, messageC: any) {
 
 async function createPieceOfContent(web: WebClient, messageC: any) {
 
-    console.log(messageC.view.state.values)
-    console.log(Object.values(messageC.view.state.values))
-    console.log(Object.values(messageC.view.state.values)[0])
-
     let value: any = {};
     value = (Object.values(messageC.view.state.values)[0])
     let fValue = value.item.selected_option.value
@@ -75,8 +71,27 @@ async function createPieceOfContentModal(web: WebClient, trigger_id: string, mes
     }
 }
 
+
+async function createFollowUpEmail(web: WebClient, messageC: any) {
+    await web.chat.postMessage({
+        channel: messageC.container.channel_id,
+        text: "Creating follow up email ...",
+    });
+
+    const responseOpenAI = await openAICall(false, "Create me a followup email to send to the client, based on the given topics that were talked about on a client call. \n Topics:"
+        + messageC.message.blocks[2].text.text,
+        "You are a professional customer success manager");
+
+    await web.chat.postMessage({
+        channel: messageC.container.channel_id,
+        text: "<@" + messageC.user.id + "> Here you have the draft email:\n" + "----email----\n\n" + responseOpenAI,
+    });
+}
+
+
 export {
     createCaseStudyURL,
     createPieceOfContentModal,
-    createPieceOfContent
+    createPieceOfContent,
+    createFollowUpEmail
 };

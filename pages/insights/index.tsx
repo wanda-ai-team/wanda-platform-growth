@@ -3,7 +3,7 @@ import ModalComponent from "@/components/modal/Modal";
 import RadioTag from "@/components/radio-tag";
 import styles from "@/styles/HomeN.module.css";
 import { getListOfChannels, getListOfUsers, sendMessageToChannel } from "@/utils/api/integrations/slack";
-import { urlToText, urlToTranscript } from "@/utils/common/transcript/transcript";
+import { getLemurInsights, urlToText, urlToTranscript } from "@/utils/common/transcript/transcript";
 import uploadFile from "@/utils/common/upload/upload";
 import {
     Input,
@@ -122,14 +122,13 @@ export default function Insights() {
             .then(response => response.json())
             .then(async data => {
                 if (data.success) {
-                    console.log("data.content");
-                    console.log(data.content);
                     setTranscript(data.content.transcript);
+                    const response = await getLemurInsights(data.content.media.audioUrl);
                     // const response = await urlToTranscript(data.content.media.audioUrl, true, true, true, true, true, 'Transcribed, getting insights..');
                     // setCallId(data.content.metaData.id);
                     setTopics(data.content.content.topics.map((item: any) => item.name));
 
-                    // setKeyphrases(response.auto_highlights_result.results.map((item: any) => item.text))
+                    setKeyphrases(response.response)
 
                     // setSummary(response.summary);
 
@@ -369,7 +368,7 @@ export default function Insights() {
                                 .primary(),
                             Elements.Button({ text: 'Update CRM', actionId: 'gotClicked' })
                                 .primary(),
-                            Elements.Button({ text: 'Write follow up email', actionId: 'gotClicked1' })
+                            Elements.Button({ text: 'Write follow up email', actionId: 'followUpEmail' })
                                 .primary(),
                             Elements.Button({ text: 'Create piece of content', actionId: 'createPieceOfContent' })
                                 .primary()))
