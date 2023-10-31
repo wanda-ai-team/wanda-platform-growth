@@ -19,6 +19,12 @@ import {
     VStack,
     FormControl,
     FormErrorMessage,
+    Accordion,
+    AccordionButton,
+    AccordionIcon,
+    AccordionItem,
+    AccordionPanel,
+    Box,
 } from "@chakra-ui/react";
 import { Link } from '@chakra-ui/react'
 import {
@@ -123,42 +129,39 @@ export default function Insights() {
             .then(async data => {
                 if (data.success) {
                     setTranscript(data.content.transcript);
-                    const response = await getLemurInsights(data.content.media.audioUrl);
-                    // const response = await urlToTranscript(data.content.media.audioUrl, true, true, true, true, true, 'Transcribed, getting insights..');
-                    // setCallId(data.content.metaData.id);
+                    const response = await urlToTranscript(data.content.media.audioUrl, true, true, true, true, true, 'Transcribed, getting insights..');
+
+                    const responseLemur = await getLemurInsights(data.content.media.audioUrl);
+                    
+                    setCallId(data.content.metaData.id);
                     setTopics(data.content.content.topics.map((item: any) => item.name));
 
-                    setKeyphrases(response.response)
+                    setKeyphrases(responseLemur.pain_points)
+                    setSummary(response.transcript.summary);
 
-                    // setSummary(response.summary);
+                    const speakerArr = responseLemur.speakers.map((speaker: any) => speaker.speaker);
+                    console.log(speakerArr);
+                    const speakerSet = new Set(speakerArr);
+                    setSpeakers(Array.from(speakerSet));
+                    await POSTApiCall('/api/db/addOrCreateDBEntry',
+                        {
+                            collection: 'gongCalls',
+                            numberOfConditions: 1,
+                            condition: ['callId'],
+                            conditionValue: [data.content.metaData.id],
+                            conditionOperation: ['=='],
+                            body: {
+                                callId: data.content.metaData.id,
+                                title: data.content.metaData.title,
+                                transcript: data.content.transcript,
+                                keyphrases: response.response,
+                                topics: Object.keys(response.topics).map((item: any) => item.split('>')[item.split('>').length - 1]),
+                                date: new Date().toISOString(),
+                            },
+                        })
 
-                    // console.log(Object.keys(response.topics))
-                    // setTopics(Object.keys(response.topics).map((item: any) => item.split('>')[item.split('>').length - 1]));
 
 
-                    // const speakerArr = response.speakers.map((speaker: any) => speaker.speaker);
-                    // console.log(speakerArr);
-                    // const speakerSet = new Set(speakerArr);
-                    // setSpeakers(Array.from(speakerSet));
-
-                    // await POSTApiCall('/api/db/addOrCreateDBEntry',
-                    //     {
-                    //         collection: 'gongCalls',
-                    //         numberOfConditions: 1,
-                    //         condition: ['callId'],
-                    //         conditionValue: [data.content.metaData.id],
-                    //         conditionOperation: ['=='],
-                    //         body: {
-                    //             callId: data.content.metaData.id,
-                    //             title: data.content.metaData.title,
-                    //             transcript: data.content.transcript,
-                    //             summary: response.summary,
-                    //             keyphrases: response.auto_highlights_result.results.map((item: any) => item.text),
-                    //             topics: Object.keys(response.topics).map((item: any) => item.split('>')[item.split('>').length - 1]),
-                    //             speakers: Array.from(speakerSet),
-                    //             date: new Date().toISOString(),
-                    //         },
-                    //     })
 
                 } else {
                     console.log(data);
@@ -347,7 +350,7 @@ export default function Insights() {
 
     function sendMessageToChannelT(message: string, channelId: any, selectedGongCall: any, selectedSlackUsers: any, channelName: string) {
         console.log(selectedGongCall)
-        console.log('Meeting Insights for meeting ' + selectedGongCall.title + " id_"+ selectedGongCall.value);
+        console.log('Meeting Insights for meeting ' + selectedGongCall.title + " id_" + selectedGongCall.value);
         if (message && message.length > 0) {
             let listOfUsers = ""
             if (selectedSlackUsers.length > 0) {
@@ -358,7 +361,7 @@ export default function Insights() {
             console.log(channelId);
             const messageF = Message({ channel: channelId, text: "Meeting insights" })
                 .blocks(
-                    Blocks.Section({ text: 'Meeting Insights for meeting ' + selectedGongCall.title + " id_"+ selectedGongCall.value }),
+                    Blocks.Section({ text: 'Meeting Insights for meeting ' + selectedGongCall.title + " id_" + selectedGongCall.value }),
                     Blocks.Divider(),
                     Blocks.Section({ text: message }),
                     Blocks.Divider(),
@@ -461,44 +464,89 @@ export default function Insights() {
                 <div className={styles.texts}>
                     <Progress size='xs' isIndeterminate />
 
-                    <Text as="h3" fontSize="xl">
-                        Transcript
-                    </Text>
-                    {getTextArea(outputSelected === 'Summary' ? transcript : outputSelected === 'Transcript' ? transcript : transcript)}
+                    <Accordion allowToggle w={"100%"}>
+                        <AccordionItem>
+                            <h2>
+                                <AccordionButton>
+                                    <Box as="span" flex='1' textAlign='left'>
+                                        Transcript
+                                    </Box>
+                                    <AccordionIcon />
+                                </AccordionButton>
+                            </h2>
+                            <AccordionPanel pb={4}>
+                                {getTextArea(outputSelected === 'Summary' ? transcript : outputSelected === 'Transcript' ? transcript : transcript)}
+                            </AccordionPanel>
+                        </AccordionItem>
 
-                    <Text as="h3" fontSize="xl">
-                        Brief
-                    </Text>
-                    <Text>
-                        {summary}
-                    </Text>
+                        <AccordionItem>
+                            <h2>
+                                <AccordionButton>
+                                    <Box as="span" flex='1' textAlign='left'>
+                                        Pain Points
+                                    </Box>
+                                    <AccordionIcon />
+                                </AccordionButton>
+                            </h2>
+                            <AccordionPanel pb={4}>
+                                {keyphrases.length > 0 && keyphrases.map((item: any, index: number) => (
+                                    <Text key={index}>
+                                        - {item}
+                                    </Text>
+                                ))}
+                            </AccordionPanel>
+                        </AccordionItem>
 
-                    <Text as="h3" fontSize="xl">
-                        Keypoints
-                    </Text>
-                    {keyphrases.map((item: any, index: number) => (
-                        <Text key={index}>
-                            - {item}
-                        </Text>
-                    ))}
+                        <AccordionItem>
+                            <h2>
+                                <AccordionButton>
+                                    <Box as="span" flex='1' textAlign='left'>
+                                        Brief
+                                    </Box>
+                                    <AccordionIcon />
+                                </AccordionButton>
+                            </h2>
+                            <AccordionPanel pb={4}>
+                                {summary}
+                            </AccordionPanel>
+                        </AccordionItem>
 
-                    <Text as="h3" fontSize="xl">
-                        Speakers
-                    </Text>
-                    {speakers.map((item: any, index: number) => (
-                        <Text key={index}>
-                            - {item}
-                        </Text>
-                    ))}
+                        <AccordionItem>
+                            <h2>
+                                <AccordionButton>
+                                    <Box as="span" flex='1' textAlign='left'>
+                                        Speakers
+                                    </Box>
+                                    <AccordionIcon />
+                                </AccordionButton>
+                            </h2>
+                            <AccordionPanel pb={4}>
+                                {speakers.map((item: any, index: number) => (
+                                    <Text key={index}>
+                                        - {item}
+                                    </Text>
+                                ))}
+                            </AccordionPanel>
+                        </AccordionItem>
 
-                    <Text as="h3" fontSize="xl">
-                        Topics
-                    </Text>
-                    {topics.map((item: any, index: number) => (
-                        <Text key={index}>
-                            - {item}
-                        </Text>
-                    ))}
+                        <AccordionItem>
+                            <h2>
+                                <AccordionButton>
+                                    <Box as="span" flex='1' textAlign='left'>
+                                        Topics
+                                    </Box>
+                                    <AccordionIcon />
+                                </AccordionButton>
+                            </h2>
+                            <AccordionPanel pb={4}>
+                                {topics.map((item: any, index: number) => (
+                                    <Text key={index}>
+                                        - {item}
+                                    </Text>
+                                ))}
+                            </AccordionPanel>
+                        </AccordionItem>
+                    </Accordion>
                     {/* {getTextArea(speakers)} */}
                 </div>
             </div>
