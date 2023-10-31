@@ -23,7 +23,6 @@ export async function urlToTranscript(url: string, speakers: boolean, key_phrase
   let URLF = url;
   toastDisplay(messageToast, true);
 
-  const decoder = new TextDecoder();
   const response = await fetch("/api/integrations/llm/assemblyAI/getTranscript", {
     method: "POST",
     headers: {
@@ -41,9 +40,12 @@ export async function urlToTranscript(url: string, speakers: boolean, key_phrase
 
 
   let old = await response.json();
+  console.log(old)
   let test: any = {};
 
-  if (old) {
+  if (old.transcript.status !== undefined && old.transcript.status === "completed") {
+    test = old;
+  } else {
     do {
       console.log("waiting")
       console.log(old.transcriptId)
@@ -55,29 +57,6 @@ export async function urlToTranscript(url: string, speakers: boolean, key_phrase
     } while (test.processing)
   }
   return test;
-  // if (response === undefined) return;
-  // const reader = response?.body?.getReader();
-  // let trans = "";
-  // while (!done) {
-  //   if (reader === undefined) return;
-  //   const { value, done: doneReading } = await reader?.read();
-
-  //   done = doneReading;
-  //   if (value && decoder.decode(value) !== "processing") {
-
-  //     const data = decoder.decode(value);
-  //     // Do something with data
-  //     trans += data;
-  //   };
-
-  // }
-
-  // setTranscript(trans)
-  // toastDisplay('Transcript done, summarizing...', true);
-
-  // setLoadingAPICall(false);
-
-  // console.log('Uploaded successfully!');
 
 }
 async function youtubeToThread(url: string, transB = true, setTranscript: ((arg0: string) => void), setLoadingAPICall: ((arg0: boolean) => void)) {

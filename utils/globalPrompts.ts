@@ -211,20 +211,20 @@ function getGenerateTestX(context: string, contextuser: string) {
     Don't forget to label each tweet with the number of the tweet.
     Topic: ${context}.\n`
 
-// Please ignore all previous instructions.
-// Please respond only in the english language.
-// You are a Twitter influencer with a large following.
-// Do not self reference.
-// Do not explain what you are doing.
-// Please create a thread about ${context}. 
-// The character count for each thread should be between 270 to 280 characters.
-// Your content should be based on the business type and style of writing: ${contextuser}.
-// Please use simple and understandable words.
-// Don't use hashtags or emojis.
-// Clearly label each tweet with the number of the tweet, with the following "1.", "2.", "3.", "4.", "5.", "6.", "7.", "8.", "9.", "10.", depending on the number of tweets.
-// Don't use digits with dots so 
-// Please include statistics, personal experience, and fun facts in the thread.
-// `
+    // Please ignore all previous instructions.
+    // Please respond only in the english language.
+    // You are a Twitter influencer with a large following.
+    // Do not self reference.
+    // Do not explain what you are doing.
+    // Please create a thread about ${context}. 
+    // The character count for each thread should be between 270 to 280 characters.
+    // Your content should be based on the business type and style of writing: ${contextuser}.
+    // Please use simple and understandable words.
+    // Don't use hashtags or emojis.
+    // Clearly label each tweet with the number of the tweet, with the following "1.", "2.", "3.", "4.", "5.", "6.", "7.", "8.", "9.", "10.", depending on the number of tweets.
+    // Don't use digits with dots so 
+    // Please include statistics, personal experience, and fun facts in the thread.
+    // `
 }
 
 
@@ -330,8 +330,15 @@ Use the pain points mentioned to increase the click through rate for purchases a
 Please display the structure of the Landing page and include a title tag (between 50-60 characters) and meta description (between 120-130 characters).
 The landing page should have the flow of a story.
 
-.
-    `
+.`
+}
+
+function getPainPointPrompt() {
+    return `
+Provide a list of pain points that were discussed during this call.
+This should be pain points that the client on the call feels.
+Use both a small description of the pain point and extract content from the transcript to support your answer.
+`
 }
 
 export {
@@ -350,5 +357,6 @@ export {
     getLandingPageScrapePrompt,
     getGenerateTestX,
     getGenerateTestBlog,
-    getGenerateLandingPage
+    getGenerateLandingPage,
+    getPainPointPrompt
 };
