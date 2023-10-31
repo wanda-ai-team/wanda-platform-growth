@@ -2,6 +2,7 @@ import { slackModalOutputPlatform } from "@/utils/globalVariables";
 import { WebClient } from "@slack/web-api";
 import { Modal, Blocks, Elements, Bits, Message } from 'slack-block-builder';
 import createDBEntry from "../../db/createDBEntry";
+import getDBEntry from "../../db/getDBEntry";
 import { openAICall } from "../../openAI/openAICalls";
 
 async function createCaseStudyURL(web: WebClient, messageC: any) {
@@ -78,14 +79,23 @@ async function createFollowUpEmail(web: WebClient, messageC: any) {
         text: "Creating follow up email ...",
     });
 
-    const responseOpenAI = await openAICall(false, "Create me a followup email to send to the client, based on the given topics that were talked about on a client call. \n Topics:"
-        + messageC.message.blocks[2].text.text,
-        "You are a professional customer success manager");
-
     await web.chat.postMessage({
         channel: messageC.container.channel_id,
-        text: "<@" + messageC.user.id + "> Here you have the draft email:\n" + "----email----\n\n" + responseOpenAI,
+        text: "call id " + messageC.message.blocks[0].text.text.split("id_")[1] + " topics " + messageC.message.blocks[2].text.text,
     });
+
+    const gongCall = getDBEntry("gongCalls", ["id"], ["=="], [messageC.message.blocks[0].text.text.split("id_")[1]], 1)
+
+    console.log(gongCall)
+
+    // const responseOpenAI = await openAICall(false, "Create me a followup email to send to the client, based on the given topics that were talked about on a client call. \n Topics:"
+    //     + messageC.message.blocks[2].text.text,
+    //     "You are a professional customer success manager");
+
+    // await web.chat.postMessage({
+    //     channel: messageC.container.channel_id,
+    //     text: "<@" + messageC.user.id + "> Here you have the draft email:\n" + "----email----\n\n" + responseOpenAI,
+    // });
 }
 
 
