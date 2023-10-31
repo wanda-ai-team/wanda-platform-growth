@@ -14,6 +14,7 @@ export const config = {
         "/dashboard",
         "/reporpuse",
         "/repurpose",
-        "/insights"
+        "/insights",
+        "/slack"
     ]
 }

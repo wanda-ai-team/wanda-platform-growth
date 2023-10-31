@@ -42,6 +42,11 @@ async function getOpenAIAnswer(context: string, platform: string, streamB = fals
 
     }
 
+    return await openAICall(streamB, userContent, systemContent)
+}
+
+async function openAICall(streamB: boolean, userContent: string, systemContent: string) {
+
     if (streamB) {
 
         console.log({ userContent })
@@ -87,7 +92,8 @@ async function getOpenAIAnswer(context: string, platform: string, streamB = fals
                 if (result.includes(`markdown`)) {
                     result = result.replace(`markdown`, '')
                 }
-                const parsedResult: any = JSON.parse(result)
+                console.log(typeof result)
+                const parsedResult: any = JSON.parse(result) ? JSON.parse(result) : result
                 return parsedResult
             } catch (error) {
                 console.log({ error })
@@ -101,5 +107,6 @@ async function getOpenAIAnswer(context: string, platform: string, streamB = fals
 }
 
 export {
-    getOpenAIAnswer
+    getOpenAIAnswer,
+    openAICall
 };

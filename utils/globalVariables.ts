@@ -84,6 +84,14 @@ const outputsWithPlatform = [
     { platform: 'Summary', outputs: ['Summary'] }
 ];
 
+const slackModalOutputPlatform = [
+    { platform: 'Twitter', outputs: ['Thread'] },
+    // { platform: 'Instagram', outputs: ['Carousel', 'Post'] },
+    { platform: 'Landing Page', outputs: ['Copy']}, 
+    { platform: 'Linkedin', outputs: ['Post'] },
+    { platform: 'Blog', outputs: ['Post', 'Article'] },
+];
+
 const platformsToGenerateIdeas = [
     "Twitter",
     "Blog",
@@ -105,5 +113,6 @@ export {
     writingStyles,
     outputsWithPlatform,
     pagesWithoutHeader,
-    platformsToGenerateIdeas
+    platformsToGenerateIdeas,
+    slackModalOutputPlatform
 }

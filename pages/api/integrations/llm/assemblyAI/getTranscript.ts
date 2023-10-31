@@ -1,11 +1,8 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
-import deleteDBEntry from "@/utils/api/db/deleteDBEntry";
-import getDBEntry from "@/utils/api/db/getDBEntry";
-import axios from "axios";
-import type { NextApiRequest, NextApiResponse } from "next";
+
 
 export const config = {
-    runtime: "edge",
+    runtime: 'edge', // this is a pre-requisite
 };
 
 const handler = async (req: Request): Promise<Response> => {
@@ -19,9 +16,7 @@ const handler = async (req: Request): Promise<Response> => {
     };
 
 
-    let transcribe: any = {};
-    transcribe = await transcribeAudio(url, speakers, key_phrases, summary, sentiment_analysis, iab_categories)
-    return new Response(transcribe, {
+    return new Response(await transcribeAudio(url, speakers, key_phrases, summary, sentiment_analysis, iab_categories), {
         headers: { "Content-Type": "text/html; charset=utf-8" },
     });
 
@@ -53,42 +48,15 @@ async function transcribeAudio(audio_url = "", speakers: boolean, key_phrases: b
         headers,
     });
 
-    console.log(audio_url)
+    console.log("2")
 
     // Retrieve the ID of the transcript from the response data
     let responseData: any = {};
     responseData = await response.json();
     const transcriptId = responseData.id;
 
-    // Construct the polling endpoint URL using the transcript ID
-    const pollingEndpoint = `https://api.assemblyai.com/v2/transcript/${transcriptId}`;
-    const encoder = new TextEncoder();
-    // Poll the transcription API until the transcript is ready
-    let result;
-    while (true) {
-        const pollingResponse = await fetch(pollingEndpoint, {
-            headers: headers
-        })
-        const transcriptionResult = await pollingResponse.json()
-        console.log(transcriptionResult)
-
-        if (transcriptionResult.status === 'completed') {
-            // print the results
-            result = transcriptionResult
-            break
-        } else if (transcriptionResult.status === 'error') {
-            throw new Error(`Transcription failed: ${transcriptionResult.error}`)
-        } else {
-            await new Promise((resolve) => setTimeout(resolve, 3000))
-        }
-    }
     return JSON.stringify({
-        auto_highlights_result: result.auto_highlights_result,
-        transcript: result.text,
-        summary: result.summary,
-        sentiment_analysis: result.sentiment_analysis_results,
-        speakers: result.utterances,
-        topics: result.iab_categories_result.summary
+        transcriptId: transcriptId,
     });
 }
 

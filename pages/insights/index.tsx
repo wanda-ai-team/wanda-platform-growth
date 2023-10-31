@@ -3,7 +3,7 @@ import ModalComponent from "@/components/modal/Modal";
 import RadioTag from "@/components/radio-tag";
 import styles from "@/styles/HomeN.module.css";
 import { getListOfChannels, getListOfUsers, sendMessageToChannel } from "@/utils/api/integrations/slack";
-import { urlToText, urlToTranscript } from "@/utils/common/transcript/transcript";
+import { getLemurInsights, urlToText, urlToTranscript } from "@/utils/common/transcript/transcript";
 import uploadFile from "@/utils/common/upload/upload";
 import {
     Input,
@@ -16,22 +16,18 @@ import {
     InputRightElement,
     Spinner,
     useDisclosure,
-    HStack,
     VStack,
     FormControl,
     FormErrorMessage,
 } from "@chakra-ui/react";
 import { Link } from '@chakra-ui/react'
 import {
-    AsyncCreatableSelect,
-    AsyncSelect,
-    CreatableSelect,
     Select,
 } from "chakra-react-select";
 import { Message, Blocks, Elements } from 'slack-block-builder';
 
 import { useEffect, useRef, useState } from "react";
-import { isError } from "util";
+import { POSTApiCall } from "@/utils/api/commonAPICall";
 
 type Contents = "context" | "url" | "text" | "file" | "gong";
 const inputList: {
@@ -68,6 +64,7 @@ export default function Insights() {
     const [slackUsers, setSlackUsers] = useState<any>([]);
     const [slackChannels, setSlackChannels] = useState<any>([]);
     const [selectedChannel, setSelectedChannel] = useState<any>("");
+    const [callId, setCallId] = useState<string>("");
     const [channelName, setChannelName] = useState<string>("");
     const [selectedSlackUsers, setSelectedSlackUsers] = useState<any>([]);
 
@@ -75,6 +72,7 @@ export default function Insights() {
     const [gongCallsA, setGongCallsA] = useState([]);
     const [selectedGongCall, setSelectedGongCall] = useState<any>({});
     const [loadingGongCalls, setLoadingGongCalls] = useState<boolean>(true);
+    const [loadingGongCallInfo, setLoadingGongCallInfo] = useState<boolean>(false);
     const { isOpen, onOpen, onClose } = useDisclosure()
     const { getRootProps, getRadioProps } = useRadioGroup({
         name: "content",
@@ -111,7 +109,7 @@ export default function Insights() {
 
     async function getCallInformation(callId: any) {
         console.log(callId.value);
-        setLoadingGongCalls(true);
+        setLoadingGongCallInfo(true);
         await fetch('/api/integrations/gong/getCallInformationById', {
             method: "POST",
             headers: {
@@ -123,14 +121,14 @@ export default function Insights() {
         })
             .then(response => response.json())
             .then(async data => {
-                console.log(data);
                 if (data.success) {
-                    console.log(data.content);
-                    // const response = await urlToTranscript(data.content.media.audioUrl, true, true, true, true, true);
                     setTranscript(data.content.transcript);
+                    const response = await getLemurInsights(data.content.media.audioUrl);
+                    // const response = await urlToTranscript(data.content.media.audioUrl, true, true, true, true, true, 'Transcribed, getting insights..');
+                    // setCallId(data.content.metaData.id);
                     setTopics(data.content.content.topics.map((item: any) => item.name));
 
-                    // setKeyphrases(response.auto_highlights_result.results.map((item: any) => item.text))
+                    setKeyphrases(response.response)
 
                     // setSummary(response.summary);
 
@@ -143,6 +141,25 @@ export default function Insights() {
                     // const speakerSet = new Set(speakerArr);
                     // setSpeakers(Array.from(speakerSet));
 
+                    // await POSTApiCall('/api/db/addOrCreateDBEntry',
+                    //     {
+                    //         collection: 'gongCalls',
+                    //         numberOfConditions: 1,
+                    //         condition: ['callId'],
+                    //         conditionValue: [data.content.metaData.id],
+                    //         conditionOperation: ['=='],
+                    //         body: {
+                    //             callId: data.content.metaData.id,
+                    //             title: data.content.metaData.title,
+                    //             transcript: data.content.transcript,
+                    //             summary: response.summary,
+                    //             keyphrases: response.auto_highlights_result.results.map((item: any) => item.text),
+                    //             topics: Object.keys(response.topics).map((item: any) => item.split('>')[item.split('>').length - 1]),
+                    //             speakers: Array.from(speakerSet),
+                    //             date: new Date().toISOString(),
+                    //         },
+                    //     })
+
                 } else {
                     console.log(data);
                 }
@@ -150,7 +167,7 @@ export default function Insights() {
             .catch((error) => {
                 console.error('Error:', error);
             });
-        setLoadingGongCalls(false);
+        setLoadingGongCallInfo(false);
     }
 
     async function getSlackInfo() {
@@ -215,7 +232,7 @@ export default function Insights() {
                             if (responseO && responseO.upload.ok && responseO.fields.success_action_status) {
                                 console.log(responseO);
 
-                                const response = await urlToTranscript(url + responseO.url, true, true, true, true, true);
+                                const response = await urlToTranscript(url + responseO.url, true, true, true, false, false, 'Upload done, transcribing..');
                                 setTranscript(response.transcript);
                                 setSummary(response.summary);
                                 setKeyphrases(response.auto_highlights_result.results.map((item: any) => item.text))
@@ -329,8 +346,8 @@ export default function Insights() {
     }
 
     function sendMessageToChannelT(message: string, channelId: any, selectedGongCall: any, selectedSlackUsers: any, channelName: string) {
-        console.log(selectedSlackUsers);
-        console.log("awd")
+        console.log(selectedGongCall)
+        console.log('Meeting Insights for meeting ' + selectedGongCall.title + " id_"+ selectedGongCall.value);
         if (message && message.length > 0) {
             let listOfUsers = ""
             if (selectedSlackUsers.length > 0) {
@@ -341,17 +358,19 @@ export default function Insights() {
             console.log(channelId);
             const messageF = Message({ channel: channelId, text: "Meeting insights" })
                 .blocks(
-                    Blocks.Section({ text: 'Meeting Insights for meeting ' + selectedGongCall.title }),
+                    Blocks.Section({ text: 'Meeting Insights for meeting ' + selectedGongCall.title + " id_"+ selectedGongCall.value }),
                     Blocks.Divider(),
                     Blocks.Section({ text: message }),
                     Blocks.Divider(),
                     Blocks.Actions()
                         .elements(
-                            Elements.Button({ text: 'Create case study', actionId: 'scaredyCat' })
+                            Elements.Button({ text: 'Create case study', actionId: 'createCaseStudy' })
                                 .primary(),
                             Elements.Button({ text: 'Update CRM', actionId: 'gotClicked' })
                                 .primary(),
-                            Elements.Button({ text: 'Write follow up email', actionId: 'gotClicked1' })
+                            Elements.Button({ text: 'Write follow up email', actionId: 'followUpEmail' })
+                                .primary(),
+                            Elements.Button({ text: 'Create piece of content', actionId: 'createPieceOfContent' })
                                 .primary()))
                 .asUser()
                 .buildToJSON();
@@ -406,7 +425,15 @@ export default function Insights() {
                                         <Progress size='xs' isIndeterminate />
                                     </>
                                     :
-                                    gongCalls()
+                                    loadingGongCallInfo ?
+                                        <>
+                                            <Text>
+                                                Loading call information.
+                                            </Text>
+                                            <Progress size='xs' isIndeterminate />
+                                        </>
+                                        :
+                                        gongCalls()
                                 :
                                 <></>
                         }
