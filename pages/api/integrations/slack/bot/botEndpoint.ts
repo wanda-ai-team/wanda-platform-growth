@@ -31,7 +31,7 @@ export default async function handler(
                     case "Repurpose":
 
                         createPieceOfContent(web, messageC);
-                        res.send({})
+                        res.status(200).json({});
                         break;
                 }
                 break
