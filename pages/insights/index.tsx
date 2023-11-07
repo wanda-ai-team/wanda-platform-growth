@@ -517,7 +517,7 @@ export default function Insights() {
                     <Progress size='xs' isIndeterminate />
 
                     <Accordion allowToggle w={"100%"}>
-                        <AccordionItem>
+                        <AccordionItem isDisabled={transcript == ""}>
                             <h2>
                                 <AccordionButton>
                                     <Box as="span" flex='1' textAlign='left'>
@@ -531,7 +531,7 @@ export default function Insights() {
                             </AccordionPanel>
                         </AccordionItem>
 
-                        <AccordionItem>
+                        <AccordionItem isDisabled={keyphrases.length <= 0}>
                             <h2>
                                 <AccordionButton>
                                     <Box as="span" flex='1' textAlign='left'>
@@ -549,7 +549,7 @@ export default function Insights() {
                             </AccordionPanel>
                         </AccordionItem>
 
-                        <AccordionItem>
+                        <AccordionItem isDisabled={summary == ""}>
                             <h2>
                                 <AccordionButton>
                                     <Box as="span" flex='1' textAlign='left'>
@@ -563,7 +563,7 @@ export default function Insights() {
                             </AccordionPanel>
                         </AccordionItem>
 
-                        <AccordionItem>
+                        <AccordionItem isDisabled={speakers.length <= 0}>
                             <h2>
                                 <AccordionButton>
                                     <Box as="span" flex='1' textAlign='left'>
@@ -581,7 +581,7 @@ export default function Insights() {
                             </AccordionPanel>
                         </AccordionItem>
 
-                        <AccordionItem>
+                        <AccordionItem isDisabled={topics.length <= 0}>
                             <h2>
                                 <AccordionButton>
                                     <Box as="span" flex='1' textAlign='left'>
