@@ -31,7 +31,6 @@ export default async function handler(
                     case "Repurpose":
 
                         createPieceOfContent(web, messageC);
-                        res.status(200).json({});
                         break;
                 }
                 break
@@ -62,7 +61,7 @@ export default async function handler(
                 break
         }
 
-        res.status(200).json({ content: "Bot correctly answered", success: false, "response_action": "clear", status: 200 });
+        res.status(200).json({});
     } catch (error) {
         console.log("error")
         console.log(error)
