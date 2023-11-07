@@ -60,7 +60,7 @@ export default async function handler(
                 break
         }
 
-        res.status(200).json({ content: "Bot correctly answered", success: false });
+        res.status(200).json({ content: "Bot correctly answered", success: false, "response_action": "clear" });
     } catch (error) {
         console.log(error)
         res.status(200).json({ content: error, success: false });
