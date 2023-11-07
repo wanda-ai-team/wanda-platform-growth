@@ -16,9 +16,14 @@ export default async function handler(
 
         // Initialize
         const web = new WebClient(token);
-        console.log(JSON.parse(req.body.payload))
+        let messageC;
+        try {
+            console.log(JSON.parse(req.body.payload))
 
-        let messageC = JSON.parse(req.body.payload)
+            messageC = JSON.parse(req.body.payload)
+        } catch (error) {
+            messageC = req.body.payload
+        }
 
         switch (messageC.type) {
             case "view_submission":

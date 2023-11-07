@@ -341,6 +341,12 @@ Use both a small description of the pain point and extract content from the tran
 `
 }
 
+function getWriteFollowupEmailPrompt(){
+    return `
+Create me a followup email to send to the client, based on the given topics that were talked about on a client call.    
+`
+}
+
 export {
     textToInstagramCarrouselTextPrompt,
     textToTwitterThreadPrompt,
