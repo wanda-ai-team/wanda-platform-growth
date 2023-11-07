@@ -29,7 +29,9 @@ export default async function handler(
             case "view_submission":
                 switch (messageC.view.title.text) {
                     case "Repurpose":
+
                         createPieceOfContent(web, messageC);
+                        res.send({})
                         break;
                 }
                 break
