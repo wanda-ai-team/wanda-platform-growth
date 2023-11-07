@@ -13,10 +13,7 @@ async function createCaseStudyURL(web: WebClient, messageC: any) {
             text: "Loading case study response ...",
         });
 
-
-        const gongCall = await getDBEntry("gongCalls", ["callId"], ["=="], [messageC.message.blocks[0].text.text.split("id_")[1]], 1)
-
-        const responseOpenAI = await outputContentBackendCall(gongCall[0].data.summary, "casestudy")
+        const responseOpenAI = await outputContentBackendCall(messageC.message.blocks[0].text.text.split("id_")[1], "casestudy")
 
         const newUseCase = await createDBEntry("useCases", { content: responseOpenAI, title: "Case Study", type: "caseStudy", meetingTitle: messageC.message.blocks[0].text.text });
 
@@ -36,6 +33,9 @@ async function createCaseStudyURL(web: WebClient, messageC: any) {
 
 
 async function createPieceOfContent(web: WebClient, messageC: any) {
+
+    console.log("messageC")
+    console.log(messageC)
     try {
         let value: any = {};
         value = (Object.values(messageC.view.state.values)[0])
@@ -48,9 +48,12 @@ async function createPieceOfContent(web: WebClient, messageC: any) {
             text: "Creating piece of content, loading ...",
         });
 
-        const responseOpenAI = await openAICall(false, "Create me a " + fValue + " post " + " based on the give topics that were talked about during the client meeting\n Topics:"
-            + messageC.view.private_metadata.split(":")[1],
-            "You are a professional content creator with millions of followers");
+        
+        const responseOpenAI = await outputContentBackendCall(messageC.view.private_metadata.split(":")[1], fValue)
+
+        // const responseOpenAI = await openAICall(false, "Create me a " + fValue + " post " + " based on the give topics that were talked about during the client meeting\n Topics:"
+        //     + messageC.view.private_metadata.split(":")[1],
+        //     "You are a professional content creator with millions of followers");
 
         // const newUseCase = await createDBEntry("useCases", { content: responseOpenAI, title: "Case Study", type: "caseStudy", meetingTitle: messageC.message.blocks[0].text.text });
         await web.chat.postMessage({
@@ -68,7 +71,7 @@ async function createPieceOfContent(web: WebClient, messageC: any) {
 
 async function createPieceOfContentModal(web: WebClient, trigger_id: string, message: any) {
     try {
-        const modal = Modal({ title: 'Repurpose', submit: 'Repurpose', privateMetaData: message.container.channel_id + ":" + message.message.blocks[2].text.text })
+        const modal = Modal({ title: 'Repurpose', submit: 'Repurpose', privateMetaData: message.container.channel_id + ":" + message.message.blocks[0].text.text.split("id_")[1] })
             .blocks(
                 Blocks.Section({ text: 'Let\' repurpose this piece of content!' }),
                 Blocks.Input({ label: 'What\s the output platform?' })
@@ -80,7 +83,6 @@ async function createPieceOfContentModal(web: WebClient, trigger_id: string, mes
                                     return Bits.Option({ text: platform.platform, value: platform.platform })
                                 })))
             ).buildToJSON();
-        console.log(modal)
         await web.views.open({
             trigger_id: trigger_id,
             view: JSON.parse(modal)
@@ -103,9 +105,7 @@ async function createFollowUpEmail(web: WebClient, messageC: any) {
             text: "call id " + messageC.message.blocks[0].text.text.split("id_")[1] + " topics " + messageC.message.blocks[2].text.text,
         });
 
-        const gongCall = await getDBEntry("gongCalls", ["callId"], ["=="], [messageC.message.blocks[0].text.text.split("id_")[1]], 1)
-
-        const responseOpenAI = await outputContentBackendCall(gongCall[0].data.summary, "followupemail")
+        const responseOpenAI = await outputContentBackendCall(messageC.message.blocks[0].text.text.split("id_")[1], "followupemail")
 
         // const responseOpenAI = await openAICall(false, "Create me a followup email to send to the client, based on the given topics that were talked about on a client call. \n Topics:"
         //     + messageC.message.blocks[2].text.text,

@@ -85,11 +85,11 @@ const outputsWithPlatform = [
 ];
 
 const slackModalOutputPlatform = [
-    { platform: 'Twitter', outputs: ['Thread'] },
+    { platform: 'Twitter Thread', outputs: ['Thread'] },
     // { platform: 'Instagram', outputs: ['Carousel', 'Post'] },
-    { platform: 'Landing Page', outputs: ['Copy']}, 
-    { platform: 'Linkedin', outputs: ['Post'] },
-    { platform: 'Blog', outputs: ['Post', 'Article'] },
+    { platform: 'Landing Page Copy', outputs: ['Copy']}, 
+    { platform: 'Linkedin Post', outputs: ['Post'] },
+    { platform: 'Blog Post', outputs: ['Post', 'Article'] },
 ];
 
 const platformsToGenerateIdeas = [
