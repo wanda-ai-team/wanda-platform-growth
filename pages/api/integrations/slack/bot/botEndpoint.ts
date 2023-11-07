@@ -29,7 +29,7 @@ export default async function handler(
             case "view_submission":
                 switch (messageC.view.title.text) {
                     case "Repurpose":
-                        await createPieceOfContent(web, messageC);
+                        createPieceOfContent(web, messageC);
                         break;
                 }
                 break

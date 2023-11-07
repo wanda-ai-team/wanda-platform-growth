@@ -42,13 +42,12 @@ async function createPieceOfContent(web: WebClient, messageC: any) {
         let fValue = value.item.selected_option.value
         console.log(messageC.view.private_metadata.split)
 
-
         await web.chat.postMessage({
             channel: messageC.view.private_metadata.split(":")[0],
             text: "Creating piece of content, loading ...",
         });
 
-        
+
         const responseOpenAI = await outputContentBackendCall(messageC.view.private_metadata.split(":")[1], fValue, messageC.view.private_metadata.split(":")[1])
 
         // const responseOpenAI = await openAICall(false, "Create me a " + fValue + " post " + " based on the give topics that were talked about during the client meeting\n Topics:"
@@ -58,8 +57,9 @@ async function createPieceOfContent(web: WebClient, messageC: any) {
         // const newUseCase = await createDBEntry("useCases", { content: responseOpenAI, title: "Case Study", type: "caseStudy", meetingTitle: messageC.message.blocks[0].text.text });
         await web.chat.postMessage({
             channel: messageC.view.private_metadata.split(":")[0],
-            text:  "<@> Here you have the draft "+ fValue + ":\n" + "----" + fValue + "----\n\n" + responseOpenAI,
+            text: "<@" + messageC.view.private_metadata.split(":")[3] +"> Here you have the draft for a " + fValue + ":\n" + "----" + fValue + "----\n\n" + responseOpenAI,
         });
+
     } catch (error) {
         console.log(error)
         await web.chat.postMessage({
@@ -71,7 +71,7 @@ async function createPieceOfContent(web: WebClient, messageC: any) {
 
 async function createPieceOfContentModal(web: WebClient, trigger_id: string, message: any) {
     try {
-        const modal = Modal({ title: 'Repurpose', submit: 'Repurpose', privateMetaData: message.container.channel_id + ":" + message.message.blocks[0].text.text.split("id_")[1] })
+        const modal = Modal({ title: 'Repurpose', submit: 'Repurpose', privateMetaData: message.container.channel_id + ":" + message.message.blocks[0].text.text.split("id_")[1] + ":" + trigger_id + ":" + message.user.id })
             .blocks(
                 Blocks.Section({ text: 'Let\' repurpose this piece of content!' }),
                 Blocks.Input({ label: 'What\s the output platform?' })
@@ -113,7 +113,7 @@ async function createFollowUpEmail(web: WebClient, messageC: any) {
 
         await web.chat.postMessage({
             channel: messageC.container.channel_id,
-            text: "<@> Here you have the draft email:\n" + "----email----\n\n" + responseOpenAI,
+            text: "<@" + messageC.user.id + "> Here you have the draft email:\n" + "----email----\n\n" + responseOpenAI,
         });
     } catch (error) {
         console.log(error)

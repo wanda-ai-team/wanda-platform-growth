@@ -396,7 +396,7 @@ export default function Insights() {
         )
     }
 
-    function sendMessageToChannelT(message: string, channelId: any, selectedGongCall: any, selectedSlackUsers: any, channelName: string, selectedInsightsV: any) {
+    function sendMessageToChannelT(channelId: any, selectedGongCall: any, selectedSlackUsers: any, channelName: string, selectedInsightsV: any) {
         console.log(selectedGongCall)
         console.log('Meeting Insights for meeting ' + selectedGongCall.title + " id_" + selectedGongCall.value);
         if (true) {
@@ -415,7 +415,7 @@ export default function Insights() {
                 .blocks(
                     Blocks.Section({ text: 'Meeting Insights for meeting ' + selectedGongCall.title + " id_" + selectedGongCall.value }),
                     Blocks.Divider(),
-                    Blocks.Section({ text: message }),
+                    message !== "" ? Blocks.Section({ text: message }) : Blocks.Section({ text: "No insights selected" }),
                     Blocks.Divider(),
                     Blocks.Actions()
                         .elements(
@@ -504,10 +504,14 @@ export default function Insights() {
 
                     </Button>
                     <ModalComponent isOpen={isOpen} onClose={onClose} title={"Slack Notification"} content={slackModalContent()} buttonText={"Send to Slack"}
-                        buttonClickT={() => { sendMessageToChannelT(topics.join(" "), selectedChannel, selectedGongCall, selectedSlackUsers, channelName, selectedInsights); onClose() }}
-                        buttonDisabled={channelName === "" || (selectedChannel.value === "create"
-                            ? (slackChannels.find((item: any) => item.label === channelName) && channelName !== "")
-                            : !selectedChannel)} />
+                        buttonClickT={() => { sendMessageToChannelT(selectedChannel, selectedGongCall, selectedSlackUsers, channelName, selectedInsights); onClose() }}
+                        buttonDisabled={
+                            (selectedChannel.value === "create" && slackChannels.find((item: any) => item.label === channelName))
+                            ||
+                            (selectedChannel.value === "create" && channelName === "")
+                            || 
+                            (selectedGongCall.value === "")
+                            } />
 
                 </div>
             </div>
