@@ -49,6 +49,8 @@ async function transcribeAudio(audio_url = "", speakers: boolean, key_phrases: b
         }
     }
     let responseDataT: any = {};
+    console.log("1")
+    console.log(transcriptId)
     if (transcriptId.id !== undefined && transcriptId.id !== '') {
         const response = await fetch(transcriptId.resource_url, {
             headers,
