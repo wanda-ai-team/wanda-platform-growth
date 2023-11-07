@@ -57,13 +57,13 @@ async function createPieceOfContent(web: WebClient, messageC: any) {
 
         // const newUseCase = await createDBEntry("useCases", { content: responseOpenAI, title: "Case Study", type: "caseStudy", meetingTitle: messageC.message.blocks[0].text.text });
         await web.chat.postMessage({
-            channel: messageC.container.channel_id,
+            channel: messageC.view.private_metadata.split(":")[0],
             text: responseOpenAI,
         });
     } catch (error) {
         console.log(error)
         await web.chat.postMessage({
-            channel: messageC.container.channel_id,
+            channel: messageC.view.private_metadata.split(":")[0],
             text: "Error creating piece of content, please try again later",
         });
     }
