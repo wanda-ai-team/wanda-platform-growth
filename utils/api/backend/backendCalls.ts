@@ -45,12 +45,13 @@ async function outputContent(userPrompt: string, output: string) {
         })
 }
 
-async function outputContentBackendCall(userPrompt: string, output: string){
+async function outputContentBackendCall(userPrompt: string, output: string, gongCallId: string){
     const response = await axios.post(process.env.BACKEND_URL + '/llmTools/outputContent', {
         userPrompt: userPrompt,
         systemPrompt: "",
         config: {
-            "output": output
+            "output": output,
+            "gongCallId": gongCallId
         }
     },
         {

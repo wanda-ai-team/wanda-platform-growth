@@ -13,7 +13,7 @@ async function createCaseStudyURL(web: WebClient, messageC: any) {
             text: "Loading case study response ...",
         });
 
-        const responseOpenAI = await outputContentBackendCall(messageC.message.blocks[0].text.text.split("id_")[1], "casestudy")
+        const responseOpenAI = await outputContentBackendCall("", "casestudy", messageC.message.blocks[0].text.text.split("id_")[1])
 
         const newUseCase = await createDBEntry("useCases", { content: responseOpenAI, title: "Case Study", type: "caseStudy", meetingTitle: messageC.message.blocks[0].text.text });
 
@@ -49,7 +49,7 @@ async function createPieceOfContent(web: WebClient, messageC: any) {
         });
 
         
-        const responseOpenAI = await outputContentBackendCall(messageC.view.private_metadata.split(":")[1], fValue)
+        const responseOpenAI = await outputContentBackendCall(messageC.view.private_metadata.split(":")[1], fValue, messageC.view.private_metadata.split(":")[1])
 
         // const responseOpenAI = await openAICall(false, "Create me a " + fValue + " post " + " based on the give topics that were talked about during the client meeting\n Topics:"
         //     + messageC.view.private_metadata.split(":")[1],
@@ -58,7 +58,7 @@ async function createPieceOfContent(web: WebClient, messageC: any) {
         // const newUseCase = await createDBEntry("useCases", { content: responseOpenAI, title: "Case Study", type: "caseStudy", meetingTitle: messageC.message.blocks[0].text.text });
         await web.chat.postMessage({
             channel: messageC.view.private_metadata.split(":")[0],
-            text: responseOpenAI,
+            text:  "<@> Here you have the draft "+ fValue + ":\n" + "----" + fValue + "----\n\n" + responseOpenAI,
         });
     } catch (error) {
         console.log(error)
@@ -105,7 +105,7 @@ async function createFollowUpEmail(web: WebClient, messageC: any) {
             text: "call id " + messageC.message.blocks[0].text.text.split("id_")[1] + " topics " + messageC.message.blocks[2].text.text,
         });
 
-        const responseOpenAI = await outputContentBackendCall(messageC.message.blocks[0].text.text.split("id_")[1], "followupemail")
+        const responseOpenAI = await outputContentBackendCall("", "followupemail", messageC.message.blocks[0].text.text.split("id_")[1])
 
         // const responseOpenAI = await openAICall(false, "Create me a followup email to send to the client, based on the given topics that were talked about on a client call. \n Topics:"
         //     + messageC.message.blocks[2].text.text,
