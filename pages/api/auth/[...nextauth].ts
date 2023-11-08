@@ -58,15 +58,12 @@ export const authOptions: NextAuthOptions = {
     jwt: async ({ token, trigger, session, user }) => {
       if (trigger === "update") {
         token.isActive = session?.user.isActive;
-        console.log(session)
-        console.log("update");
       }
       if (user) {
         token.image = user.image;
         token.uid = user.id;
         if (user.isActive === false) {
           const dbUser = await getUser("email", "==", user.email);
-          console.log(dbUser);
           token.isActive = dbUser!.isActive;
         } else {
 

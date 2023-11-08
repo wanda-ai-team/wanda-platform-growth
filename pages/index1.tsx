@@ -160,7 +160,6 @@ export default function Home() {
         }
         else {
           if (youtubeURLN.includes("twitter")) {
-            console.log("olaaa");
             twitterThreadToText(youtubeURLN);
           } else {
             blogToThread(youtubeURLN);
@@ -215,8 +214,6 @@ export default function Home() {
     setApiStep('Getting Thread...');
     const response = await getThread(youtubeURLN);
     if (response.success) {
-      console.log("response.content")
-      console.log(response.content)
       const thread = response.content.flat().toString();
       setSummary(thread)
     } else {
@@ -294,7 +291,6 @@ export default function Home() {
       });
 
       const body = await res.json();
-      console.log(body)
 
       if (body.success) {
         setWantTranscript(true)
@@ -371,7 +367,6 @@ export default function Home() {
   }
 
   function getTextArea(valueChosen: any) {
-    console.log(valueChosen)
     if (outputSelected === 'Twitter') {
       return getTwitterThread();
     }

@@ -12,7 +12,6 @@ export default async function handler(
 
     try {
         // Read a token from the environment variables
-        const token = process.env.SLACK_TOKEN;
         const session = await getServerSession(req, res, authOptions)
         // Error handling
 
