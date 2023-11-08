@@ -12,7 +12,8 @@ export default function Profile() {
 
     const slack_client_id = "4964233382976.6071462192929"
     const slack_redirect_uri = process.env.NEXT_PUBLIC_URLS + "/auth/slack"
-    const slackBotURL = "https://slack.com/oauth/v2/authorize?scope=channels:manage,chat:write,users:read&user_scope=&client_id=" + slack_client_id + "&redirect_uri=" + slack_redirect_uri
+    const slackBotURL = "https://slack.com/oauth/v2/authorize?client_id=4964233382976.6071462192929&scope=channels:join,channels:manage,channels:read,chat:write,commands,groups:read,im:read,mpim:read,users:read&user_scope="+ "&redirect_uri=" + slack_redirect_uri
+    // const slackBotURL = "https://slack.com/oauth/v2/authorize?scope=channels:manage,chat:write,users:read&user_scope=&client_id=" + slack_client_id 
 
     async function getUser() {
         // if (session && session.data && session.data.user.isActive === false) {
@@ -22,13 +23,15 @@ export default function Profile() {
                 "Content-Type": "application/json",
             },
             body: JSON.stringify({
-                info: "gongAccessToken",
+                info: ["gongAccessToken", "slackAccessToken"],
             }),
         })
             .then((res) => res.json())
             .then(async (data1) => {
                 if (data1.success) {
-                    setGongUser(data1.content)
+                    console.log(data1)
+                    setGongUser(data1.content[0].gongAccessToken)
+                    setSlackBot(data1.content[0].slackAccessToken)
                     console.log(data1)
                 }
             })

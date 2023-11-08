@@ -45,17 +45,17 @@ import { useChat } from 'ai/react';
 import streamResponse from "@/utils/common/stream";
 import { Mixpanel } from "@/utils/mixpanel";
 
-type Contents = "context" | "url" | "text" | "podcast";
+type Contents =  "url" | "text" | "podcast";
 type ContentsAV = "gong" | "file";
 
 const inputList: {
   key: Contents;
   value: string;
 }[] = [
-    {
-      key: "context",
-      value: "Created Content"
-    },
+    // {
+    //   key: "context",
+    //   value: "Created Content"
+    // },
     {
       key: "url",
       value: "URL",
@@ -529,12 +529,12 @@ export default function Repurpose() {
     setConvertedText("");
     setTwitterThreadTextPerTweet([""]);
     setLoadingC(true);
-    if (outputSelectedI === 'context') {
-      const response = await getStoredThreads(selectedProject);
-      if (response.success) {
-        await convertSummaryS(response.project.content, false, toneStyle);
-      }
-    } else {
+    // if (outputSelectedI === 'context') {
+    //   const response = await getStoredThreads(selectedProject);
+    //   if (response.success) {
+    //     await convertSummaryS(response.project.content, false, toneStyle);
+    //   }
+    // } else {
       if (outputSelected === "Twitter") {
         await convertSummaryS(summary, false, toneStyle);
       } else {
@@ -548,7 +548,7 @@ export default function Repurpose() {
           }
         }
       }
-    }
+    // }
     setLoadingC(false);
     // setCurrentStep("result");
   };
@@ -970,7 +970,7 @@ export default function Repurpose() {
                     </>
                   )}
 
-                  {outputSelectedI === "context" && loadingProjects && (
+                  {/* {outputSelectedI === "context" && loadingProjects && (
                     <>
                       <Text>
                         Loading created content.
@@ -1003,7 +1003,7 @@ export default function Repurpose() {
                         ))}
                       </Select>
                     </>
-                  )}
+                  )} */}
 
                   {loadingAPICall && (
                     <Progress size='xs' isIndeterminate />
@@ -1141,9 +1141,13 @@ export default function Repurpose() {
                   {outputSelected !== "Summary" && outputSelected !== "Transcript" && (
                     <Button
                       isDisabled={(
-                        (outputSelectedI !== "context" && summary === "")
+                        // (outputSelectedI !== "context" && summary === "")
+                        // || canStopB.current
+                        // || (outputSelectedI === "context" && selectedProject === "")
+                        
+                        (summary === "")
                         || canStopB.current
-                        || (outputSelectedI === "context" && selectedProject === "")
+                        || (selectedProject === "")
                       )}
                       colorScheme="purple"
                       onClick={() => handleConvert(landingURL)}

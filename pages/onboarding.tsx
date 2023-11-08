@@ -31,7 +31,7 @@ export default function Onboarding() {
   const { data: session, status } = useSession()
   const [businessName, setBusinessName] = useState("");
 
-  const MAX_STEPS = 5;
+  const MAX_STEPS = 2;
 
   const handleNext = () => {
     setStep((prev) => Math.min(prev + 1, MAX_STEPS - 1));
@@ -60,7 +60,8 @@ export default function Onboarding() {
               if (data !== 'skip') {
                 setSiteData((prev: any) => ({ ...prev, ...data }));
               }
-              handleNext();
+              // handleNext();
+              push('/repurpose');
             }}
 
             businessName={businessName}
@@ -336,7 +337,7 @@ const Step0: FunctionComponent<Step0Props> = ({
           }}
           isDisabled={!product || !targetAudience || !businessName}
         >
-          Next
+          Start using
         </Button>
 
 
