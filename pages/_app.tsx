@@ -23,7 +23,7 @@ export default function App({ Component, pageProps: { session, ...pageProps } }:
     <Provider store={store}>
       <SessionProvider session={session} >
         <ChakraProvider>
-          {!pagesWithoutHeader.includes(router.pathname) && router.pathname !== "/" &&
+          {!pagesWithoutHeader.includes(router.pathname)  &&
             <Header />
           }
           {Component.auth ? (

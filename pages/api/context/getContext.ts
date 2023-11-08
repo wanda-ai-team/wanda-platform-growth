@@ -10,9 +10,6 @@ export default async function handler(
     res: NextApiResponse
 ) {
     try {
-
-        console.log("documents")
-
         const session = await getServerSession(req, res, authOptions)
         // Error handling
 
@@ -29,7 +26,6 @@ export default async function handler(
 
         const documents = await getContext(session.user.email, platform)
 
-        console.log(documents)
 
         return res.status(200).json({ documents: documents, status: 200 })
     } catch (e) {

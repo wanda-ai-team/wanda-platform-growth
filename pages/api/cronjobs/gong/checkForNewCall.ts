@@ -16,7 +16,6 @@ export default async function handler(
 
     for (let index = 0; index < allUsers.length; index++) {
         const currentUser = allUsers[index];
-        console.log(index)
         if (currentUser.data.gongAccessToken !== undefined && currentUser.data.gongAccessToken !== "") {
             if (await checkIfTokenNeedsRefresh(currentUser.data.email)) {
                 await refreshToken(currentUser.data.email);

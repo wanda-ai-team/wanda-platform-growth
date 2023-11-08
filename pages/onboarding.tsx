@@ -61,7 +61,7 @@ export default function Onboarding() {
                 setSiteData((prev: any) => ({ ...prev, ...data }));
               }
               // handleNext();
-              push('/repurpose');
+              push('/');
             }}
 
             businessName={businessName}
@@ -212,7 +212,6 @@ const Step0: FunctionComponent<Step0Props> = ({
 
     setLoading(true);
     setBusinessName(businessNameT);
-    console.log(businessNameT);
     await fetch("/api/onboarding/scrape", {
       method: "POST",
       headers: {
@@ -225,8 +224,6 @@ const Step0: FunctionComponent<Step0Props> = ({
     })
       .then((response) => response.json())
       .then(async ({ data, siteContent, success }: any) => {
-        console.log(data);
-        console.log(success);
         if (success) {
 
           toastDisplay('Business understood, storing ...', true);
@@ -373,7 +370,6 @@ const Step1: FunctionComponent<Step1Props> = ({
   const { data: session, status } = useSession()
 
   const addXHandle = async () => {
-    console.log(businessName)
     setLoading(true);
     fetch("/api/onboarding/xHandle", {
       method: "POST",
@@ -384,7 +380,6 @@ const Step1: FunctionComponent<Step1Props> = ({
     })
       .then((response) => response.json())
       .then(async ({ data }: any) => {
-        console.log(data);
         if (data.status === 200 || data.length > 0) {
           toastDisplay('X handle added successfully, storing ...', true);
           setTweets(data);

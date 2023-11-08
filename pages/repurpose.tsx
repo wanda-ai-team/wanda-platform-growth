@@ -159,7 +159,6 @@ export default function Repurpose() {
     await fetch('/api/user/getProjectsWithInfo')
       .then((res) => res.json())
       .then(async (data1) => {
-        console.log("data1.projects")
         if (data1.projects.length > 0) {
           setProjects(data1.projects)
           setSelectedproject(data1.projects[0].id)
@@ -217,8 +216,6 @@ export default function Repurpose() {
       })
         .then((response) => response.json())
         .then(async ({ data, siteContent, success }: any) => {
-          console.log(data);
-          console.log(success);
           if (success) {
             return { context: data.target_audience + " " + data.product, content: siteContent.replace(/(\r\n|\n|\r)/gm, "") };
           } else {
@@ -242,8 +239,6 @@ export default function Repurpose() {
         landingPageContext: websitescrape.context ? websitescrape.context : "",
       }),
     });
-    console.log("response")
-    console.log(response)
     if (!response.ok) {
       throw new Error(response.statusText);
     }
@@ -305,13 +300,11 @@ export default function Repurpose() {
   async function youtubeToThread(youtubeURLN: string, transB = true) {
     let subtitles = await getYoutubeSubtitles(youtubeURLN);
     if (subtitles !== "") {
-      console.log("subtitles1")
       let stringF = "";
       const sub = subtitles;
       sub.forEach((element: any) => {
         stringF = stringF + '[' + element.offser + 's] ' + element.text + "\n";
       });
-      console.log(stringF)
       setTranscript(stringF);
       toast.success('Transcript done', {
         position: "top-right",
@@ -323,7 +316,6 @@ export default function Repurpose() {
         progress: undefined,
         theme: "light",
       });
-      console.log("subtitles2")
 
       subtitles = subtitles.map((caption: any) => caption.text);
       subtitles = subtitles.join('');
@@ -388,9 +380,6 @@ export default function Repurpose() {
   }
 
   async function summarizeTextAndCreateThread(data: any, url: string, transc: string = "") {
-    console.log("Ola")
-    console.log(data)
-    console.log(url)
 
     const response = await getTextSummary(data, url);
     setTranscript(transc);
@@ -433,8 +422,6 @@ export default function Repurpose() {
     let a;
 
     for (let i = 0; i < inputFileRef.current.files.length; i++) {
-      console.log("file")
-      console.log(inputFileRef.current.files[i])
 
       a = await new Promise((resolve, reject) => {
         const reader = new FileReader();
@@ -454,8 +441,6 @@ export default function Repurpose() {
       });
     }
 
-    console.log("a")
-    console.log(a)
 
     await fetch("/api/llm/whisper/speechToTextAAI", {
       method: "POST",
@@ -468,8 +453,6 @@ export default function Repurpose() {
     })
       .then((response) => response.json())
       .then(async ({ content, success }: any) => {
-        console.log("data")
-        console.log(content)
         if (success) {
           setWantTranscript(true)
           setTranscript(content)
@@ -525,7 +508,7 @@ export default function Repurpose() {
   };
 
   const handleConvert = async (landingPageURL = "") => {
-    Mixpanel.track("Clicked Convert Button", { "Input Type": outputSelectedI, "Output Type": outputSelected, "Output Type O": outputSelectedO, "Output Tone": outputSelectedT, "Output Writing Style": outputSelectedW, "Landing Page URL": landingPageURL })
+    Mixpanel.track("Clicked Convert Button", { "Page": "Repurpose", "Input Type": outputSelectedI, "Output Type": outputSelected, "Output Type O": outputSelectedO, "Output Tone": outputSelectedT, "Output Writing Style": outputSelectedW, "Landing Page URL": landingPageURL })
     setConvertedText("");
     setTwitterThreadTextPerTweet([""]);
     setLoadingC(true);
@@ -559,21 +542,17 @@ export default function Repurpose() {
   const [gongConnected, setGongConnected] = useState<boolean>(false);
   async function getCalls() {
     setLoadingGongCalls(true);
-    console.log('getCalls');
     await fetch('/api/integrations/gong/getCallByDateWithToken')
       .then(response => response.json())
       .then(data => {
-        console.log(data);
         setGongConnected(true);
         if (data.success) {
           setGongCallsA(data.content);
           setSelectedGongCall(data.content[0].id);
         } else {
           if (data.content.includes("authorization")) {
-            console.log('gong not connected');
             setGongConnected(false);
           }
-          console.log(data);
         }
       })
       .catch((error) => {
@@ -596,12 +575,9 @@ export default function Repurpose() {
     })
       .then(response => response.json())
       .then(async data => {
-        console.log(data);
         if (data.success) {
           await summarizeTextAndCreateThread(data.content, callId, data.content);
-          console.log(data.content);
         } else {
-          console.log(data);
         }
       })
       .catch((error) => {
@@ -647,7 +623,7 @@ export default function Repurpose() {
     const { getRootProps, getRadioProps } = useRadioGroup({
       name: "contentAV",
       defaultValue: inputListaudioVideo[0].key,
-      onChange: async (value: ContentsAV) => { setOutputSelectedAudioVideo(value); Mixpanel.track("Changed Input Type", { "Input Type": value }) },
+      onChange: async (value: ContentsAV) => { setOutputSelectedAudioVideo(value); Mixpanel.track("Changed Input Type", { "Input Type": value, "Page": "Repurpose"  }) },
     })
 
     const group = getRootProps()
@@ -678,7 +654,7 @@ export default function Repurpose() {
     const { getRootProps, getRadioProps } = useRadioGroup({
       name: "content",
       defaultValue: inputList[0].key,
-      onChange: (value: Contents) => { setOutputSelectedI(value); Mixpanel.track("Changed Input Type", { "Input Type": value }) },
+      onChange: (value: Contents) => { setOutputSelectedI(value); Mixpanel.track("Changed Input Type", { "Input Type": value, "Page": "Repurpose" }) },
     })
 
     const group = getRootProps()
@@ -725,7 +701,6 @@ export default function Repurpose() {
     if (inputFileRef === null || inputFileRef.current === null || inputFileRef.current.files === null || inputFileRef.current.files.length === 0) {
       return;
     }
-    console.log("ola")
 
     const file = inputFileRef.current.files[0];
     const filename = encodeURIComponent(inputFileRef.current.files[0].name.replace(/\s/g, ""));
@@ -734,10 +709,6 @@ export default function Repurpose() {
     const formData = new FormData();
 
     Object.entries({ ...fields, file }).forEach(([key, value]) => {
-      console.log("key")
-      console.log(key)
-      console.log("value")
-      console.log(value)
       // @ts-ignore
       formData.append(key, value);
     });
@@ -748,8 +719,6 @@ export default function Repurpose() {
     });
 
     if (upload.ok) {
-      console.log("url")
-      console.log(url + filename)
       let URLF = url + filename;
       toastDisplay('Upload done, transcribing..', true);
 
@@ -777,8 +746,6 @@ export default function Repurpose() {
           }),
         })
         let done = false;
-        console.log("response")
-        console.log(response)
         if (response === undefined) return;
         const reader = response?.body?.getReader();
         let trans = "";
@@ -799,8 +766,6 @@ export default function Repurpose() {
         setTranscript(trans)
         toastDisplay('Transcript done, summarizing...', true);
         const responseS = await getTextSummary(trans, "null");
-        console.log("responseS")
-        console.log(responseS)
         if (responseS.success && responseS.content !== "Error") {
           setSummary(responseS.content);
           toastDisplay('Summary done', true);

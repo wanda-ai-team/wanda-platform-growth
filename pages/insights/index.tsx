@@ -36,6 +36,7 @@ import { Message, Blocks, Elements } from 'slack-block-builder';
 
 import { useEffect, useRef, useState } from "react";
 import { POSTApiCall } from "@/utils/api/commonAPICall";
+import { Mixpanel } from "@/utils/mixpanel";
 
 type Contents = "context" | "url" | "text" | "file" | "gong";
 const inputList: {
@@ -104,11 +105,12 @@ export default function Insights() {
     const { getRootProps, getRadioProps } = useRadioGroup({
         name: "content",
         defaultValue: inputList[0].key,
-        onChange: (value: Contents) => setOutputSelectedI(value),
+        onChange: (value: Contents) => { setOutputSelectedI(value); Mixpanel.track("Changed Input Type", { "Input Type": value, "Page": "Insights" }) },
     });
     const group = getRootProps();
 
     useEffect(() => {
+        Mixpanel.track("Loaded Insights Page");
         getCalls();
         getSlackInfo();
     }, []);
@@ -333,6 +335,7 @@ export default function Insights() {
                         />
 
                         <Button isDisabled={!selectedGongCall.value} colorScheme="purple" onClick={async (e) => {
+                            Mixpanel.track("Clicked on get call information for Gong", { "Page": "Insights" });
                             getCallInformation(selectedGongCall);
                         }} >
                             Get Call Information
@@ -367,7 +370,11 @@ export default function Insights() {
                                 }
                             </Button>
                             <ModalComponent isOpen={isOpen} onClose={onClose} title={"Slack Notification"} content={slackModalContent()} buttonText={"Send to Slack"}
-                                buttonClickT={() => { sendMessageToChannelT(selectedChannel, selectedGongCall, selectedSlackUsers, channelName, selectedInsights); onClose() }}
+                                buttonClickT={() => {
+                                    Mixpanel.track("Sent notification to slack", { "Selected Channel": selectedChannel, "Selected Gong Call": selectedGongCall, "Selected Slack Users": selectedSlackUsers, "Selected Channel Name": channelName, "Selected Insights": selectedInsights });
+                                    sendMessageToChannelT(selectedChannel, selectedGongCall, selectedSlackUsers, channelName, selectedInsights);
+                                    onClose()
+                                }}
                                 buttonDisabled={
                                     (selectedChannel.value === "create" && slackChannels.find((item: any) => item.label === channelName))
                                     ||

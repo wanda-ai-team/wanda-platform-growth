@@ -24,8 +24,6 @@ export default async function handler(
             }
         );
 
-        console.log(response.data)
-
         res.status(200).json({ content: response.data, success: true })
     } catch (error) {
         console.log(error)

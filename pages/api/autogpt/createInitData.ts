@@ -9,8 +9,6 @@ export default async function handler(
 ) {
 
 	const session = await getServerSession(req, res, authOptions);
-    console.log(session)
-    console.log("olaaaaaaa1")
     const data = JSON.parse(req.body).data;
     if (
         session === null ||
