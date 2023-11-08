@@ -76,6 +76,7 @@ const insights = [{
 export default function Insights() {
     const inputFileRef = useRef<HTMLInputElement | null>(null);
     const [gongConnected, setGongConnected] = useState<boolean>(false);
+    const [slackConnected, setSlackConnected] = useState<boolean>(false);
     const [outputSelectedI, setOutputSelectedI] = useState<Contents>(inputList[0].key);
     const [url, setUrl] = useState<string>("");
     const [loadingAPICall, setLoadingAPICall] = useState<boolean>(false);
@@ -106,6 +107,11 @@ export default function Insights() {
         onChange: (value: Contents) => setOutputSelectedI(value),
     });
     const group = getRootProps();
+
+    useEffect(() => {
+        getCalls();
+        getSlackInfo();
+    }, []);
 
     async function getCalls() {
         setLoadingGongCalls(true);
@@ -210,8 +216,21 @@ export default function Insights() {
 
     async function getSlackInfo() {
         setLoadingSlack(true)
+        console.log('getSlackInfo');
         let users = await getListOfUsers();
+        console.log("users");
+        if (users.code && users.data && users.data.ok === false) {
+            setLoadingSlack(false)
+            setSlackConnected(false);
+            return;
+        }
         let channels = await getListOfChannels();
+        if (channels.code && channels.data && channels.data.ok === false) {
+            setLoadingSlack(false)
+            setSlackConnected(false);
+            return;
+        }
+        console.log(channels);
         users = users.map((item: any) => ({ label: item.name, value: item.id }));
         setSlackUsers(users);
         channels = channels.map((item: any) => ({ label: item.name, value: item.id }));
@@ -221,10 +240,6 @@ export default function Insights() {
         setLoadingSlack(false)
     }
 
-    useEffect(() => {
-        getCalls();
-        getSlackInfo();
-    }, []);
 
     function urlInput() {
         return (
@@ -323,6 +338,45 @@ export default function Insights() {
                             Get Call Information
                         </Button>
                     </>
+                }
+            </>
+        )
+    }
+
+    function slackButton() {
+        return (
+            <>
+                {loadingSlack ?
+                    <>
+                        <Text>
+                            Loading slack information.
+                        </Text>
+                        <Progress size='xs' isIndeterminate />
+                    </>
+                    :
+                    !slackConnected ?
+                        <Text>
+                            Slack bot was not added to your channel. <Link color='teal.500' href="/profile"> Please connect it here </Link>
+                        </Text>
+                        :
+                        <>
+
+                            <Button isDisabled={loadingSlack || transcript.length <= 0} colorScheme="purple" onClick={onOpen} >
+                                {
+                                    "Send to slack"
+                                }
+                            </Button>
+                            <ModalComponent isOpen={isOpen} onClose={onClose} title={"Slack Notification"} content={slackModalContent()} buttonText={"Send to Slack"}
+                                buttonClickT={() => { sendMessageToChannelT(selectedChannel, selectedGongCall, selectedSlackUsers, channelName, selectedInsights); onClose() }}
+                                buttonDisabled={
+                                    (selectedChannel.value === "create" && slackChannels.find((item: any) => item.label === channelName))
+                                    ||
+                                    (selectedChannel.value === "create" && channelName === "")
+                                    ||
+                                    (selectedGongCall.value === "")
+                                } />
+                        </>
+
                 }
             </>
         )
@@ -434,18 +488,18 @@ export default function Insights() {
     }
 
     return (
-        <main className={styles.main}>
+        <main className={styles.main} style={{ height: "92vh" }}>
             <div className={styles.form__container}>
                 <div className={styles.title__container}>
                     <Text as="h2" fontSize="3xl">
                         Customer Insights
                     </Text>
                     <Text>
-                        Get insights on your customers and their interests based on the selected platfrom.
+                        Get insights from your customer calls, align your team and take action.
                     </Text>
                 </div>
                 <div className={styles.options}>
-                    <Text fontWeight="semibold">Post Content</Text>
+                    <Text fontWeight="semibold"></Text>
                     <div className={styles.radio__group} {...group}>
                         {inputList.map(({ key, value }) => {
                             const radio = getRadioProps({ value: key });
@@ -496,23 +550,7 @@ export default function Insights() {
                 </div>
 
                 <div className={styles.platform__container}>
-                    {/* <Text fontWeight="semibold">Select Platform:</Text> */}
-                    <Button isDisabled={loadingSlack || transcript.length <= 0} colorScheme="purple" onClick={onOpen} >
-                        {
-                            loadingSlack ? "Loading Slack ..." : "Send to slack"
-                        }
-
-                    </Button>
-                    <ModalComponent isOpen={isOpen} onClose={onClose} title={"Slack Notification"} content={slackModalContent()} buttonText={"Send to Slack"}
-                        buttonClickT={() => { sendMessageToChannelT(selectedChannel, selectedGongCall, selectedSlackUsers, channelName, selectedInsights); onClose() }}
-                        buttonDisabled={
-                            (selectedChannel.value === "create" && slackChannels.find((item: any) => item.label === channelName))
-                            ||
-                            (selectedChannel.value === "create" && channelName === "")
-                            || 
-                            (selectedGongCall.value === "")
-                            } />
-
+                    {slackButton()}
                 </div>
             </div>
 

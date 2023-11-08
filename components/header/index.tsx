@@ -34,28 +34,27 @@ const Header = () => {
 
       {!router.pathname.includes('onboarding') && !router.pathname.includes('login') && (
         <div style={{ display: 'flex', gap: '12px', verticalAlign: 'middle' }}>
-          {/* <Button
+          <Button
             size='sm'
             colorScheme="purple"
-            isDisabled={true}
-            title="Coming Soon"
+            onClick={() => router.push('/insights')}
           >
-            Insights
-          </Button> */}
+            Customer Call Insights
+          </Button>
           <Button
             size='sm'
             colorScheme="purple"
             onClick={() => router.push('/repurpose')}
           >
-            Repurpose
+            Repurpose Content
           </Button>
-          <Button
+          {/* <Button
             size='sm'
             colorScheme="purple"
             onClick={() => router.push('/dashboard')}
           >
             Create
-          </Button>
+          </Button> */}
         </div>
       )}
       <div style={{ display: 'flex', gap: '12px', verticalAlign: 'middle' }}>

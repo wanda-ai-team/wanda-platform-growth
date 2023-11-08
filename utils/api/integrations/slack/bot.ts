@@ -33,20 +33,11 @@ async function createCaseStudyURL(web: WebClient, messageC: any) {
 
 
 async function createPieceOfContent(web: WebClient, messageC: any) {
-
-    console.log("messageC")
-    console.log(messageC)
     try {
         let value: any = {};
         value = (Object.values(messageC.view.state.values)[0])
         let fValue = value.item.selected_option.value
         console.log(messageC.view.private_metadata.split)
-
-        await web.chat.postMessage({
-            channel: messageC.view.private_metadata.split(":")[0],
-            text: "Creating piece of content, loading ...",
-        });
-
 
         const responseOpenAI = await outputContentBackendCall(messageC.view.private_metadata.split(":")[1], fValue, messageC.view.private_metadata.split(":")[1])
 
@@ -57,7 +48,7 @@ async function createPieceOfContent(web: WebClient, messageC: any) {
         // const newUseCase = await createDBEntry("useCases", { content: responseOpenAI, title: "Case Study", type: "caseStudy", meetingTitle: messageC.message.blocks[0].text.text });
         await web.chat.postMessage({
             channel: messageC.view.private_metadata.split(":")[0],
-            text: "<@" + messageC.view.private_metadata.split(":")[3] +"> Here you have the draft for a " + fValue + ":\n" + "----" + fValue + "----\n\n" + responseOpenAI,
+            text: "<@" + messageC.view.private_metadata.split(":")[3] + "> Here you have the draft for a " + fValue + ":\n" + "----" + fValue + "----\n\n" + responseOpenAI,
         });
 
     } catch (error) {

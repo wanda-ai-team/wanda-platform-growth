@@ -29,7 +29,10 @@ export default async function handler(
             case "view_submission":
                 switch (messageC.view.title.text) {
                     case "Repurpose":
-
+                        await web.chat.postMessage({
+                            channel: messageC.view.private_metadata.split(":")[0],
+                            text: "Creating piece of content, loading ...",
+                        });
                         createPieceOfContent(web, messageC);
                         break;
                 }
