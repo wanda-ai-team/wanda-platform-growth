@@ -62,8 +62,6 @@ async function outputContentBackendCall(userPrompt: string, output: string, gong
         }
     );
 
-    console.log(response.data)
-
     return response.data
 }
 
