@@ -415,7 +415,7 @@ export default function Home() {
 
               {outputSelectedI === 'URL' &&
                 <>
-                  <Input placeholder={outputSelectedI === 'URL' ? 'URL (works with Medium, Youtube, Twitter tweets)' : 'URL (works with spotify)'} value={youtubeURL} className={styles.input} onChange={(e) => {
+                  <Input placeholder={outputSelectedI === 'URL' ? 'URL (works with Medium, Youtube, X)' : 'URL (works with spotify)'} value={youtubeURL} className={styles.input} onChange={(e) => {
                     setYoutubeURL(e.target.value);
                     if (e.target.value !== "") {
                       if (outputSelectedI === 'URL') {

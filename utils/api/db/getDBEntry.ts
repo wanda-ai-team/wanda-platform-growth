@@ -25,7 +25,6 @@ async function getDBEntry(
 
 
   coll.forEach(async function (doc: { id: any; data: () => any; }) {
-    console.log(doc.id, " => ", doc.data());
     response.push({ id: doc.id, data: doc.data() });
   });
 

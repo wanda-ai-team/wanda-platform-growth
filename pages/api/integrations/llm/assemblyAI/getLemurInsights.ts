@@ -6,9 +6,7 @@ export const config = {
 };
 import { getPainPointPrompt } from '@/utils/globalPrompts';
 import { AssemblyAI } from 'assemblyai'
-const client = new AssemblyAI({
-    apiKey: process.env.ASSEMBLYAI_API_KEY
-})
+
 const handler = async (req: Request): Promise<Response> => {
     let { url } = (await req.json()) as {
         url?: string;

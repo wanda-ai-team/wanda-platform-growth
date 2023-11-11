@@ -17,7 +17,6 @@ export default async function handler(
     const session = await getServerSession(req, res, authOptions)
     // Error handling
 
-    console.log("error");
     if (!session?.user || !session?.user?.email) {
         return res.status(401).json({
             error: {
@@ -28,6 +27,7 @@ export default async function handler(
     }
 
     if(await checkIfTokenNeedsRefresh(session.user.email)){
+        console.log("refreshing token");
         await refreshToken(session.user.email);
     }
 
@@ -50,6 +50,7 @@ export default async function handler(
     }).then((response) => response.json())
         .then((data) => {
             let callsData = []
+            console.log(data);
             if (data.calls.length > 0) {
                 callsData = data.calls.map((call: any) => { return { title: call.title, id: call.id, meetingUrl: call.meetingUrl, started: call.started } })
                 callsData = callsData.sort((a: any, b: any) => { return new Date(b.started).getTime() - new Date(a.started).getTime() })

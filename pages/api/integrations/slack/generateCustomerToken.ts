@@ -38,11 +38,12 @@ export default async function handler(
             client_secret: process.env.SLACK_CLIENT_SECRET as string,
         })
             .then(async (data) => {
-                console.log(data);
-                console.log("data");
                 if (data.access_token !== undefined) {
-                    await updateDBEntry("users", { slackAccessToken: data.access_token }, ['email'], '==', [session.user.email], 1);
-                    return data;
+                    if (data.refresh_token !== undefined && data.expires_in !== undefined) {
+                        const currentSeconds = (new Date().getTime() / 1000) + data.expires_in;
+                        await updateDBEntry("users", { slackAccessToken: data.access_token, slackRefreshToken: data.refresh_token, slackTokenexpiration: currentSeconds }, ['email'], '==', [session.user.email], 1);
+                        return data;
+                    }
                 }
                 return null
             })

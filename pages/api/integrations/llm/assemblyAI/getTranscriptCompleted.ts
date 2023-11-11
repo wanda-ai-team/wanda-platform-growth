@@ -30,6 +30,8 @@ async function transcribeAudio(transcriptId: string) {
             headers: headers
         })
         const transcriptionResult = await pollingResponse.json()
+        console.log(transcriptId)
+        console.log(transcriptionResult)
 
         if (transcriptionResult.status === 'completed') {
             // print the results

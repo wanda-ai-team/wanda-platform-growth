@@ -1,7 +1,6 @@
 
 import type { NextApiRequest, NextApiResponse } from "next";
 import { WebClient } from '@slack/web-api';
-import { list } from "@vercel/blob";
 import getDBEntry from "@/utils/api/db/getDBEntry";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../../auth/[...nextauth]";

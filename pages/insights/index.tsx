@@ -221,18 +221,20 @@ export default function Insights() {
         console.log('getSlackInfo');
         let users = await getListOfUsers();
         console.log("users");
+        console.log(users);
         if (users.code && users.data && users.data.ok === false) {
             setLoadingSlack(false)
             setSlackConnected(false);
             return;
         }
         let channels = await getListOfChannels();
+        console.log(channels);
         if (channels.code && channels.data && channels.data.ok === false) {
             setLoadingSlack(false)
             setSlackConnected(false);
             return;
         }
-        console.log(channels);
+        setSlackConnected(true);
         users = users.map((item: any) => ({ label: item.name, value: item.id }));
         setSlackUsers(users);
         channels = channels.map((item: any) => ({ label: item.name, value: item.id }));

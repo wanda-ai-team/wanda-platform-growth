@@ -38,7 +38,6 @@ export default async function handler(
         }
         const dbEntry = await getDBEntry(collection as string, condition as any[], conditionOperation as any[], conditionValue as any[], parseInt(numberOfConditions as string));
 
-        console.log(dbEntry);
 
         if(dbEntry.length === 0) {
            await createDBEntry(collection as string, body);
