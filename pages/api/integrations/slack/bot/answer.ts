@@ -1,7 +1,6 @@
 
 import type { NextApiRequest, NextApiResponse } from "next";
 import { WebClient } from '@slack/web-api';
-import { list } from "@vercel/blob";
 
 export default async function handler(
     req: NextApiRequest,

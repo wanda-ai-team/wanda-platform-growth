@@ -24,8 +24,6 @@ export default async function handler(
         }
         const { info } = req.body
 
-        console.log(info);
-
         let updateObj: any = {};
         for (let index = 0; index < info.length; index++) {
             const element = info[index];

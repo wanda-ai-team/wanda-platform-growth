@@ -5,17 +5,15 @@ export default async function handler(
     req: NextApiRequest,
     res: NextApiResponse
 ) {
-    const { content } = req.body
+    const { userPrompt } = req.body
+    const { output } = req.body
 
     try {
-        const response = await axios.post(process.env.BACKEND_URL + '/llmTools/summarize', {
-            userPrompt: content,
+        const response = await axios.post(process.env.BACKEND_URL + '/llmTools/outputContent', {
+            userPrompt: userPrompt,
             systemPrompt: "",
             config: {
-                "output": "",
-                "tone": "",
-                "url": "",
-                "writing": ""
+                "output": output
             }
         },
             {
@@ -25,7 +23,6 @@ export default async function handler(
                 }
             }
         );
-
 
         res.status(200).json({ content: response.data, success: true })
     } catch (error) {

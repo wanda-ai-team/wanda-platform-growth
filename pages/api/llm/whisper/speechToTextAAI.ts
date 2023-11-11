@@ -34,6 +34,8 @@ export default async function handler(
         let status = 200,
             resultBody = { status: 'ok', message: 'Files were uploaded successfully' };
         let { file } = req.body;
+
+        
         // getVideoCaptions()
         // const files = await new Promise<ProcessedFiles | undefined>((resolve, reject) => {
         //     const customOptions = { maxFileSize: 300 * 1024 * 1024 };

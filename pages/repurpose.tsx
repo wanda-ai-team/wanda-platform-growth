@@ -27,7 +27,7 @@ import TwitterThread from "@/components/text/twitterThread/twitterThreadN";
 import { getSubtitlesFromYoutube } from "@/utils/api/video/getSubtitlesFromYoutube";
 import { getTextSummary } from "@/utils/api/text/getTextSummary";
 import { getAudioFromYoutube } from "@/utils/api/video/getAudioFromYoutube";
-import { speechToText } from "@/utils/api/AIConvert/speechToText";
+import { speechToText, speechToTextYoutubeVideo } from "@/utils/api/AIConvert/speechToText";
 import { getBlogText } from "@/utils/api/text/getBlogText";
 import { postTweet } from "@/utils/api/text/postTweet";
 import { getAudioTranscript } from "@/utils/api/audio/getAudioTranscript";
@@ -40,22 +40,22 @@ import { outputsWithPlatform, toneList, writingStyles } from "@/utils/globalVari
 import { useSession } from 'next-auth/react';
 import { useRouter } from "next/router";
 import toastDisplay from "@/utils/common/toast";
-import { put, type PutBlobResult } from '@vercel/blob';
 import { useChat } from 'ai/react';
 import streamResponse from "@/utils/common/stream";
 import { Mixpanel } from "@/utils/mixpanel";
+import { urlToTranscript } from "@/utils/common/transcript/transcript";
 
-type Contents = "context" | "url" | "text" | "podcast";
+type Contents = "url" | "text" | "podcast";
 type ContentsAV = "gong" | "file";
 
 const inputList: {
   key: Contents;
   value: string;
 }[] = [
-    {
-      key: "context",
-      value: "Created Content"
-    },
+    // {
+    //   key: "context",
+    //   value: "Created Content"
+    // },
     {
       key: "url",
       value: "URL",
@@ -89,7 +89,6 @@ const inputListaudioVideo: {
 export default function Repurpose() {
   const router = useRouter();
   const inputFileRefF = useRef<HTMLInputElement>(null);
-  const [blob, setBlob] = useState<PutBlobResult | null>(null);
   const stopB = useRef(false);
   const canStopB = useRef(false);
   const [youtubeURL, setYoutubeURL] = useState("");
@@ -123,8 +122,6 @@ export default function Repurpose() {
 
   const [outputSelectedW, setOutputSelectedW] = useState(toneList[0]);
   const [outputSelectedT, setOutputSelectedT] = useState(writingStyles[0]);
-
-  const [postingThread, setPostingThread] = useState(false);
   const [wantTranscript, setWantTranscript] = useState(false);
   const [landingURL, setLandingURL] = useState("");
   const [selectedProject, setSelectedproject] = useState("");
@@ -133,23 +130,6 @@ export default function Repurpose() {
   );
   const inputFileRef = useRef<HTMLInputElement | null>(null);
 
-  async function getStoredThreads(selectedProject: string) {
-    return await fetch('/api/user/getProjectById', {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        projectId: selectedProject
-      }),
-    })
-      .then((res) => res.json())
-      .then(async (data1) => {
-        return data1;
-      }).catch((err) => {
-        return err;
-      })
-  }
   async function getCallsGongInit() {
     await getCalls();
   }
@@ -159,7 +139,6 @@ export default function Repurpose() {
     await fetch('/api/user/getProjectsWithInfo')
       .then((res) => res.json())
       .then(async (data1) => {
-        console.log("data1.projects")
         if (data1.projects.length > 0) {
           setProjects(data1.projects)
           setSelectedproject(data1.projects[0].id)
@@ -179,19 +158,6 @@ export default function Repurpose() {
 
     Mixpanel.track("Loaded Repurpose Page");
   }, []);
-
-  async function test1() {
-    const response = await fetch("/api/agents/agent_textToSummary", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        textData: "he ability to run open-source large language models (LLM) with billions of parameters is a superpower that not many people know about. Imagine having ChatGPT operating on your personal computer, allowing you to utilize any language model without limitations. In this article, I am going to show you a step-by-step guide on how you can run AI chatbots for free on your local machine. Let’s get started. What is Text Generation WebUI? Text generation web UI is a Gradio WebUI for running LLMs. Its goal is to provide a simple and easy-to-use interface when running powerful chatbots on your local machine. Here’s an example: What is Text Generation WebUI? Text generation web UI is a Gradio WebUI for running LLMs. Its goal is to provide a simple and easy-to-use interface when running powerful chatbots on your local machine. Image by Jim Clyde Monge How to install Step 1: Setup the WebUI Download and unzip this zip file: oobabooga-windows.zip Step 1: Setup the WebUI Download and unzip this zip file: oobabooga-windows.zip Image by Jim Clyde Monge Double-click on the “install.bat” file. A command-line window will show up and install all the requirements and dependency files. Double-click on the “install.bat” file. A command-line window will show up and install all the requirements and dependency files. Image by Jim Clyde Monge Make sure you see the “Finished processing dependencies...” message at the end. Step 2: Download the AI model In this step, we will be setting up the GPT-4 x Alpaca project from HuggingFace. Note that you can use other language models; head over to the HuggingFace conversational AI page to explore. Copy the command below and paste it into a CLI pointing to the \text-generation-webui\models folder. # Make sure you have git-lfs installed (https://git-lfs.com) git lfs install git clone https://huggingface.co/anon8231489123/gpt4-x-alpaca-13b-native-4bit-128g # if you want to clone without large files – just their pointers # prepend your git clone with the following env var: GIT_LFS_SKIP_SMUDGE=1 You should see these cloned project files on your local disk: Download the 8GB language model file gpt-x-alpaca-13b-native-4bit-128g-cuda.pt and paste it into the “gpt4-x-alpaca-13b-native-4bit-128g” folder. Image by Jim Clyde Monge Download the 8GB language model file gpt-x-alpaca-13b-native-4bit-128g-cuda.pt and paste it into the “gpt4-x-alpaca-13b-native-4bit-128g” folder. Step 3: Run the WebUI Before running the WebUI, open the start-webui.bat file and make a few changes to the script: @echo off @echo Starting the web UI… cd /D “%~dp0” set MAMBA_ROOT_PREFIX=%cd%\installer_files\mamba set INSTALL_ENV_DIR=%cd%\installer_files\env if not exist “%MAMBA_ROOT_PREFIX%\condabin\micromamba.bat” ( call “%MAMBA_ROOT_PREFIX%\micromamba.exe” shell hook >nul 2>&1 ) call “%MAMBA_ROOT_PREFIX%\condabin\micromamba.bat” activate “%INSTALL_ENV_DIR%” || ( echo MicroMamba hook not found. && goto end ) cd text-generation-webui call python server.py — auto-devices — chat — wbits 4 — groupsize 128 :end pause Finally, double-click the batch file to load the model. Run the WebUI Before running the WebUI, open the start-webui.bat file and make a few changes to the script: Image by Jim Clyde Monge The web interface should be running in your local browser via http://127.0.0.1:7860. The web interface should be running in your local browser via http://127.0.0.1:7860. Image by Jim Clyde Monge Awesome. Now you can begin chatting with the gpt-x-alpaca AI model. If you encounter any issues while running the program on your local machine, feel free to ask for help in the comments. Final Thoughts Overall, I am impressed with how easy it is nowadays to run large language models on your local PC. However, as users, we must exercise caution when using these open-source language models, as their capabilities can be both beneficial and detrimental. You can use it to probably entertain yourself or impress your friends, but not to perpetuate biases and stereotypes or produce harmful content. In a future article, I will show you how to create a chatbot that can act as a virtual girlfriend.",
-        url: "https://github.com/wanda-ai/langchain-py/tree/main/api"
-      }),
-    });
-  }
 
   async function convertSummaryS(
     summaryN: string,
@@ -217,8 +183,6 @@ export default function Repurpose() {
       })
         .then((response) => response.json())
         .then(async ({ data, siteContent, success }: any) => {
-          console.log(data);
-          console.log(success);
           if (success) {
             return { context: data.target_audience + " " + data.product, content: siteContent.replace(/(\r\n|\n|\r)/gm, "") };
           } else {
@@ -242,8 +206,6 @@ export default function Repurpose() {
         landingPageContext: websitescrape.context ? websitescrape.context : "",
       }),
     });
-    console.log("response")
-    console.log(response)
     if (!response.ok) {
       throw new Error(response.statusText);
     }
@@ -261,35 +223,24 @@ export default function Repurpose() {
     setLoadingC(false);
   }
 
-  async function postTweet1() {
-    setPostingThread(true);
-    const threadResult = await postTweet(twitterThreadTextPerTweet);
-    if (threadResult.success) {
-      setThreadPostResult(threadResult.content);
-    } else {
-      setThreadPostResult("Error");
-    }
-    setPostingThread(false);
-  }
-
-  async function youtubeTransformText(youtubeURLN: string, transB = false) {
+  async function contentToText(url: string, transB = false) {
     if (outputSelectedI !== "url") {
-      textToSummary(youtubeURLN);
+      textToSummary(url);
     } else {
-      if (youtubeURLN === "") return;
-      if (youtubeURLN.includes("youtube")) {
-        youtubeToThread(youtubeURLN, transB);
+      if (url === "") return;
+      if (url.includes("youtube")) {
+        youtubeToThread(url, transB);
       } else {
-        if (youtubeURLN.includes("spotify")) {
+        if (url.includes("spotify")) {
           getAudioTranscript(
             "https://open.spotify.com/episode/6KSA3AdTUc3LLUocRCHCJL?si=5vw8HIzYSqKAPP6h6MRpaQ",
             ""
           );
         } else {
-          if (youtubeURLN.includes("twitter")) {
-            twitterThreadToText(youtubeURLN);
+          if (url.includes("twitter")) {
+            twitterThreadToText(url);
           } else {
-            blogToThread(youtubeURLN);
+            blogToThread(url);
           }
         }
       }
@@ -305,13 +256,11 @@ export default function Repurpose() {
   async function youtubeToThread(youtubeURLN: string, transB = true) {
     let subtitles = await getYoutubeSubtitles(youtubeURLN);
     if (subtitles !== "") {
-      console.log("subtitles1")
       let stringF = "";
       const sub = subtitles;
       sub.forEach((element: any) => {
         stringF = stringF + '[' + element.offser + 's] ' + element.text + "\n";
       });
-      console.log(stringF)
       setTranscript(stringF);
       toast.success('Transcript done', {
         position: "top-right",
@@ -323,7 +272,6 @@ export default function Repurpose() {
         progress: undefined,
         theme: "light",
       });
-      console.log("subtitles2")
 
       subtitles = subtitles.map((caption: any) => caption.text);
       subtitles = subtitles.join('');
@@ -334,18 +282,10 @@ export default function Repurpose() {
       if (response.success) {
         if (transB) {
           setTranscript(response.content);
-          toast.success('Transcript done', {
-            position: "top-right",
-            autoClose: 5000,
-            hideProgressBar: false,
-            closeOnClick: true,
-            pauseOnHover: true,
-            draggable: true,
-            progress: undefined,
-            theme: "light",
-          });
+          toastDisplay('Transcript done', true);
         }
-        const responseWhisper = await speechToText(response.content);
+        console.log(response.content);
+        const responseWhisper = await speechToTextYoutubeVideo(response.content.videoId);
         if (responseWhisper.success) {
           await summarizeTextAndCreateThread(
             responseWhisper.content,
@@ -387,113 +327,17 @@ export default function Repurpose() {
     }
   }
 
-  async function summarizeTextAndCreateThread(data: any, url: string, transc: string = "") {
-    console.log("Ola")
-    console.log(data)
-    console.log(url)
-
-    const response = await getTextSummary(data, url);
+  async function summarizeTextAndCreateThread(data: any, url: string, transc: string = "", output: string = "") {
+    const response = await getTextSummary(data, url, output);
     setTranscript(transc);
     if (response.success) {
       setSummary(response.content);
-
-      toast.success('Summary done', {
-        position: "top-right",
-        autoClose: 5000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "light",
-      });
+      toastDisplay('Summary done', true);
     } else {
-      toast.error('OpenAI is overloaded, please try again later', {
-        position: "top-right",
-        autoClose: 5000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "light",
-      });
+      toastDisplay('Error while doing the summary, please try again', false);
     }
 
     setLoadingAPICall(false);
-  }
-
-  async function submitFile(e: React.MouseEvent<HTMLButtonElement, MouseEvent>) {
-    setLoadingAPICall(true);
-    e.preventDefault();
-    let formData = new FormData();
-    if (inputFileRef === null || inputFileRef.current === null || inputFileRef.current.files === null || inputFileRef.current.files.length === 0) {
-      return;
-    }
-    let a;
-
-    for (let i = 0; i < inputFileRef.current.files.length; i++) {
-      console.log("file")
-      console.log(inputFileRef.current.files[i])
-
-      a = await new Promise((resolve, reject) => {
-        const reader = new FileReader();
-
-        reader.onload = (event) => {
-          if (!event.target) return;
-          resolve(event.target.result);
-        };
-
-        reader.onerror = (err) => {
-          reject(err);
-        };
-        if (inputFileRef === null || inputFileRef.current === null || inputFileRef.current.files === null || inputFileRef.current.files.length === 0) {
-          return;
-        }
-        reader.readAsDataURL(inputFileRef.current.files[i]);
-      });
-    }
-
-    console.log("a")
-    console.log(a)
-
-    await fetch("/api/llm/whisper/speechToTextAAI", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        file: a,
-      }),
-    })
-      .then((response) => response.json())
-      .then(async ({ content, success }: any) => {
-        console.log("data")
-        console.log(content)
-        if (success) {
-          setWantTranscript(true)
-          setTranscript(content)
-          const response = await getTextSummary(content, "null");
-          if (response.success) {
-            setSummary(response.content);
-          } else {
-          }
-          // Do some stuff on successfully upload
-        } else {
-          // Do some stuff on error
-        }
-
-        setLoadingAPICall(false);
-      })
-      .catch((error) => {
-        console.error("Error:", error);
-        setLoadingAPICall(false);
-      });
-
-
-
-
-
   }
 
   function getTwitterThread() {
@@ -525,30 +369,30 @@ export default function Repurpose() {
   };
 
   const handleConvert = async (landingPageURL = "") => {
-    Mixpanel.track("Clicked Convert Button", { "Input Type": outputSelectedI, "Output Type": outputSelected, "Output Type O": outputSelectedO, "Output Tone": outputSelectedT, "Output Writing Style": outputSelectedW, "Landing Page URL": landingPageURL })
+    Mixpanel.track("Clicked Convert Button", { "Page": "Repurpose", "Input Type": outputSelectedI, "Output Type": outputSelected, "Output Type O": outputSelectedO, "Output Tone": outputSelectedT, "Output Writing Style": outputSelectedW, "Landing Page URL": landingPageURL })
     setConvertedText("");
     setTwitterThreadTextPerTweet([""]);
     setLoadingC(true);
-    if (outputSelectedI === 'context') {
-      const response = await getStoredThreads(selectedProject);
-      if (response.success) {
-        await convertSummaryS(response.project.content, false, toneStyle);
-      }
+    // if (outputSelectedI === 'context') {
+    //   const response = await getStoredThreads(selectedProject);
+    //   if (response.success) {
+    //     await convertSummaryS(response.project.content, false, toneStyle);
+    //   }
+    // } else {
+    if (outputSelected === "Twitter") {
+      await convertSummaryS(summary, false, toneStyle);
     } else {
-      if (outputSelected === "Twitter") {
-        await convertSummaryS(summary, false, toneStyle);
+      if (outputSelectedO === "Text") {
+        await convertSummaryS(inputText, true, toneStyle);
       } else {
-        if (outputSelectedO === "Text") {
-          await convertSummaryS(inputText, true, toneStyle);
+        if (outputSelected === "Landing Page") {
+          await convertSummaryS(summary, false, toneStyle, landingPageURL);
         } else {
-          if (outputSelected === "Landing Page") {
-            await convertSummaryS(summary, false, toneStyle, landingPageURL);
-          } else {
-            await convertSummaryS(summary, false, toneStyle);
-          }
+          await convertSummaryS(summary, false, toneStyle);
         }
       }
     }
+    // }
     setLoadingC(false);
     // setCurrentStep("result");
   };
@@ -559,21 +403,17 @@ export default function Repurpose() {
   const [gongConnected, setGongConnected] = useState<boolean>(false);
   async function getCalls() {
     setLoadingGongCalls(true);
-    console.log('getCalls');
     await fetch('/api/integrations/gong/getCallByDateWithToken')
       .then(response => response.json())
       .then(data => {
-        console.log(data);
         setGongConnected(true);
         if (data.success) {
           setGongCallsA(data.content);
           setSelectedGongCall(data.content[0].id);
         } else {
           if (data.content.includes("authorization")) {
-            console.log('gong not connected');
             setGongConnected(false);
           }
-          console.log(data);
         }
       })
       .catch((error) => {
@@ -596,12 +436,9 @@ export default function Repurpose() {
     })
       .then(response => response.json())
       .then(async data => {
-        console.log(data);
         if (data.success) {
           await summarizeTextAndCreateThread(data.content, callId, data.content);
-          console.log(data.content);
         } else {
-          console.log(data);
         }
       })
       .catch((error) => {
@@ -647,7 +484,7 @@ export default function Repurpose() {
     const { getRootProps, getRadioProps } = useRadioGroup({
       name: "contentAV",
       defaultValue: inputListaudioVideo[0].key,
-      onChange: async (value: ContentsAV) => { setOutputSelectedAudioVideo(value); Mixpanel.track("Changed Input Type", { "Input Type": value }) },
+      onChange: async (value: ContentsAV) => { setOutputSelectedAudioVideo(value); Mixpanel.track("Changed Input Type", { "Input Type": value, "Page": "Repurpose" }) },
     })
 
     const group = getRootProps()
@@ -678,7 +515,7 @@ export default function Repurpose() {
     const { getRootProps, getRadioProps } = useRadioGroup({
       name: "content",
       defaultValue: inputList[0].key,
-      onChange: (value: Contents) => { setOutputSelectedI(value); Mixpanel.track("Changed Input Type", { "Input Type": value }) },
+      onChange: (value: Contents) => { setOutputSelectedI(value); Mixpanel.track("Changed Input Type", { "Input Type": value, "Page": "Repurpose" }) },
     })
 
     const group = getRootProps()
@@ -701,6 +538,7 @@ export default function Repurpose() {
   }
 
   function getTextArea(valueChosen: any) {
+    console.log(outputSelected)
     if (outputSelected === 'Twitter') {
       return getTwitterThread();
     }
@@ -725,7 +563,6 @@ export default function Repurpose() {
     if (inputFileRef === null || inputFileRef.current === null || inputFileRef.current.files === null || inputFileRef.current.files.length === 0) {
       return;
     }
-    console.log("ola")
 
     const file = inputFileRef.current.files[0];
     const filename = encodeURIComponent(inputFileRef.current.files[0].name.replace(/\s/g, ""));
@@ -734,10 +571,6 @@ export default function Repurpose() {
     const formData = new FormData();
 
     Object.entries({ ...fields, file }).forEach(([key, value]) => {
-      console.log("key")
-      console.log(key)
-      console.log("value")
-      console.log(value)
       // @ts-ignore
       formData.append(key, value);
     });
@@ -748,111 +581,35 @@ export default function Repurpose() {
     });
 
     if (upload.ok) {
-      console.log("url")
-      console.log(url + filename)
       let URLF = url + filename;
-      toastDisplay('Upload done, transcribing..', true);
-
-      // const formData = new FormData();
-
-      // Object.entries({ ...fields, file }).forEach(([key, value]) => {
-      //   // @ts-ignore
-      //   formData.append(key, value);
-      // });
-
-      // const upload = await fetch(url, {
-      //   method: 'POST',
-      //   body: formData,
-      // });
 
       if (fields.success_action_status === '201') {
-        const decoder = new TextDecoder();
-        const response = await fetch("/api/llm/whisper/speechToTextAAIURL", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            url: URLF,
-          }),
-        })
-        let done = false;
-        console.log("response")
-        console.log(response)
-        if (response === undefined) return;
-        const reader = response?.body?.getReader();
-        let trans = "";
-        while (!done) {
-          if (reader === undefined) return;
-          const { value, done: doneReading } = await reader?.read();
+        const response = await urlToTranscript(URLF, true, false, true, false, false, 'Upload done, transcribing..');
 
-          done = doneReading;
-          if (value && decoder.decode(value) !== "processing") {
-
-            const data = decoder.decode(value);
-            // Do something with data
-            trans += data;
-          };
-
-        }
         setWantTranscript(true)
-        setTranscript(trans)
-        toastDisplay('Transcript done, summarizing...', true);
-        const responseS = await getTextSummary(trans, "null");
-        console.log("responseS")
-        console.log(responseS)
-        if (responseS.success && responseS.content !== "Error") {
-          setSummary(responseS.content);
-          toastDisplay('Summary done', true);
-        } else {
-          toastDisplay('Error while doing the summary, please try again', false);
+        if (typeof response.transcript === 'string') {
+          setTranscript(response.transcript);
+        }
+        else {
+          setTranscript(response.transcript.text);
         }
 
-
+        if (response.summary !== undefined) {
+          setSummary(response.summary);
+        }
+        else {
+          setSummary(response.transcript.summary);
+        }
+        toastDisplay('Summary done', true);
         setLoadingAPICall(false);
-
-        // await fetch("/api/llm/whisper/speechToTextAAIURL", {
-        //   method: "POST",
-        //   headers: {
-        //     "Content-Type": "application/json",
-        //   },
-        //   body: JSON.stringify({
-        //     url: "https://storage.googleapis.com/audios-wanda/" + filename,
-        //   }),
-        // })
-        //   .then((response) => response.json())
-        //   .then(async ({ content, success }: any) => {
-        //     console.log("data")
-        //     console.log(content)
-        //     if (success) {
-        //       setWantTranscript(true)
-        //       setTranscript(content)
-        //       toastDisplay('Transcript done', true);
-        //       const response = await getTextSummary(content, "null");
-        //       if (response.success) {
-        //         setSummary(response.content);
-        //         toastDisplay('Summary done', true);
-        //       } else {
-        //       }
-        //       // Do some stuff on successfully upload
-        //     } else {
-        //       // Do some stuff on error
-        //     }
-
-        //     setLoadingAPICall(false);
-        //   })
-        //   .catch((error) => {
-        //     console.error("Error:", error);
-        //     setLoadingAPICall(false);
-        //   });
-
-
-        console.log('Uploaded successfully!');
       } else {
+        toastDisplay('Error with the upload', false);
+        setLoadingAPICall(false);
         console.error('Upload failed.');
       }
     }
   };
+
   return (
     <>
       <main className={styles.main}>
@@ -881,7 +638,7 @@ export default function Repurpose() {
                           isDisabled={loadingAPICall}
                           placeholder={
                             outputSelectedI === "url"
-                              ? "URL (works with Medium, Youtube, Twitter tweets)"
+                              ? "URL (works with Medium, Youtube, X)"
                               : "URL (works with spotify)"
                           }
                           value={youtubeURL}
@@ -889,19 +646,14 @@ export default function Repurpose() {
                             setYoutubeURL(e.target.value);
                             if (e.target.value !== "") {
                               if (outputSelectedI === "url") {
+                                let urlN = e.target.value;
                                 if (e.target.value.includes('youtu.be')) {
-                                  const urlN = 'https://www.youtube.com/watch?v=' + e.target.value.split('youtu.be/')[1];
-                                  youtubeTransformText(
-                                    urlN,
-                                    wantTranscript
-                                  );
-                                } else {
-                                  youtubeTransformText(
-                                    e.target.value,
-                                    wantTranscript
-                                  );
-
+                                  urlN = 'https://www.youtube.com/watch?v=' + e.target.value.split('youtu.be/')[1];
                                 }
+                                contentToText(
+                                  urlN,
+                                  wantTranscript
+                                );
                               } else {
                                 // getAudioTranscript(e.target.value);
                               }
@@ -919,12 +671,12 @@ export default function Repurpose() {
                                 if (outputSelectedI === "url") {
                                   if (youtubeURL.includes('youtu.be')) {
                                     const urlN = 'https://www.youtube.com/watch?v=' + youtubeURL.split('youtu.be/')[1];
-                                    youtubeTransformText(
+                                    contentToText(
                                       urlN,
                                       wantTranscript
                                     );
                                   } else {
-                                    youtubeTransformText(
+                                    contentToText(
                                       youtubeURL,
                                       wantTranscript
                                     );
@@ -963,45 +715,10 @@ export default function Repurpose() {
                       <Button
                         isDisabled={((inputText === ""))}
                         colorScheme="purple"
-                        onClick={() => youtubeTransformText(inputText)}
+                        onClick={() => contentToText(inputText)}
                       >
                         Start analysis
                       </Button>
-                    </>
-                  )}
-
-                  {outputSelectedI === "context" && loadingProjects && (
-                    <>
-                      <Text>
-                        Loading created content.
-                      </Text>
-                      <Progress size='xs' isIndeterminate />
-                    </>
-                  )}
-
-
-                  {outputSelectedI === "context" && !loadingProjects && projects.length <= 0 && (
-                    <Text>
-                      No previous created content.
-                    </Text>
-                  )}
-                  {outputSelectedI === "context" && projects.length > 0 && (
-                    <>
-                      <Select
-                        sx={{ backgroundColor: "white" }}
-                        // onChange={(e) => {
-                        //   setOutputSelected(e.target.value);
-                        //   setOutputSelectedO(outputsWithPlatform.filter(v => v.platform === e.target.value)[0].outputs[0]);
-                        // }}
-                        value={selectedProject}
-                        onChange={(e) => { setSelectedproject(e.target.value); }}
-                      >
-                        {projects.map((project: any, index) => (
-                          <option key={index} value={project.id}>
-                            {project.platform} - {project.content.substring(0, 75) + ' ...'}
-                          </option>
-                        ))}
-                      </Select>
                     </>
                   )}
 
@@ -1141,9 +858,13 @@ export default function Repurpose() {
                   {outputSelected !== "Summary" && outputSelected !== "Transcript" && (
                     <Button
                       isDisabled={(
-                        (outputSelectedI !== "context" && summary === "")
+                        // (outputSelectedI !== "context" && summary === "")
+                        // || canStopB.current
+                        // || (outputSelectedI === "context" && selectedProject === "")
+
+                        (summary === "")
                         || canStopB.current
-                        || (outputSelectedI === "context" && selectedProject === "")
+                        || (selectedProject === "")
                       )}
                       colorScheme="purple"
                       onClick={() => handleConvert(landingURL)}
@@ -1175,62 +896,10 @@ export default function Repurpose() {
 
               <div className={styles.texts}>
               </div>
-            </div>
-
-            {/* <div className={styles.transcript__summary}>
-              <div className={styles.texts}>
-                <span className={styles.summary__header}>Summary</span>
-                <Textarea
-                  disabled={!summary}
-                  style={{
-                    height: `calc(${wantTranscript ? "40" : "100"}vh  - 200px)`,
-                    width: "40vw",
-                  }}
-                  value={summary}
-                  onChange={(e) => {
-                    handleInputSChange(e);
-                  }}
-                  size="lg"
-                  resize="none"
-                  variant="flushed"
-                />
-              </div>
-
-              {wantTranscript && <hr className={styles.divider} />}
-              {wantTranscript && (
-                <div className={styles.texts}>
-                  <span className={styles.transcript__header}>Transcript</span>
-                  <Textarea
-                    disabled={!transcript}
-                    style={{ height: "calc(60vh - 168px)", width: "40vw" }}
-                    value={transcript}
-                    onChange={(e) => {
-                      setTranscript(e.target.value);
-                    }}
-                    size="lg"
-                    resize="none"
-                    variant="flushed"
-                  />
-                </div>
-              )}
-            </div> */}
+            </div>          
           </>
         ) : (
           <>
-            {/* <div className={styles.form__container}>
-              <div className={styles.title__container}>
-                <Text as="h2" fontSize="3xl">
-                  Edit & Publish AI Post
-                </Text>
-                <Text>Adjust, edit or add one or all of the posts.</Text>
-              </div>
-              <Chat
-                selectedTweets={selectedTweets}
-                twitterThreadText={twitterThreadTextPerTweet}
-                setTwitterThreadTextPerTweet={setTwitterThreadTextPerTweet}
-              />
-            </div> */}
-
             <div className={styles.transcript__summary}>
               <div className={styles.texts}>
                 <span className={styles.summary__header}>
@@ -1262,15 +931,6 @@ export default function Repurpose() {
 
       <footer className={styles.generate__footer}>
         <Button colorScheme='purple' isDisabled={!canStopB.current} onClick={() => stopB.current = true}> Stop Generation </Button>
-        {/* {outputSelected === "Twitter" && (
-          <Button
-            colorScheme="purple"
-            isDisabled={twitterThreadTextPerTweet.length <= 1}
-            onClick={postTweet1}
-          >
-            {postingThread ? <Spinner /> : `Publish on ${outputSelected}`}
-          </Button>
-        )} */}
 
       </footer>
       <ToastContainer

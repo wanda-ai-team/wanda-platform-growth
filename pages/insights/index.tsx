@@ -25,6 +25,8 @@ import {
     AccordionItem,
     AccordionPanel,
     Box,
+    Checkbox,
+    Stack,
 } from "@chakra-ui/react";
 import { Link } from '@chakra-ui/react'
 import {
@@ -34,6 +36,7 @@ import { Message, Blocks, Elements } from 'slack-block-builder';
 
 import { useEffect, useRef, useState } from "react";
 import { POSTApiCall } from "@/utils/api/commonAPICall";
+import { Mixpanel } from "@/utils/mixpanel";
 
 type Contents = "context" | "url" | "text" | "file" | "gong";
 const inputList: {
@@ -54,9 +57,27 @@ const inputList: {
         },
     ];
 
+const insights = [{
+    value: "summary",
+    label: "Summary",
+    checked: false
+}, {
+    value: "painPoints",
+    label: "Pain Points",
+    checked: false
+}, {
+    value: "topics",
+    label: "Topics",
+    checked: false
+}, {
+    value: "speakers",
+    label: "Speakers",
+    checked: false
+}];
 export default function Insights() {
     const inputFileRef = useRef<HTMLInputElement | null>(null);
     const [gongConnected, setGongConnected] = useState<boolean>(false);
+    const [slackConnected, setSlackConnected] = useState<boolean>(false);
     const [outputSelectedI, setOutputSelectedI] = useState<Contents>(inputList[0].key);
     const [url, setUrl] = useState<string>("");
     const [loadingAPICall, setLoadingAPICall] = useState<boolean>(false);
@@ -73,6 +94,7 @@ export default function Insights() {
     const [callId, setCallId] = useState<string>("");
     const [channelName, setChannelName] = useState<string>("");
     const [selectedSlackUsers, setSelectedSlackUsers] = useState<any>([]);
+    const [selectedInsights, setSelectedInsights] = useState<any>([]);
 
     const isError = slackChannels.find((item: any) => item.label === channelName) || channelName === "";
     const [gongCallsA, setGongCallsA] = useState([]);
@@ -83,9 +105,15 @@ export default function Insights() {
     const { getRootProps, getRadioProps } = useRadioGroup({
         name: "content",
         defaultValue: inputList[0].key,
-        onChange: (value: Contents) => setOutputSelectedI(value),
+        onChange: (value: Contents) => { setOutputSelectedI(value); Mixpanel.track("Changed Input Type", { "Input Type": value, "Page": "Insights" }) },
     });
     const group = getRootProps();
+
+    useEffect(() => {
+        Mixpanel.track("Loaded Insights Page");
+        getCalls();
+        getSlackInfo();
+    }, []);
 
     async function getCalls() {
         setLoadingGongCalls(true);
@@ -128,41 +156,56 @@ export default function Insights() {
             .then(response => response.json())
             .then(async data => {
                 if (data.success) {
-                    setTranscript(data.content.transcript);
-                    const response = await urlToTranscript(data.content.media.audioUrl, true, true, true, true, true, 'Transcribed, getting insights..');
 
-                    const responseLemur = await getLemurInsights(data.content.media.audioUrl);
-                    
-                    setCallId(data.content.metaData.id);
-                    setTopics(data.content.content.topics.map((item: any) => item.name));
+                    const gongCall = await POSTApiCall('/api/db/getDBEntry', {
+                        collection: 'gongCalls',
+                        numberOfConditions: 1,
+                        condition: ['callId'],
+                        conditionValue: [data.content.metaData.id],
+                        conditionOperation: ['=='],
+                    })
 
-                    setKeyphrases(responseLemur.pain_points)
-                    setSummary(response.transcript.summary);
+                    if (gongCall.content.length > 0) {
 
-                    const speakerArr = responseLemur.speakers.map((speaker: any) => speaker.speaker);
-                    console.log(speakerArr);
-                    const speakerSet = new Set(speakerArr);
-                    setSpeakers(Array.from(speakerSet));
-                    await POSTApiCall('/api/db/addOrCreateDBEntry',
-                        {
-                            collection: 'gongCalls',
-                            numberOfConditions: 1,
-                            condition: ['callId'],
-                            conditionValue: [data.content.metaData.id],
-                            conditionOperation: ['=='],
-                            body: {
-                                callId: data.content.metaData.id,
-                                title: data.content.metaData.title,
-                                transcript: data.content.transcript,
-                                keyphrases: response.response,
-                                topics: Object.keys(response.topics).map((item: any) => item.split('>')[item.split('>').length - 1]),
-                                date: new Date().toISOString(),
-                            },
-                        })
+                        setTranscript(gongCall.content[0].data.transcript);
+                        setTopics(gongCall.content[0].data.topics);
+                        setSummary(gongCall.content[0].data.summary);
+                        setSpeakers(gongCall.content[0].data.speakers);
+                        setKeyphrases(gongCall.content[0].data.keyphrases)
+                    }
+                    else {
+                        setTranscript(data.content.transcript);
+                        const response = await urlToTranscript(data.content.media.audioUrl, true, true, true, true, true, 'Transcribed, getting insights..');
+
+                        setCallId(data.content.metaData.id);
+                        setTopics(data.content.content.topics.map((item: any) => item.name));
+
+                        setSummary(response.transcript.summary);
+
+                        const speakerArr = response.transcript.words.map((speaker: any) => speaker.speaker);
+                        const speakerSet = new Set(speakerArr);
+                        setSpeakers(Array.from(speakerSet));
 
 
-
-
+                        const responseLemur = await getLemurInsights(data.content.media.audioUrl);
+                        setKeyphrases(responseLemur.pain_points)
+                        await POSTApiCall('/api/db/addOrCreateDBEntry',
+                            {
+                                collection: 'gongCalls',
+                                numberOfConditions: 1,
+                                condition: ['callId'],
+                                conditionValue: [data.content.metaData.id],
+                                conditionOperation: ['=='],
+                                body: {
+                                    callId: data.content.metaData.id,
+                                    title: data.content.metaData.title,
+                                    transcript: data.content.transcript,
+                                    keyphrases: responseLemur.pain_points,
+                                    topics: data.content.content.topics.map((item: any) => item.name),
+                                    date: new Date().toISOString(),
+                                },
+                            })
+                    }
                 } else {
                     console.log(data);
                 }
@@ -175,8 +218,23 @@ export default function Insights() {
 
     async function getSlackInfo() {
         setLoadingSlack(true)
+        console.log('getSlackInfo');
         let users = await getListOfUsers();
+        console.log("users");
+        console.log(users);
+        if (users.code && users.data && users.data.ok === false) {
+            setLoadingSlack(false)
+            setSlackConnected(false);
+            return;
+        }
         let channels = await getListOfChannels();
+        console.log(channels);
+        if (channels.code && channels.data && channels.data.ok === false) {
+            setLoadingSlack(false)
+            setSlackConnected(false);
+            return;
+        }
+        setSlackConnected(true);
         users = users.map((item: any) => ({ label: item.name, value: item.id }));
         setSlackUsers(users);
         channels = channels.map((item: any) => ({ label: item.name, value: item.id }));
@@ -186,10 +244,6 @@ export default function Insights() {
         setLoadingSlack(false)
     }
 
-    useEffect(() => {
-        getCalls();
-        getSlackInfo();
-    }, []);
 
     function urlInput() {
         return (
@@ -283,11 +337,55 @@ export default function Insights() {
                         />
 
                         <Button isDisabled={!selectedGongCall.value} colorScheme="purple" onClick={async (e) => {
+                            Mixpanel.track("Clicked on get call information for Gong", { "Page": "Insights" });
                             getCallInformation(selectedGongCall);
                         }} >
                             Get Call Information
                         </Button>
                     </>
+                }
+            </>
+        )
+    }
+
+    function slackButton() {
+        return (
+            <>
+                {loadingSlack ?
+                    <>
+                        <Text>
+                            Loading slack information.
+                        </Text>
+                        <Progress size='xs' isIndeterminate />
+                    </>
+                    :
+                    !slackConnected ?
+                        <Text>
+                            Slack bot was not added to your channel. <Link color='teal.500' href="/profile"> Please connect it here </Link>
+                        </Text>
+                        :
+                        <>
+
+                            <Button isDisabled={loadingSlack || transcript.length <= 0} colorScheme="purple" onClick={onOpen} >
+                                {
+                                    "Send to slack"
+                                }
+                            </Button>
+                            <ModalComponent isOpen={isOpen} onClose={onClose} title={"Slack Notification"} content={slackModalContent()} buttonText={"Send to Slack"}
+                                buttonClickT={() => {
+                                    Mixpanel.track("Sent notification to slack", { "Selected Channel": selectedChannel, "Selected Gong Call": selectedGongCall, "Selected Slack Users": selectedSlackUsers, "Selected Channel Name": channelName, "Selected Insights": selectedInsights });
+                                    sendMessageToChannelT(selectedChannel, selectedGongCall, selectedSlackUsers, channelName, selectedInsights);
+                                    onClose()
+                                }}
+                                buttonDisabled={
+                                    (selectedChannel.value === "create" && slackChannels.find((item: any) => item.label === channelName))
+                                    ||
+                                    (selectedChannel.value === "create" && channelName === "")
+                                    ||
+                                    (selectedGongCall.value === "")
+                                } />
+                        </>
+
                 }
             </>
         )
@@ -335,6 +433,19 @@ export default function Insights() {
                             }
                         </FormControl>
                     </>}
+
+                <Text as="h2" fontSize="l">
+                    Insights to send
+                </Text>
+
+                <Select
+                    colorScheme="purple"
+                    options={insights.map((item: any) => ({ label: item.label, value: item.value }))}
+                    value={selectedInsights}
+                    onChange={(e) => { setSelectedInsights(e); }}
+                    isMulti={true}
+                />
+
                 <Text as="h2" fontSize="l">
                     Invite people to channel
                 </Text>
@@ -348,22 +459,26 @@ export default function Insights() {
         )
     }
 
-    function sendMessageToChannelT(message: string, channelId: any, selectedGongCall: any, selectedSlackUsers: any, channelName: string) {
+    function sendMessageToChannelT(channelId: any, selectedGongCall: any, selectedSlackUsers: any, channelName: string, selectedInsightsV: any) {
         console.log(selectedGongCall)
         console.log('Meeting Insights for meeting ' + selectedGongCall.title + " id_" + selectedGongCall.value);
-        if (message && message.length > 0) {
+        if (true) {
+            let message = ""
+            selectedInsightsV.map((item: any) => {
+                message += "\n>" + "*" + item.label + "*"
+                    + "\n>- " + (item.value === "summary" ? summary : item.value === "painPoints" ? keyphrases.join("\n>- ") : item.value === "topics" ? topics.join("\n>- ") : item.value === "speakers" ? speakers.join("\n>- ") : "")
+                    + "\n>"
+            })
             let listOfUsers = ""
             if (selectedSlackUsers.length > 0) {
                 listOfUsers = selectedSlackUsers.map((item: any) => item.value).join(",");
             }
-            message = "\n>" + "*Topics*"
-                + "\n>- " + topics.join("\n>- ")
             console.log(channelId);
             const messageF = Message({ channel: channelId, text: "Meeting insights" })
                 .blocks(
                     Blocks.Section({ text: 'Meeting Insights for meeting ' + selectedGongCall.title + " id_" + selectedGongCall.value }),
                     Blocks.Divider(),
-                    Blocks.Section({ text: message }),
+                    message !== "" ? Blocks.Section({ text: message }) : Blocks.Section({ text: "No insights selected" }),
                     Blocks.Divider(),
                     Blocks.Actions()
                         .elements(
@@ -382,18 +497,18 @@ export default function Insights() {
     }
 
     return (
-        <main className={styles.main}>
+        <main className={styles.main} style={{ height: "92vh" }}>
             <div className={styles.form__container}>
                 <div className={styles.title__container}>
                     <Text as="h2" fontSize="3xl">
                         Customer Insights
                     </Text>
                     <Text>
-                        Get insights on your customers and their interests based on the selected platfrom.
+                        Get insights from your customer calls, align your team and take action.
                     </Text>
                 </div>
                 <div className={styles.options}>
-                    <Text fontWeight="semibold">Post Content</Text>
+                    <Text fontWeight="semibold"></Text>
                     <div className={styles.radio__group} {...group}>
                         {inputList.map(({ key, value }) => {
                             const radio = getRadioProps({ value: key });
@@ -444,19 +559,7 @@ export default function Insights() {
                 </div>
 
                 <div className={styles.platform__container}>
-                    {/* <Text fontWeight="semibold">Select Platform:</Text> */}
-                    <Button isDisabled={loadingSlack || transcript.length <= 0} colorScheme="purple" onClick={onOpen} >
-                        {
-                            loadingSlack ? "Loading Slack ..." : "Send to slack"
-                        }
-
-                    </Button>
-                    <ModalComponent isOpen={isOpen} onClose={onClose} title={"Slack Notification"} content={slackModalContent()} buttonText={"Send to Slack"}
-                        buttonClickT={() => { sendMessageToChannelT(topics.join(" "), selectedChannel, selectedGongCall, selectedSlackUsers, channelName); onClose() }}
-                        buttonDisabled={(selectedChannel.value === "create"
-                            ? (slackChannels.find((item: any) => item.label === channelName) && channelName !== "")
-                            : !selectedChannel)} />
-
+                    {slackButton()}
                 </div>
             </div>
 
@@ -465,7 +568,7 @@ export default function Insights() {
                     <Progress size='xs' isIndeterminate />
 
                     <Accordion allowToggle w={"100%"}>
-                        <AccordionItem>
+                        <AccordionItem isDisabled={transcript == ""}>
                             <h2>
                                 <AccordionButton>
                                     <Box as="span" flex='1' textAlign='left'>
@@ -479,7 +582,7 @@ export default function Insights() {
                             </AccordionPanel>
                         </AccordionItem>
 
-                        <AccordionItem>
+                        <AccordionItem isDisabled={keyphrases.length <= 0}>
                             <h2>
                                 <AccordionButton>
                                     <Box as="span" flex='1' textAlign='left'>
@@ -497,7 +600,7 @@ export default function Insights() {
                             </AccordionPanel>
                         </AccordionItem>
 
-                        <AccordionItem>
+                        <AccordionItem isDisabled={summary == ""}>
                             <h2>
                                 <AccordionButton>
                                     <Box as="span" flex='1' textAlign='left'>
@@ -511,7 +614,7 @@ export default function Insights() {
                             </AccordionPanel>
                         </AccordionItem>
 
-                        <AccordionItem>
+                        <AccordionItem isDisabled={speakers.length <= 0}>
                             <h2>
                                 <AccordionButton>
                                     <Box as="span" flex='1' textAlign='left'>
@@ -529,7 +632,7 @@ export default function Insights() {
                             </AccordionPanel>
                         </AccordionItem>
 
-                        <AccordionItem>
+                        <AccordionItem isDisabled={topics.length <= 0}>
                             <h2>
                                 <AccordionButton>
                                     <Box as="span" flex='1' textAlign='left'>

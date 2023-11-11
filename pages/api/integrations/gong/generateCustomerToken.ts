@@ -36,12 +36,6 @@ export default async function handler(
         let data = process.env.GONG_ID + ":" + process.env.GONG_SECRET;
         let buff = Buffer.from(data);
         let base64data = buff.toString('base64');
-
-        console.log("values")
-        console.log(process.env.GONG_ID);
-        console.log(process.env.GONG_SECRET);
-        console.log(code);
-
         // Set the headers for the request, including the API token and content type
         const headers = {
             authorization: "Basic " + base64data,
@@ -58,7 +52,7 @@ export default async function handler(
                 console.log(data);
                 if (data.access_token !== undefined && data.refresh_token !== undefined && data.expires_in !== undefined) {
                     const currentSeconds = (new Date().getTime() / 1000) + data.expires_in;
-                    await updateDBEntry("users", { gongAccessToken: data.access_token, gongRefreshToken: data.refresh_token, expiration: currentSeconds }, ['email'], '==', [session.user.email], 1);
+                    await updateDBEntry("users", { gongAccessToken: data.access_token, gongRefreshToken: data.refresh_token, gongTokenExpiration: currentSeconds }, ['email'], '==', [session.user.email], 1);
                     return data;
                 }
                 return null

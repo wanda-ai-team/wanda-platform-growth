@@ -77,19 +77,20 @@ const writingStyles = [
 const outputsWithPlatform = [
     { platform: 'Twitter', outputs: ['Thread'] },
     // { platform: 'Instagram', outputs: ['Carousel', 'Post'] },
-    { platform: 'Landing Page', outputs: ['Copy']}, 
+    // { platform: 'Landing Page', outputs: ['Copy'] },
     { platform: 'Linkedin', outputs: ['Post'] },
-    { platform: 'Blog', outputs: ['Post', 'Article'] },
+    { platform: 'Blog', outputs: ['Post'] },
+    // { platform: 'Email', outputs: ['Follow-up'] },
     { platform: 'Transcript', outputs: ['Transcript'] },
     { platform: 'Summary', outputs: ['Summary'] }
 ];
 
 const slackModalOutputPlatform = [
-    { platform: 'Twitter', outputs: ['Thread'] },
+    { platform: 'Twitter Thread', outputs: ['Thread'] },
     // { platform: 'Instagram', outputs: ['Carousel', 'Post'] },
-    { platform: 'Landing Page', outputs: ['Copy']}, 
-    { platform: 'Linkedin', outputs: ['Post'] },
-    { platform: 'Blog', outputs: ['Post', 'Article'] },
+    { platform: 'Landing Page Copy', outputs: ['Copy'] },
+    { platform: 'Linkedin Post', outputs: ['Post'] },
+    { platform: 'Blog Post', outputs: ['Post', 'Article'] },
 ];
 
 const platformsToGenerateIdeas = [

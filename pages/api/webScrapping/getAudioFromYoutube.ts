@@ -2,11 +2,11 @@
 import createDBEntry from "@/utils/api/db/createDBEntry";
 import type { NextApiRequest, NextApiResponse } from "next";
 import ytdl from "ytdl-core";
-
+import "fs"
 
 const downloadAudio = async (videoId: string, pathFile: string, res: any) => {
     try {
-        const stream = await ytdl(videoId, { filter: 'audioonly' })
+        const stream = await ytdl(videoId, { filter: 'audio' })
         let result: any[] = [];
         let resultA: any[] = [];
         let value = 0;
@@ -26,15 +26,15 @@ const downloadAudio = async (videoId: string, pathFile: string, res: any) => {
                 reject(err);
             });
         });
-
         for (let i = 0; i < resultA.length; i++) {
             await createDBEntry("youtubeVideos", { videoId: videoId, audio: resultA[i] });
         }
 
-        console.log("done");
-        console.log(resultA);
+        
+        const audioFile = new Blob(result,  { type: 'audio/mp3' });
 
-        return result;
+
+        return {result: result, videoId: videoId};
     } catch (e: any) {
         console.log(e);
         return "";

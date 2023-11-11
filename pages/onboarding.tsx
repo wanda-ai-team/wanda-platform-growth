@@ -2,6 +2,7 @@ import {
   Box,
   Button,
   Center,
+  Checkbox,
   HStack,
   Input,
   Progress,
@@ -20,6 +21,8 @@ import sleep from "@/utils/common/utils";
 import { embedText } from "@/utils/api/backend/backendCalls";
 import { useSession } from "next-auth/react";
 import { Mixpanel } from "@/utils/mixpanel";
+import ModalComponent from "@/components/modal/Modal";
+import axios from "axios";
 
 interface OnboardingProps { }
 
@@ -31,7 +34,7 @@ export default function Onboarding() {
   const { data: session, status } = useSession()
   const [businessName, setBusinessName] = useState("");
 
-  const MAX_STEPS = 5;
+  const MAX_STEPS = 2;
 
   const handleNext = () => {
     setStep((prev) => Math.min(prev + 1, MAX_STEPS - 1));
@@ -60,7 +63,8 @@ export default function Onboarding() {
               if (data !== 'skip') {
                 setSiteData((prev: any) => ({ ...prev, ...data }));
               }
-              handleNext();
+              // handleNext();
+              push('/');
             }}
 
             businessName={businessName}
@@ -199,40 +203,136 @@ const Step0: FunctionComponent<Step0Props> = ({
   // loading,
   Step0Props) => {
   const [url, setURL] = useState("");
+  const [urls, setURLs] = useState([]);
 
   const [product, setProduct] = useState("");
   const [targetAudience, setTargetAudience] = useState("");
   const [businessNameT, setBusinessNameT] = useState("");
 
   const [loading, setLoading] = useState(false);
+  const [loadingSitemap, setLoadingSitemap] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
+  const [checkedItems, setCheckedItems] = React.useState<any[]>([])
+
   const { data: session, status } = useSession()
 
-  const handleScrape = async () => {
-
-    setLoading(true);
-    setBusinessName(businessNameT);
-    console.log(businessNameT);
-    await fetch("/api/onboarding/scrape", {
+  const checkSitemap = async () => {
+    setLoadingSitemap(true);
+    let URLIsWorking = false;
+    await fetch("/api/onboarding/checkURL", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
         url: url,
+      }),
+    }).then((response) => response.json()).then(({ success }: any) => {
+      if (!success) {
+        toastDisplay('Error while scraping, check if URL is well formed', false);
+        URLIsWorking = false;
+        setLoadingSitemap(false);
+      } else {
+        setIsOpen(true);
+        URLIsWorking = true;
+      }
+    })
+
+    if (!URLIsWorking) {
+      return;
+    }
+
+    const urls = await fetch("/api/onboarding/scrapeSitemap", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        url: url,
+      }),
+    }).then((response) => response.json()).then(({ siteContent, success }: any) => {
+      if (success) {
+        return siteContent;
+      }
+      else {
+        return [];
+      }
+    })
+
+    if (urls.length === 0) {
+      toastDisplay('Error while scraping, check if URL is well formed', false);
+      setIsOpen(false)
+    } else {
+      setURLs(urls);
+      setCheckedItems(new Array(urls.length).fill(false));
+    }
+    setLoadingSitemap(false);
+  }
+
+  const sitemapModelContent = () => {
+    return (
+      <VStack spacing={4}
+        align='stretch'>
+        <Text as="h2" fontSize="l">
+          Select the pages you want to use for context.
+        </Text>
+        {loadingSitemap ?
+          <Center>
+            <Spinner color="#8F50E2" />
+          </Center>
+          :
+          <Stack spacing={[1, 5]} direction={'column'}>
+            {urls.map((url: any, index: any) => (
+              <Checkbox
+                key={index}
+                size='md'
+                colorScheme='purple'
+                isChecked={checkedItems[index]}
+                onChange={(e) => {
+                  const newCheckedItems = [...checkedItems];
+                  newCheckedItems[index] = e.target.checked;
+                  setCheckedItems(newCheckedItems);
+                }}
+              >
+                {url}
+              </Checkbox>
+            ))}
+          </Stack>
+        }
+      </VStack>
+    )
+  }
+
+  const handleScrape = async () => {
+    setIsOpen(false);
+    let finalUrl: any[] = []
+    urls.forEach((url: any, index: any) => {
+      if (checkedItems[index]) {
+        finalUrl.push(url);
+      }
+    })
+    setLoading(true);
+    setBusinessName(businessNameT);
+    await fetch("/api/onboarding/scrapeURLS", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        urls: finalUrl,
         businessName: businessNameT
       }),
     })
       .then((response) => response.json())
       .then(async ({ data, siteContent, success }: any) => {
-        console.log(data);
-        console.log(success);
         if (success) {
-
           toastDisplay('Business understood, storing ...', true);
-
+          console.log(data);
           setProduct(data.product);
           setTargetAudience(data.target_audience);
 
+          setLoading(false);
+          return
           const content = siteContent.replace(/(\r\n|\n|\r)/gm, "");
 
           await embedText(
@@ -245,7 +345,6 @@ const Step0: FunctionComponent<Step0Props> = ({
             , 'Landing Page Content');
 
         }
-        setLoading(false);
       })
       .catch((error) => {
         console.error("Error:", error);
@@ -295,12 +394,12 @@ const Step0: FunctionComponent<Step0Props> = ({
             />
           </VStack>
           <Button
-            isDisabled={loading || !businessNameT || !url}
+            isDisabled={loading || !businessNameT || !url || loadingSitemap}
             onClick={() => {
-              handleScrape();
+              checkSitemap();
             }}
           >
-            Add
+            {loadingSitemap ? <Spinner color="#8F50E2" /> : 'Add'}
           </Button>
         </HStack>
       </VStack>
@@ -336,7 +435,7 @@ const Step0: FunctionComponent<Step0Props> = ({
           }}
           isDisabled={!product || !targetAudience || !businessName}
         >
-          Next
+          Start using
         </Button>
 
 
@@ -349,6 +448,9 @@ const Step0: FunctionComponent<Step0Props> = ({
           Skip
         </Button>
       </HStack>
+      <ModalComponent isOpen={isOpen} onClose={() => setIsOpen(false)} title={"Website"} content={sitemapModelContent()} buttonText={"Get context"}
+        buttonClickT={() => { handleScrape() }}
+        buttonDisabled={!checkedItems.some((element) => element === true)} />
     </>
   );
 };
@@ -372,7 +474,6 @@ const Step1: FunctionComponent<Step1Props> = ({
   const { data: session, status } = useSession()
 
   const addXHandle = async () => {
-    console.log(businessName)
     setLoading(true);
     fetch("/api/onboarding/xHandle", {
       method: "POST",
@@ -383,7 +484,6 @@ const Step1: FunctionComponent<Step1Props> = ({
     })
       .then((response) => response.json())
       .then(async ({ data }: any) => {
-        console.log(data);
         if (data.status === 200 || data.length > 0) {
           toastDisplay('X handle added successfully, storing ...', true);
           setTweets(data);
@@ -636,7 +736,7 @@ const Step3: FunctionComponent<Step3Props> = ({
 
   useEffect(() => {
     changer()
-    
+
     Mixpanel.track("Loaded Onboarding Page");
   });
 

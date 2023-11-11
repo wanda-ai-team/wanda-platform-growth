@@ -21,7 +21,6 @@ export default async function handler(
             return;
         }
 
-        console.log(req.body);
         const { collection } = req.body;
         const { conditionOperation } = req.body;
         const { conditionValue } = req.body;
@@ -36,14 +35,7 @@ export default async function handler(
             });
         }
 
-        console.log(collection);
-        console.log(conditionOperation);
-        console.log(conditionValue);
-        console.log(condition);
-        console.log(numberOfConditions);
-
         const dbEntry = await getDBEntry(collection as string, condition as any[], conditionOperation as any[], conditionValue as any[], parseInt(numberOfConditions as string));
-        console.log(dbEntry);
         return res.status(200).json({
             content: dbEntry,
             success: true,

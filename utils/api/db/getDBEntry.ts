@@ -23,6 +23,7 @@ async function getDBEntry(
     return [];
   });
 
+
   coll.forEach(async function (doc: { id: any; data: () => any; }) {
     response.push({ id: doc.id, data: doc.data() });
   });

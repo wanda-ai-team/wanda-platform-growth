@@ -74,8 +74,6 @@ async function transcribeAudio(audio_url = "", speakers: boolean, key_phrases: b
         responseDataT = await response.json();
         transcriptId = responseData.id;
     }
-    console.log("2")
-
     // Retrieve the ID of the transcript from the response data
 
     return JSON.stringify({

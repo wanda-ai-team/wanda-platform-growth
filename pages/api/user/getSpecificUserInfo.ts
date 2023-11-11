@@ -24,10 +24,18 @@ export default async function handler(
         const { info } = req.body
 
         const user = await getDBEntry("users", ["email"], ["=="], [session.user.email], 1);
+        const response = []
+        const infoO = <any>{}
+        for (let index = 0; index < info.length; index++) {
+            if (user[0].data[info[index]] !== undefined) {
+                infoO[info[index]] = user[0].data[info[index]].slice(0, 10).concat("......")
 
-        const response = user[0].data[info];
+            }
+        }
+        response.push(
+            infoO
+        )
         if (response === undefined || response.length === 0) {
-
             return res.status(400).json({
                 content: "",
                 success: false,
@@ -35,11 +43,11 @@ export default async function handler(
 
         }
         return res.status(200).json({
-            content: response.slice(0, 10).concat("......"),
+            content: response,
             success: true,
         });
     } catch (e: any) {
-
+        console.log(e)
         return res.status(400).json({
             content: "",
             success: false,
