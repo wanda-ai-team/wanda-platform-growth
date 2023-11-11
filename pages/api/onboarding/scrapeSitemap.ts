@@ -10,7 +10,6 @@ import getDBEntry from '@/utils/api/db/getDBEntry';
 import updateDBEntryArray from '@/utils/api/db/updateDBEntryArray';
 import { getOpenAIAnswer } from '@/utils/api/openAI/openAICalls';
 import * as cheerio from 'cheerio';
-import { Url } from 'slack-block-builder/dist/methods';
 const { sitemapUrlScraper } = require("xml-sitemap-url-scraper");
 
 export const maxDuration = 300;
@@ -56,11 +55,13 @@ export default async function handler(
 
     let urls = await sitemapUrlScraper(urlsWithSitemap, concurrency);
 
+    console.log( "urls" )
+    console.log( urls )
     for (let i = 0; i < urls.length; i++) {
       urls[i] = urls[i].replaceAll("\r\n", "").trim()
     }
 
-    console.log({ urls })
+    console.log( urls )
 
     res.status(200).json({ siteContent: urls, success: true })
   } catch (error) {

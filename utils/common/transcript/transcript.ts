@@ -38,21 +38,19 @@ export async function urlToTranscript(url: string, speakers: boolean, key_phrase
     }),
   })
 
-
   let old = await response.json();
-  console.log(old)
   let test: any = {};
 
   if (old.transcript.status !== undefined && old.transcript.status === "completed") {
     test = old;
   } else {
     do {
-      console.log("waiting")
-      console.log(old.transcriptId)
       await new Promise((resolve) => setTimeout(resolve, 3000));
       test = await POSTApiCall("/api/integrations/llm/assemblyAI/getTranscriptCompleted", {
-        transcriptId: old.transcriptId
+        transcriptId: old.transcript.id
       })
+
+      console.log(old)
       console.log(test.processing)
     } while (test.processing)
   }

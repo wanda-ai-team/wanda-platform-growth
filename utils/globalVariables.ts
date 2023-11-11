@@ -77,10 +77,10 @@ const writingStyles = [
 const outputsWithPlatform = [
     { platform: 'Twitter', outputs: ['Thread'] },
     // { platform: 'Instagram', outputs: ['Carousel', 'Post'] },
-    { platform: 'Landing Page', outputs: ['Copy'] },
+    // { platform: 'Landing Page', outputs: ['Copy'] },
     { platform: 'Linkedin', outputs: ['Post'] },
-    { platform: 'Blog', outputs: ['Post', 'Article'] },
-    { platform: 'Email', outputs: ['Follow-up'] },
+    { platform: 'Blog', outputs: ['Post'] },
+    // { platform: 'Email', outputs: ['Follow-up'] },
     { platform: 'Transcript', outputs: ['Transcript'] },
     { platform: 'Summary', outputs: ['Summary'] }
 ];

@@ -62,16 +62,17 @@ function Auth({ children }: any) {
     );
   }
   else {
-    if ((session && session.data && session.data.user.isActive === false) && !router.pathname.includes('stripeSession')) {
-      if (router.pathname !== '/payment') {
-        router.push('/payment');
-      }
-    } else {
-      if (router.pathname === '/payment') {
-        router.push('/');
-      }
-      return children
-    }
+    return children
+    // if ((session && session.data && session.data.user.isActive === false) && !router.pathname.includes('stripeSession')) {
+    //   if (router.pathname !== '/payment') {
+    //     router.push('/payment');
+    //   }
+    // } else {
+    //   if (router.pathname === '/payment') {
+    //     router.push('/');
+    //   }
+    //   return children
+    // }
   }
 
 }

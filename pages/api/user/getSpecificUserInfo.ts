@@ -47,7 +47,7 @@ export default async function handler(
             success: true,
         });
     } catch (e: any) {
-console.log(e)
+        console.log(e)
         return res.status(400).json({
             content: "",
             success: false,
