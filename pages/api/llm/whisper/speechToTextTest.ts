@@ -45,6 +45,7 @@ export default async function handler(
                         console.log(`URL: ${data['upload_url']}`)
 
                         const transcribe = await transcribeAudio(process.env.ASSEMBLYAI_API_KEY, urlVideo)
+                        fs.unlinkSync(output);
                         return res.status(200).json({
                             content: transcribe?.text,
                             success: true,
