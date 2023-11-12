@@ -22,7 +22,7 @@ async function speechToText(videoContent: any) {
 
 async function speechToTextYoutubeVideo(videoContent: any) {
     console.log("speechToText");
-    return await fetch('/api/llm/whisper/speechToText',
+    return await fetch('/api/llm/whisper/speechToTextTest',
         {
             method: 'POST',
             body: JSON.stringify({
