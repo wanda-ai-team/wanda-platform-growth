@@ -288,6 +288,7 @@ export default function Repurpose() {
         const responseWhisper = await speechToTextYoutubeVideo(response.content.videoId);
 
         if (responseWhisper.success) {
+          console.log(responseWhisper);
           setTranscript(responseWhisper.content);
           await summarizeTextAndCreateThread(
             responseWhisper.content,
