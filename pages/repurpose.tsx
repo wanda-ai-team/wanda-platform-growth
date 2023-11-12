@@ -289,12 +289,16 @@ export default function Repurpose() {
 
         if (responseWhisper.success) {
           console.log(responseWhisper);
+          
+          toastDisplay('Transcript done', true);
           setTranscript(responseWhisper.content);
           await summarizeTextAndCreateThread(
             responseWhisper.content,
             youtubeURLN,
             responseWhisper.content
           );
+          
+          toastDisplay('Summary done', true);
         }
       }
     }
