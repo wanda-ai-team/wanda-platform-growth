@@ -16,7 +16,7 @@ export default async function handler(
         const result = JSON.parse(req.body).result;
         let data2 = "";
         let videoFileName = result.split("v=")[1] + ".mp3"
-        const output = path.resolve("./tmp/", videoFileName);
+        const output = path.resolve("/tmp/", videoFileName);
 
         const video = ytdl(result, { filter: 'audioonly' });
 
