@@ -6,6 +6,8 @@ import fs from "fs";
 import YoutubeMp3Downloader from "youtube-mp3-downloader";
 import ffmpeg from "ffmpeg-static";
 import { File, Blob } from "@web-std/file"
+import ytdl from "ytdl-core";
+import path from "path";
 export default async function handler(
     req: NextApiRequest,
     res: NextApiResponse
@@ -13,36 +15,22 @@ export default async function handler(
     try {
         const result = JSON.parse(req.body).result;
         let data2 = "";
-        
-        const ffmpegPath = ffmpeg === null ? "" : ffmpeg;
-        const YD = new YoutubeMp3Downloader({
-            ffmpegPath: ffmpegPath,
-            outputPath: '/tmp/',
-            youtubeVideoQuality: 'lowest',
-            queueParallelism: 2,
-            progressTimeout: 2000
-        })
+        let videoFileName = result.split("v=")[1] + ".mp3"
+        const output = path.resolve("./tmp/", videoFileName);
 
-        YD.download(result.split("v=")[1])
+        const video = ytdl(result, { filter: 'audioonly' });
 
-        YD.on('progress', (data) => {
-            console.log(data.progress.percentage + '% downloaded')
-        })
 
-        YD.on('finished', async (err, video) => {
-            const videoFileName = video.file
-            console.log(`Downloaded ${videoFileName}`)
-
-            // Continue on to get transcript here
-            console.log(videoFileName)
+        await video.pipe(fs.createWriteStream(output));
+        await video.on('progress', (chunkLength, downloaded, total) => {
+            const percent = downloaded / total;
+            console.log((percent * 100).toFixed(2) + '%');
+        });
+        await video.on('end', async () => {
             const url = "https://api.assemblyai.com/v2/upload";
             let urlVideo = ""
-            await fs.readFile(videoFileName, async (err, data) => {
-                if (err) {
-                    return console.log(err);
-                }
-
-                // add the code below to the arrow function
+            console.log("Downloaded")
+            await fs.readFile(output, async (err, data) => {
 
                 await fetch(url, {
                     headers: {
@@ -65,9 +53,64 @@ export default async function handler(
                     .catch((error) => {
                         console.error(`Error: ${error}`);
                     })
-
             })
-        })
+        });
+        // return
+
+        // const ffmpegPath = ffmpeg === null ? "" : ffmpeg;
+        // const YD = new YoutubeMp3Downloader({
+        //     ffmpegPath: ffmpegPath,
+        //     outputPath: '/tmp/',
+        //     youtubeVideoQuality: 'lowest',
+        //     queueParallelism: 2,
+        //     progressTimeout: 2000
+        // })
+
+        // YD.download(result.split("v=")[1])
+
+        // YD.on('progress', (data) => {
+        //     console.log(data.progress.percentage + '% downloaded')
+        // })
+
+        // YD.on('finished', async (err, video) => {
+        //     const videoFileName = video.file
+        //     console.log(`Downloaded ${videoFileName}`)
+
+        //     // Continue on to get transcript here
+        //     console.log(videoFileName)
+        //     const url = "https://api.assemblyai.com/v2/upload";
+        //     let urlVideo = ""
+        //     await fs.readFile(videoFileName, async (err, data) => {
+        //         if (err) {
+        //             return console.log(err);
+        //         }
+
+        //         // add the code below to the arrow function
+
+        //         await fetch(url, {
+        //             headers: {
+        //                 authorization: process.env.ASSEMBLYAI_API_KEY as string
+        //             },
+        //             body: data,
+        //             method: 'POST'
+        //         })
+        //             .then(response => response.json())
+        //             .then(async data => {
+        //                 urlVideo = data['upload_url']
+        //                 console.log(`URL: ${data['upload_url']}`)
+
+        //                 const transcribe = await transcribeAudio(process.env.ASSEMBLYAI_API_KEY, urlVideo)
+        //                 return res.status(200).json({
+        //                     content: transcribe?.text,
+        //                     success: true,
+        //                 });
+        //             })
+        //             .catch((error) => {
+        //                 console.error(`Error: ${error}`);
+        //             })
+
+        //     })
+        // })
 
     } catch (e: any) {
         console.log(e);
