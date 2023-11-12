@@ -16,7 +16,7 @@ export default async function handler(
         const result = JSON.parse(req.body).result;
         let data2 = "";
         let videoFileName = result.split("v=")[1] + ".mp3"
-        const output = path.resolve("./tmp/", videoFileName);
+        const output = path.resolve("/tmp/", videoFileName);
 
         const video = ytdl(result, { filter: 'audioonly' });
 
@@ -45,6 +45,7 @@ export default async function handler(
                         console.log(`URL: ${data['upload_url']}`)
 
                         const transcribe = await transcribeAudio(process.env.ASSEMBLYAI_API_KEY, urlVideo)
+                        fs.unlinkSync(output);
                         return res.status(200).json({
                             content: transcribe?.text,
                             success: true,
