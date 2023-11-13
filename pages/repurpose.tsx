@@ -44,6 +44,7 @@ import { useChat } from 'ai/react';
 import streamResponse from "@/utils/common/stream";
 import { Mixpanel } from "@/utils/mixpanel";
 import { urlToTranscript } from "@/utils/common/transcript/transcript";
+import { outputContent } from "@/utils/api/backend/backendCalls";
 
 type Contents = "url" | "text" | "podcast";
 type ContentsAV = "gong" | "file";
@@ -190,13 +191,17 @@ export default function Repurpose() {
           }
         })
     }
+
+    console.log(outputSelected)
+
+    // const response = await outputContent(transcript, outputSelected, outputSelectedT, outputSelectedW)
     const response = await fetch("/api/llm/gpt3/textToThreadStream", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        text: summaryN,
+        text: transcript,
         output: outputSelected,
         outputO: outputSelectedO,
         isText: text,
@@ -237,7 +242,7 @@ export default function Repurpose() {
             ""
           );
         } else {
-          if (url.includes("twitter")) {
+          if (url.includes("twitter") || url.includes("x.com")) {
             twitterThreadToText(url);
           } else {
             blogToThread(url);
@@ -289,7 +294,7 @@ export default function Repurpose() {
 
         if (responseWhisper.success) {
           console.log(responseWhisper);
-          
+
           toastDisplay('Transcript done', true);
           setTranscript(responseWhisper.content);
           await summarizeTextAndCreateThread(
@@ -297,7 +302,7 @@ export default function Repurpose() {
             youtubeURLN,
             responseWhisper.content
           );
-          
+
           toastDisplay('Summary done', true);
         }
       }
@@ -310,6 +315,7 @@ export default function Repurpose() {
     if (response.success) {
       const thread = response.content.flat().toString();
       setSummary(thread);
+      setTranscript(thread);
       toastDisplay('Correctly loaded!', true);
     }
     setLoadingAPICall(false);
@@ -335,15 +341,14 @@ export default function Repurpose() {
   }
 
   async function summarizeTextAndCreateThread(data: any, url: string, transc: string = "", output: string = "") {
-    const response = await getTextSummary(data, url, output);
     setTranscript(transc);
+    const response = await getTextSummary(data, url, output);
     if (response.success) {
       setSummary(response.content);
       toastDisplay('Summary done', true);
     } else {
       toastDisplay('Error while doing the summary, please try again', false);
     }
-
     setLoadingAPICall(false);
   }
 
@@ -386,19 +391,21 @@ export default function Repurpose() {
     //     await convertSummaryS(response.project.content, false, toneStyle);
     //   }
     // } else {
-    if (outputSelected === "Twitter") {
-      await convertSummaryS(summary, false, toneStyle);
-    } else {
-      if (outputSelectedO === "Text") {
-        await convertSummaryS(inputText, true, toneStyle);
-      } else {
-        if (outputSelected === "Landing Page") {
-          await convertSummaryS(summary, false, toneStyle, landingPageURL);
-        } else {
-          await convertSummaryS(summary, false, toneStyle);
-        }
-      }
-    }
+
+    await convertSummaryS(outputSelectedO === "Text" ? inputText : summary, outputSelectedO === "Text" ? true : false, toneStyle, landingPageURL);
+    // if (outputSelected === "Twitter") {
+    //   await convertSummaryS(summary, false, toneStyle);
+    // } else {
+    //   if (outputSelectedO === "Text") {
+    //     await convertSummaryS(inputText, true, toneStyle);
+    //   } else {
+    //     if (outputSelected === "Landing Page") {
+    //       await convertSummaryS(summary, false, toneStyle, landingPageURL);
+    //     } else {
+    //       await convertSummaryS(summary, false, toneStyle);
+    //     }
+    //   }
+    // }
     // }
     setLoadingC(false);
     // setCurrentStep("result");
@@ -871,7 +878,7 @@ export default function Repurpose() {
 
                         (summary === "")
                         || canStopB.current
-                        || (selectedProject === "")
+                        // || (selectedProject === "")
                       )}
                       colorScheme="purple"
                       onClick={() => handleConvert(landingURL)}
@@ -903,7 +910,7 @@ export default function Repurpose() {
 
               <div className={styles.texts}>
               </div>
-            </div>          
+            </div>
           </>
         ) : (
           <>

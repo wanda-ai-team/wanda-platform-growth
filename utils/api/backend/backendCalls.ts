@@ -29,8 +29,8 @@ async function vectorDBQuery(contet: string) {
         })
 }
 
-async function outputContent(userPrompt: string, output: string) {
-    await fetch('/api/backend/outputContent',
+async function outputContent(userPrompt: string, output: string, toneStyle: string, writingStyle: string) {
+    return await fetch('/api/backend/outputContent',
         {
             method: 'POST',
             headers: {
@@ -39,7 +39,9 @@ async function outputContent(userPrompt: string, output: string) {
             body: JSON.stringify({
                 "userPrompt": userPrompt,
                 "config": {
-                    "output": output
+                    "output": output,
+                    "toneStyle": toneStyle,
+                    "writingStyle": writingStyle,
                 }
             })
         })
