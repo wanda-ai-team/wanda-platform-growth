@@ -287,21 +287,48 @@ export default function Insights() {
                         if (inputFileRef && inputFileRef.current && inputFileRef.current.files && inputFileRef.current.files.length > 0) {
                             const responseO = await uploadFile(setLoadingAPICall, inputFileRef);
                             if (responseO && responseO.upload.ok && responseO.fields.success_action_status) {
-                                console.log(responseO);
+                                const response = await urlToTranscript(url + responseO.url, true, true, true, true, true, 'Upload done, transcribing..');
+                                console.log(response);
+                                if (response.transcript.text !== null) {
+                                    setTranscript(response.transcript.text);
+                                }
+                                if (response.transcript.summary !== null) {
+                                    setSummary(response.transcript.summary);
+                                }
+                                if (response.transcript.auto_highlights_result !== undefined && response.transcript.auto_highlights_result !== null) {
+                                    setKeyphrases(response.transcript.auto_highlights_result.results.map((item: any) => item.text));
+                                }
+                                if (response.transcript.topics !== null && response.transcript.topics.length > 0) {
+                                    setTopics(Object.keys(response.transcript.topics).map((item: any) => item.split('>')[item.split('>').length - 1]));
+                                }
+                                if (response.transcript.words !== null && response.transcript.words.length > 0) {
 
-                                const response = await urlToTranscript(url + responseO.url, true, true, true, false, false, 'Upload done, transcribing..');
-                                setTranscript(response.transcript);
-                                setSummary(response.summary);
-                                setKeyphrases(response.auto_highlights_result.results.map((item: any) => item.text))
+                                    const speakerArr = response.transcript.words.map((speaker: any) => speaker.speaker);
+                                    console.log(speakerArr);
+                                    const speakerSet = new Set(speakerArr);
+                                    setSpeakers(Array.from(speakerSet));
+                                }
+                                const responseLemur = await getLemurInsights(url + responseO.url);
+                                if (responseLemur.pain_points !== null) {
+                                    setKeyphrases(responseLemur.pain_points)
+                                }
+                                // await POSTApiCall('/api/db/addOrCreateDBEntry',
+                                //     {
+                                //         collection: 'gongCalls',
+                                //         numberOfConditions: 1,
+                                //         condition: ['callId'],
+                                //         conditionValue: [url + responseO.url],
+                                //         conditionOperation: ['=='],
+                                //         body: {
+                                //             callId: data.content.metaData.id,
+                                //             title: data.content.metaData.title,
+                                //             transcript: data.content.transcript,
+                                //             keyphrases: responseLemur.pain_points,
+                                //             topics: data.content.content.topics.map((item: any) => item.name),
+                                //             date: new Date().toISOString(),
+                                //         },
+                                //     })
 
-                                console.log(Object.keys(response.topics))
-                                setTopics(Object.keys(response.topics).map((item: any) => item.split('>')[item.split('>').length - 1]));
-
-
-                                const speakerArr = response.speakers.map((speaker: any) => speaker.speaker);
-                                console.log(speakerArr);
-                                const speakerSet = new Set(speakerArr);
-                                setSpeakers(Array.from(speakerSet));
                             } else {
                                 console.error('Upload failed.');
                             }
