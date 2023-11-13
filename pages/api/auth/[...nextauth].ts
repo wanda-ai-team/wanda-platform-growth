@@ -56,26 +56,32 @@ export const authOptions: NextAuthOptions = {
   callbacks: {
 
     jwt: async ({ token, trigger, session, user }) => {
-      if (trigger === "update") {
-        token.isActive = session?.user.isActive;
-      }
-      if (user) {
-        token.image = user.image;
-        token.uid = user.id;
-        if (user.isActive === false) {
-          const dbUser = await getUser("email", "==", user.email);
-          token.isActive = dbUser!.isActive;
-        } else {
-          token.isActive = user.isActive;
+      try {
+        if (trigger === "update") {
+          token.isActive = session?.user.isActive;
         }
-        if (user.stripeCustomerId === undefined) {
-          const dbUser = await getUser("email", "==", user.email);
-          if (dbUser !== null && !dbUser.stripeCustomerId) {
-            token.stripeCustomerId = dbUser.stripeCustomerId;
+        if (user) {
+          token.image = user.image;
+          token.uid = user.id;
+          if (user.isActive === false) {
+            const dbUser = await getUser("email", "==", user.email);
+            console.log(dbUser);
+            token.isActive = dbUser!.isActive;
+          } else {
+            console.log(user);
+            token.isActive = user.isActive;
           }
-        } else {
-          token.stripeCustomerId = user.stripeCustomerId;
+          if (user.stripeCustomerId === undefined) {
+            const dbUser = await getUser("email", "==", user.email);
+            if (dbUser !== null && !dbUser.stripeCustomerId) {
+              token.stripeCustomerId = dbUser.stripeCustomerId;
+            }
+          } else {
+            token.stripeCustomerId = user.stripeCustomerId;
+          }
         }
+      } catch (e) {
+        console.log(e);
       }
       return token;
     },
