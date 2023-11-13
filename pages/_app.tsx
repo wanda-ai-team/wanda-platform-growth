@@ -23,7 +23,7 @@ export default function App({ Component, pageProps: { session, ...pageProps } }:
     <Provider store={store}>
       <SessionProvider session={session} >
         <ChakraProvider>
-          {!pagesWithoutHeader.includes(router.pathname)  &&
+          {!pagesWithoutHeader.includes(router.pathname) &&
             <Header />
           }
           {Component.auth ? (
@@ -62,17 +62,17 @@ function Auth({ children }: any) {
     );
   }
   else {
-    return children
-    // if ((session && session.data && session.data.user.isActive === false) && !router.pathname.includes('stripeSession')) {
-    //   if (router.pathname !== '/payment') {
-    //     router.push('/payment');
-    //   }
-    // } else {
-    //   if (router.pathname === '/payment') {
-    //     router.push('/');
-    //   }
-    //   return children
-    // }
+    console
+    if ((session && session.data && session.data.user.isActive === false) && !router.pathname.includes('stripeSession')) {
+      if (router.pathname !== '/payment') {
+        router.push('/payment');
+      }
+    } else {
+      if (router.pathname === '/payment') {
+        router.push('/');
+      }
+      return children
+    }
   }
 
 }
