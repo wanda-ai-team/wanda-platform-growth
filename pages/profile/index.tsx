@@ -30,8 +30,8 @@ export default function Profile() {
             .then(async (data1) => {
                 if (data1.success) {
                     console.log(data1)
-                    setGongUser(data1.content[0].gongAccessToken)
-                    setSlackBot(data1.content[0].slackAccessToken)
+                    setGongUser(data1.content[0].gongAccessToken === undefined ? "" : data1.content[0].gongAccessToken)
+                    setSlackBot(data1.content[0].slackAccessToken === undefined ? "" : data1.content[0].slackAccessToken)
                     console.log(data1)
                 }
             })
