@@ -685,3 +685,4 @@ export default function Insights() {
 
 
 }
+Insights.auth = true;

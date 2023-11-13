@@ -66,7 +66,6 @@ export const authOptions: NextAuthOptions = {
           const dbUser = await getUser("email", "==", user.email);
           token.isActive = dbUser!.isActive;
         } else {
-
           token.isActive = user.isActive;
         }
         if (user.stripeCustomerId === undefined) {
@@ -82,7 +81,7 @@ export const authOptions: NextAuthOptions = {
     },
 
 
-    session: async ({ session, token }) => {
+    session: async ({ session, token, user }) => {
       if (session?.user) {
         session.user.id = token.uid as string;
       }
@@ -91,6 +90,13 @@ export const authOptions: NextAuthOptions = {
         if (!session.user.image) {
           session.user.image = "/assets/icons/defaultAvatar.jpg";
         }
+        if (token.isActive === false) {
+          const dbUser = await getUser("email", "==", token.email);
+          token.isActive = dbUser!.isActive;
+        } else {
+          token.isActive = token.isActive;
+        }
+
         session.user.isActive = token.isActive as boolean;
         session.user.id = token.id as string;
         session.user.stripeCustomerId = token.stripeCustomerId as string;
