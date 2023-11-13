@@ -77,16 +77,12 @@ export default async function handler(
 
         const completeOptions = getOptions(undefined);
         const tweet = await client.tweets.findTweetById(id, completeOptions);
-        
-        console.log(tweet)
         const userId = tweet.data?.author_id as string;
         const startDate = tweet.data?.created_at as string;
         const conversationId = tweet.data?.conversation_id as string;
         const date = new Date(startDate);
-        date.setDate(date.getDate() + 10);
+        date.setDate(date.getDate() + 1);
         let endDate = date.toISOString();
-        console.log(date)
-        console.log(endDate)
         const timelineOptions: types.operations['usersIdTimeline']['parameters']['query'] =
         {
             start_time: startDate,
@@ -101,27 +97,28 @@ export default async function handler(
         };
 
 
-        const timeline = client.tweets.usersIdTweets(userId, timelineOptions);
+        const timeline = await client.tweets.usersIdTweets(userId, timelineOptions);
         let tweets: Tweet[] = [];
-        for await (const page of timeline) {
-            if (!page.data) {
+        if(timeline.data === undefined){
+            return res.status(400).json({
+                content: [""],
+                success: false,
+            });
+        }
+        for await (const page of timeline.data) {
+            if (!page) {
                 continue;
             }
-            page.data
-                .filter(
-                    x =>
-                        // First tweet it thread
-                        x.id === id ||
-                        // Or subsequent tweets in thread
-                        (x.conversation_id === conversationId &&
-                            x.in_reply_to_user_id === userId)
-                )
-                .forEach(x => tweets.push(x));
+            console.log(page)
+            if(page.conversation_id === conversationId && page.in_reply_to_user_id === userId){
+                tweets.push(page);
+            }
         }
         let tweetsT = tweets.map(e => e.text.replace("\n", ""));
         for (var i = 0; i < tweetsT.length; i++) {
             tweetsT[i] = tweetsT[i].replace("\n", "");
         }
+
 
         if (tweetsT.length > 0) {
             return res.status(200).json({
