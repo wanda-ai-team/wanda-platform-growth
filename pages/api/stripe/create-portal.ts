@@ -25,7 +25,7 @@ export default async function handler(
 
   const sessionStripe = await stripe.billingPortal.sessions.create({
     customer: session.user.stripeCustomerId,
-    return_url: process.env.ENV_URL as string + '/documentGeneration/repo',
+    return_url: process.env.ENV_URL as string + '/',
   });
 
 
