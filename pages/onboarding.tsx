@@ -22,7 +22,10 @@ import { embedText } from "@/utils/api/backend/backendCalls";
 import { useSession } from "next-auth/react";
 import { Mixpanel } from "@/utils/mixpanel";
 import ModalComponent from "@/components/modal/Modal";
-import axios from "axios";
+import { businessModelICP, companyTypeICP, countriesICP, employsICP, fundingRaisedICP, industriesICP, techUsedICP } from "@/utils/globalVariables";
+import { default as ReactSelect } from "react-select";
+import Option from "@/components/options/Option";
+import { POSTApiCall } from "@/utils/api/commonAPICall";
 
 interface OnboardingProps { }
 
@@ -74,15 +77,12 @@ export default function Onboarding() {
         );
       case 1:
         return (
-          <Step1
+          <StepICP
             onPrevAction={() => {
               handlePrev();
             }}
             onNextAction={(data: any) => {
-              if (data !== 'skip') {
-                setSiteData((prev: any) => ({ ...prev, ...data }));
-              }
-              handleNext();
+              push('/dashboard');
             }}
             businessName={businessName}
             setBusinessName={setBusinessName}
@@ -435,7 +435,7 @@ const Step0: FunctionComponent<Step0Props> = ({
           }}
           isDisabled={!product || !targetAudience || !businessName}
         >
-          Start using
+          Next
         </Button>
 
 
@@ -751,6 +751,140 @@ const Step3: FunctionComponent<Step3Props> = ({
         <Skeleton height='20px' />
       </Stack>
     </Center>
+  );
+};
+
+
+interface StepICPProps {
+  onPrevAction: () => void;
+  onNextAction: (data: any) => void;
+  businessName: string
+  setBusinessName: (businessName: string) => void;
+}
+
+const StepICP: FunctionComponent<StepICPProps> = ({
+  onPrevAction,
+  onNextAction,
+  businessName,
+  setBusinessName
+}: StepICPProps) => {
+  const { data: session, status } = useSession();
+  const [loading, setLoading] = useState(false);
+  const [selectedIndustries, setSelectedIndustries] = useState([]);
+  const [selectedEmployees, setSelectedEmployees] = useState([]);
+  const [selectedFundingRaised, setSelectedFundingRaised] = useState([]);
+  const [selectedCompanyTypes, setSelectedCompanyTypes] = useState([]);
+  const [selectedBusinessModels, setSelectedBusinessModels] = useState([]);
+  const [selectedTechUsed, setSelectedTechUsed] = useState([]);
+  const [selectedCountries, setSelectedCountries] = useState([]);
+
+  const industriesList = industriesICP.map((industry) => ({ label: industry, value: industry }));
+  const employeesList = employsICP.map((employ) => ({ label: employ, value: employ }));
+  const fundingRaisedList = fundingRaisedICP.map((funding) => ({ label: funding, value: funding }));
+  const companyTypesList = companyTypeICP.map((companyType) => ({ label: companyType, value: companyType }))
+  const businessModelList = businessModelICP.map((businessModel) => ({ label: businessModel, value: businessModel }));
+  const techUsedList = techUsedICP.map((techUsed) => ({ label: techUsed, value: techUsed }));
+  const countriesList = countriesICP.map((country) => ({ label: country, value: country }));
+
+  const addICP = async () => {
+    setLoading(true);
+
+    toastDisplay('ICP added successfully, storing ...', true);
+    const response =
+      await POSTApiCall('/api/db/addOrCreateDBEntry',
+        {
+          collection: 'userICP',
+          numberOfConditions: 1,
+          condition: ['email'],
+          conditionValue: [session?.user.email],
+          conditionOperation: ['=='],
+          body: {
+            email: session?.user.email,
+            industriesICP: selectedIndustries.map((value: any) => value?.label),
+            employsICP: selectedEmployees.map((value: any) => value.label),
+            fundingRaisedICP: selectedFundingRaised.map((value: any) => value.label),
+            businessModelICP: selectedBusinessModels.map((value: any) => value.label),
+            techUsedICP: selectedTechUsed.map((value: any) => value.label),
+            countriesICP: selectedCountries.map((value: any) => value.label),
+            companyTypeICP: selectedCompanyTypes.map((value: any) => value.label),
+          },
+        })
+    setLoading(false);
+  };
+  const handleChange = (selected: any, setSelected: any) => {
+    setSelected(selected);
+  };
+
+  const select = (title: string, optionsList: any, changeFunction: any, valueSelected: any, setSelectedValue: any) => {
+    return (
+      <HStack w={700} spacing={2} justifyContent="space-between" align="center">
+        <Text fontSize="sm" fontWeight={200}>
+          {title}
+        </Text>
+        <div style={{ width: '500px' }} >
+          <ReactSelect
+            menuPlacement="auto"
+            menuPosition="fixed"
+            options={optionsList}
+            isMulti
+            closeMenuOnSelect={false}
+            hideSelectedOptions={false}
+            components={{ Option }}
+            onChange={(selected) => changeFunction(selected, setSelectedValue)}
+            isDisabled={loading}
+            value={valueSelected} />
+        </div>
+      </HStack>
+    )
+  }
+  return (
+    <>
+
+      <Text fontSize="xl" fontWeight={600}>
+        Select your ICP
+      </Text>
+
+
+      <VStack w={700} align="flex-start" spacing={6}>
+
+        {select('Industry', industriesList, handleChange, selectedIndustries, setSelectedIndustries)}
+        {select('Employees', employeesList, handleChange, selectedEmployees, setSelectedEmployees)}
+        {select('Funding raised', fundingRaisedList, handleChange, selectedFundingRaised, setSelectedFundingRaised)}
+        {select('Company type', companyTypesList, handleChange, selectedCompanyTypes, setSelectedCompanyTypes)}
+        {select('Business model', businessModelList, handleChange, selectedBusinessModels, setSelectedBusinessModels)}
+        {select('Tech used', techUsedList, handleChange, selectedTechUsed, setSelectedTechUsed)}
+        {select('Country', countriesList, handleChange, selectedCountries, setSelectedCountries)}
+
+      </VStack>
+      {loading && (
+        <Progress size="xs" isIndeterminate colorScheme="purple" w="full" />
+      )}
+
+      <HStack w="full" justify="space-between">
+        {/* <Button onClick={handlePrevious}>Previous</Button> */}
+
+        <Button
+          isDisabled={loading}
+          onClick={async () => {
+            await addICP()
+            onNextAction({});
+          }}
+        >
+          Start using
+        </Button>
+
+
+        <Button
+          isDisabled={loading}
+          onClick={() => {
+            let skip = 'skip'
+            onNextAction({ skip });
+          }}
+        >
+          Skip
+        </Button>
+      </HStack>
+    </>
   );
 };
 

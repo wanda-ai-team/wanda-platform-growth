@@ -15,15 +15,13 @@ export default function Home() {
         await fetch('/api/user/getUser')
             .then((res) => res.json())
             .then(async (data1) => {
-                if (data1.content[0].data.context) {
-                } else {
+                if (!data1.content[0].data.context) {
                     push('/onboarding');
                 }
                 setLoading(false);
             }).catch((err) => {
                 setLoading(false);
             });
-
     }
 
     useEffect(() => {
