@@ -22,7 +22,7 @@ export const authOptions: NextAuthOptions = {
       allowDangerousEmailAccountLinking: true,
       authorization: {
         params: {
-          scope: "https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/drive"
+          scope: "https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile" // https://www.googleapis.com/auth/drive
         }
       }
     }),
@@ -56,33 +56,38 @@ export const authOptions: NextAuthOptions = {
   callbacks: {
 
     jwt: async ({ token, trigger, session, user }) => {
-      if (trigger === "update") {
-        token.isActive = session?.user.isActive;
-      }
-      if (user) {
-        token.image = user.image;
-        token.uid = user.id;
-        if (user.isActive === false) {
-          const dbUser = await getUser("email", "==", user.email);
-          token.isActive = dbUser!.isActive;
-        } else {
-
-          token.isActive = user.isActive;
+      try {
+        if (trigger === "update") {
+          token.isActive = session?.user.isActive;
         }
-        if (user.stripeCustomerId === undefined) {
-          const dbUser = await getUser("email", "==", user.email);
-          if (dbUser !== null && !dbUser.stripeCustomerId) {
-            token.stripeCustomerId = dbUser.stripeCustomerId;
+        if (user) {
+          token.image = user.image;
+          token.uid = user.id;
+          if (user.isActive === false) {
+            const dbUser = await getUser("email", "==", user.email);
+            console.log(dbUser);
+            token.isActive = dbUser!.isActive;
+          } else {
+            console.log(user);
+            token.isActive = user.isActive;
           }
-        } else {
-          token.stripeCustomerId = user.stripeCustomerId;
+          if (user.stripeCustomerId === undefined) {
+            const dbUser = await getUser("email", "==", user.email);
+            if (dbUser !== null && !dbUser.stripeCustomerId) {
+              token.stripeCustomerId = dbUser.stripeCustomerId;
+            }
+          } else {
+            token.stripeCustomerId = user.stripeCustomerId;
+          }
         }
+      } catch (e) {
+        console.log(e);
       }
       return token;
     },
 
 
-    session: async ({ session, token }) => {
+    session: async ({ session, token, user }) => {
       if (session?.user) {
         session.user.id = token.uid as string;
       }
@@ -91,6 +96,13 @@ export const authOptions: NextAuthOptions = {
         if (!session.user.image) {
           session.user.image = "/assets/icons/defaultAvatar.jpg";
         }
+        if (token.isActive === false) {
+          const dbUser = await getUser("email", "==", token.email);
+          token.isActive = dbUser!.isActive;
+        } else {
+          token.isActive = token.isActive;
+        }
+
         session.user.isActive = token.isActive as boolean;
         session.user.id = token.id as string;
         session.user.stripeCustomerId = token.stripeCustomerId as string;
