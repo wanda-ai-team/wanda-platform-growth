@@ -2,8 +2,8 @@
 import axios from "axios";
 
 import { OpenAIStream } from "./openAIStream";
-import { getGenerateLandingPage, getTextToBlogPostPrompt, getTextToInstagramCarrouselTextPrompt, getTextToLinkedInPostPrompt, getTextToTwitterThreadPrompt, textToTwitterThreadPrompt } from "@/utils/globalPrompts";
-import { load } from "cheerio";
+import { getGenerateLandingPage, getGenerateProspectingEmail, getTextToBlogPostPrompt, getTextToInstagramCarrouselTextPrompt, getTextToLinkedInPostPrompt, getTextToTwitterThreadPrompt, textToTwitterThreadPrompt } from "@/utils/globalPrompts";
+import { getContext } from "@/utils/api/context/contextCalls";
 
 
 export const config = {
@@ -11,7 +11,7 @@ export const config = {
 };
 
 const handler = async (req: Request): Promise<Response> => {
-    let { text, output, outputO, isText, toneStyle, writingStyle, landingPageContext, landingPageContent } = (await req.json()) as {
+    let { text, output, outputO, isText, toneStyle, writingStyle, landingPageContext, landingPageContent, selectedPerson, context } = (await req.json()) as {
         text?: string;
         output?: string;
         outputO?: string;
@@ -20,6 +20,8 @@ const handler = async (req: Request): Promise<Response> => {
         writingStyle?: string;
         landingPageContext?: string;
         landingPageContent?: string;
+        selectedPerson?: any;
+        context?: string;
     };
     if (!output || !text || !outputO || isText === undefined || toneStyle === undefined || writingStyle === undefined || landingPageContent === undefined || landingPageContext === undefined) {
         console.log("error");
@@ -77,9 +79,21 @@ Blog Post:\n`;
                 }
                 break;
             case "landing page":
-                    basePromptPrefix =
-                        getGenerateLandingPage(landingPageContent, landingPageContext, text);
-                
+                basePromptPrefix =
+                    getGenerateLandingPage(landingPageContent, landingPageContext, text);
+
+                break;
+            case "email":
+                if (selectedPerson === undefined || selectedPerson.full_name === undefined || selectedPerson.interests === undefined || selectedPerson.skills === undefined) {
+
+                    return new Response('Bad Request', { status: 400 });
+                }
+                const personInfo = "The client name is " + selectedPerson.full_name + " this are some of their interests " + selectedPerson.interests.join(' ,') + " and this are some of their skills " + selectedPerson.skills.join(' ,') + ".\n";
+                if (context === undefined) {
+                    return new Response('Bad Request', { status: 400 });
+                }
+
+                basePromptPrefix = getGenerateProspectingEmail(context, personInfo);
                 break;
             default:
                 break;

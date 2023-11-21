@@ -37,7 +37,7 @@ export default function Onboarding() {
   const { data: session, status } = useSession()
   const [businessName, setBusinessName] = useState("");
 
-  const MAX_STEPS = 2;
+  const MAX_STEPS = 3;
 
   const handleNext = () => {
     setStep((prev) => Math.min(prev + 1, MAX_STEPS - 1));
@@ -66,8 +66,8 @@ export default function Onboarding() {
               if (data !== 'skip') {
                 setSiteData((prev: any) => ({ ...prev, ...data }));
               }
-              // handleNext();
-              push('/');
+              handleNext();
+              // push('/');
             }}
 
             businessName={businessName}

@@ -12,6 +12,8 @@ async function getContext(email: string, platform: string) {
         case "blog":
             prompt = "What information do you have about the following business and landing page so that blog posts can be created about it: " + context[0].data.businessName + " and " + context[0].data.url
             break;
+        case "email":
+            prompt = "What information do you have about the following business and landing page so that emails can be created about it: " + context[0].data.businessName + " and " + context[0].data.url
         default:
             break;
     }

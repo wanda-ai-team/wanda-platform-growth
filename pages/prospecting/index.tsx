@@ -8,10 +8,13 @@ import {
     Checkbox,
     CheckboxGroup,
     Button,
-    Textarea
+    Textarea,
+    Container
 } from "@chakra-ui/react";
 import streamResponse from "@/utils/common/stream";
+import { useSession } from "next-auth/react";
 export default function Prospecting() {
+    const session = useSession({ required: true })
     const [companies, setCompanies] = useState([]) as any;
     const [people, setPeople] = useState([]) as any;
     const [selectedPeople, setSelectedPeople] = useState([]) as any;
@@ -21,6 +24,7 @@ export default function Prospecting() {
 
 
     async function getCompanies() {
+        console.log("getCompanies")
         const company = await GETApiCall("/api/integrations/peopledata/searchCompanies");
         setCompanies(company.data)
         console.log(company);
@@ -40,12 +44,11 @@ export default function Prospecting() {
     async function generateEmail(
         text: boolean,
     ) {
-        let websitescrape: {
-            content?: string;
-            context?: string;
-        } = {};
 
-        // const response = await outputContent(transcript, outputSelected, outputSelectedT, outputSelectedW)
+        const selectedPerson = people.filter((person: any) => { return selectedPeople.includes(person.full_name) })
+
+        const contextResponse = await POSTApiCall("api/context/getContext", { platform: "email" })
+
         const response = await fetch("/api/llm/gpt3/textToThreadStream", {
             method: "POST",
             headers: {
@@ -55,6 +58,9 @@ export default function Prospecting() {
                 text: "transcript",
                 output: "email",
                 outputO: "followup",
+                selectedPerson: selectedPerson[0],
+                email: session.data?.user.email,
+                context: contextResponse.documents[1].page_content,
                 isText: text,
                 toneStyle: "friendly",
                 writingStyle: "friendly",
@@ -62,6 +68,8 @@ export default function Prospecting() {
                 landingPageContext: "",
             }),
         });
+
+
         if (!response.ok) {
             throw new Error(response.statusText);
         }
@@ -82,63 +90,80 @@ export default function Prospecting() {
 
     return (
         <main className={styles.main}>
-            <VStack align="flex-start" justify="flex-start" ml={8}>
-                <Text fontSize="xl" fontWeight={600}>
-                    Prospecting
-                </Text>
+            <div className={styles.form__container} style={{height: '91.5vh'}}>
 
-                <Text fontSize="lg" fontWeight={400}>
-                    Companies
-                </Text>
-                <HStack spacing={4}>
-                    <Text fontSize="sm" fontWeight={200}>
-                        {companies.map((company: any) => (
-                            <div key={company.id}>
-                                <h1>{company.display_name}</h1>
-                                <a href={company.linkedin_url}><h3>{company.linkedin_url}</h3></a>
-                            </div>
-                        ))}
+                <VStack align="flex-start" justify="flex-start" ml={8}>
+                    <Text fontSize="xl" fontWeight={600}>
+                        Prospecting
                     </Text>
-                </HStack>
+
+                    <Text fontSize="lg" fontWeight={400}>
+                        Companies
+                    </Text>
+                    <Container maxH='200px' overflow='auto' ml={'0'}>
+                        <HStack spacing={4}>
+                            <Text fontSize="sm" fontWeight={200}>
+                                {companies && companies.length > 0 && companies.map((company: any) => (
+                                    <div key={company.id}>
+                                        <h1>{company.display_name}</h1>
+                                        <a href={company.linkedin_url}>{company.linkedin_url}</a>
+                                        <br></br>
+                                        <a href={company.twitter_url}>{company.twitter_url}</a>
+                                    </div>
+                                ))}
+                            </Text>
+                        </HStack>
+                    </Container>
 
 
-                <Text fontSize="lg" fontWeight={400}>
-                    People
-                </Text>
-                <CheckboxGroup colorScheme='green' value={selectedPeople} onChange={setSelectedPeople} >
-                    <HStack spacing={4}>
-                        <Text fontSize="sm" fontWeight={200}>
-                            {people.map((people: any) => (
-                                <div key={people.id}>
-                                    <Checkbox value={people.full_name}><h1>{people.full_name}</h1></Checkbox>
-                                    <a href={people.linkedin_url}><h1>{people.linkedin_url}</h1></a>
-                                    <p>{people.job_title} at {people.job_company_name}</p>
-                                    <p>{people.work_email}</p>
-                                    <p>{people.recommended_personal_email}</p>
-                                    {people.personal_emails.map((email: any, index: number) => (
-                                        <div key={index}>
-                                            <p>{email}</p>
+                    <Text fontSize="lg" fontWeight={400}>
+                        People
+                    </Text>
+
+                    <Container maxH='250px' overflow='auto' ml={'0'}>
+                        <CheckboxGroup colorScheme='green' value={selectedPeople} onChange={setSelectedPeople} >
+                            <HStack spacing={4}>
+                                <Text fontSize="sm" fontWeight={200}>
+                                    {people && people.length > 0 && people.map((people: any) => (
+                                        <div key={people.id}>
+                                            <Checkbox value={people.full_name}><h1>{people.full_name}</h1></Checkbox>
+                                            <a href={people.linkedin_url}><h1>{people.linkedin_url}</h1></a>
+                                            <p>{people.job_title} at {people.job_company_name}</p>
+                                            <p>{people.work_email}</p>
+                                            <p>{people.recommended_personal_email}</p>
+
+                                            {people.emails && people.emails.map((email: any, index: number) => (
+                                                <div key={index}>
+                                                    <p>{email.address}</p>
+                                                </div>
+                                            ))}
                                         </div>
                                     ))}
-                                    {people.emails.map((email: any, index: number) => (
-                                        <div key={index}>
-                                            <p>{email}</p>
-                                        </div>
-                                    ))}
-                                </div>
-                            ))}
-                        </Text>
-                    </HStack>
-                </CheckboxGroup>
+                                </Text>
+                            </HStack>
+                        </CheckboxGroup>
+                    </Container>
 
-                <Button colorScheme='purple' isDisabled={false} onClick={() => generateEmail(true)}> Generate Emails </Button>
+                    <Button colorScheme='purple' isDisabled={false} onClick={() => generateEmail(true)}> Generate Emails </Button>
 
-                <Textarea
-                    value={generatedText}
-                    size="lg"
-                />
-            </VStack>
-        </main>
+                </VStack>
+            </div>
+
+            <div className={styles.transcript__summary}>
+                <div className={styles.texts}>
+                    <span className={styles.summary__header}>
+                        Email
+                    </span>
+                </div>
+                <>
+              <Textarea
+                style={{ height: '100%', marginRight: '1.5%', width: '97%', marginLeft: '1.5%' }}
+                value={generatedText}
+                placeholder='Here is a sample placeholder'
+                size='lg' />
+            </>
+            </div>
+        </main >
     )
 }
 

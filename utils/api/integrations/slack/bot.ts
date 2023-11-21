@@ -60,6 +60,31 @@ async function createPieceOfContent(web: WebClient, messageC: any) {
     }
 }
 
+async function answerQuestion(web: WebClient, messageC: any) {
+    try {
+        console.log(messageC)
+
+        // const responseOpenAI = await answerQuestionBackendCall(messageC.view.private_metadata.split(":")[1], fValue, messageC.view.private_metadata.split(":")[1])
+
+        // // const responseOpenAI = await openAICall(false, "Create me a " + fValue + " post " + " based on the give topics that were talked about during the client meeting\n Topics:"
+        // //     + messageC.view.private_metadata.split(":")[1],
+        // //     "You are a professional content creator with millions of followers");
+
+        // // const newUseCase = await createDBEntry("useCases", { content: responseOpenAI, title: "Case Study", type: "caseStudy", meetingTitle: messageC.message.blocks[0].text.text });
+        // await web.chat.postMessage({
+        //     channel: messageC.view.private_metadata.split(":")[0],
+        //     text: "<@" + messageC.view.private_metadata.split(":")[3] + "> Here you have the draft for a " + fValue + ":\n" + "----" + fValue + "----\n\n" + responseOpenAI,
+        // });
+
+    } catch (error) {
+        console.log(error)
+        await web.chat.postMessage({
+            channel: messageC.view.private_metadata.split(":")[0],
+            text: "Error creating piece of content, please try again later",
+        });
+    }
+}
+
 async function createPieceOfContentModal(web: WebClient, trigger_id: string, message: any) {
     try {
         const modal = Modal({ title: 'Repurpose', submit: 'Repurpose', privateMetaData: message.container.channel_id + ":" + message.message.blocks[0].text.text.split("id_")[1] + ":" + trigger_id + ":" + message.user.id })
@@ -120,5 +145,6 @@ export {
     createCaseStudyURL,
     createPieceOfContentModal,
     createPieceOfContent,
-    createFollowUpEmail
+    createFollowUpEmail,
+    answerQuestion
 };
