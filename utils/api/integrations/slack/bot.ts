@@ -79,7 +79,7 @@ async function answerQuestion(web: WebClient, messageC: any) {
     } catch (error) {
         console.log(error)
         await web.chat.postMessage({
-            channel: messageC.view.private_metadata.split(":")[0],
+            channel: messageC.text,
             text: "Error creating piece of content, please try again later",
         });
     }
