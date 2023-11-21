@@ -47,13 +47,33 @@ async function outputContent(userPrompt: string, output: string, toneStyle: stri
         })
 }
 
-async function outputContentBackendCall(userPrompt: string, output: string, gongCallId: string){
+async function outputContentBackendCall(userPrompt: string, output: string, gongCallId: string) {
     const response = await axios.post(process.env.BACKEND_URL + '/llmTools/outputContent', {
         userPrompt: userPrompt,
         systemPrompt: "",
         config: {
             "output": output,
             "gongCallId": gongCallId
+        }
+    },
+        {
+            headers: {
+                "content-type": "application/json",
+                "Authorization": `Bearer ${123}`
+            }
+        }
+    );
+
+    return response.data
+}
+
+
+
+async function answerQuestionBackendCall(userPrompt: string) {
+    const response = await axios.post(process.env.BACKEND_URL + '/llmTools/outputContent', {
+        userPrompt: userPrompt,
+        systemPrompt: "",
+        config: {
         }
     },
         {

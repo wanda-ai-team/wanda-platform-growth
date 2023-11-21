@@ -333,6 +333,26 @@ The landing page should have the flow of a story.
 .`
 }
 
+function getGenerateProspectingEmail(clientInfo: string, productName: string) {
+    return `
+Please ignore all previous instructions.
+Please respond only in the english language.
+You are an expert sales person.
+Do not self reference.
+Do not explain what you are doing.
+
+You are making prospecting and then sending an email to a potential client.
+
+Your task is to write an email to a potential client, you will try to sale your product to them..
+
+I will provide you with the following information:
+- The name and interests of the potential client: ${clientInfo}\n
+- The name and information of the product you are selling: ${productName}\n
+
+In your email start by being friendly and show interest in anything about the client, then, try to sell them the product trying to solve them a pain point
+Email:\n.`
+}
+
 function getPainPointPrompt() {
     return `
 Provide a list of pain points that were discussed during this call.
@@ -364,5 +384,6 @@ export {
     getGenerateTestX,
     getGenerateTestBlog,
     getGenerateLandingPage,
-    getPainPointPrompt
+    getPainPointPrompt,
+    getGenerateProspectingEmail
 };
