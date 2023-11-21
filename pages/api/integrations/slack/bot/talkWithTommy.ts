@@ -16,7 +16,8 @@ export default async function handler(
         const web = new WebClient(token);
         let messageC;
         try {
-            console.log(JSON.parse(req.body.payload))
+            console.log((req))
+            console.log(JSON.parse(req.body))
 
             messageC = JSON.parse(req.body.payload)
         } catch (error) {
