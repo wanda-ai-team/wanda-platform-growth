@@ -23,6 +23,7 @@ export default async function handler(
             messageC = req.body.payload
         }
 
+        console.log(messageC)
 
         await web.chat.postMessage({
             channel: messageC.container.channel_id,
