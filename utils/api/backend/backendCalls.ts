@@ -91,5 +91,6 @@ export {
     embedText,
     vectorDBQuery,
     outputContent,
-    outputContentBackendCall
+    outputContentBackendCall,
+    answerQuestionBackendCall
 };

@@ -1,7 +1,7 @@
 import { slackModalOutputPlatform } from "@/utils/globalVariables";
 import { WebClient } from "@slack/web-api";
 import { Modal, Blocks, Elements, Bits, Message } from 'slack-block-builder';
-import { outputContent, outputContentBackendCall } from "../../backend/backendCalls";
+import { answerQuestionBackendCall, outputContent, outputContentBackendCall } from "../../backend/backendCalls";
 import createDBEntry from "../../db/createDBEntry";
 import getDBEntry from "../../db/getDBEntry";
 import { openAICall } from "../../openAI/openAICalls";
@@ -62,19 +62,16 @@ async function createPieceOfContent(web: WebClient, messageC: any) {
 
 async function answerQuestion(web: WebClient, messageC: any) {
     try {
-        console.log(messageC)
+        const responseOpenAI = await answerQuestionBackendCall(messageC.text)
 
-        // const responseOpenAI = await answerQuestionBackendCall(messageC.view.private_metadata.split(":")[1], fValue, messageC.view.private_metadata.split(":")[1])
+        // const responseOpenAI = await openAICall(false, messageC.text,
+        //     "You are a professional sales person.");
 
-        // // const responseOpenAI = await openAICall(false, "Create me a " + fValue + " post " + " based on the give topics that were talked about during the client meeting\n Topics:"
-        // //     + messageC.view.private_metadata.split(":")[1],
-        // //     "You are a professional content creator with millions of followers");
-
-        // // const newUseCase = await createDBEntry("useCases", { content: responseOpenAI, title: "Case Study", type: "caseStudy", meetingTitle: messageC.message.blocks[0].text.text });
-        // await web.chat.postMessage({
-        //     channel: messageC.view.private_metadata.split(":")[0],
-        //     text: "<@" + messageC.view.private_metadata.split(":")[3] + "> Here you have the draft for a " + fValue + ":\n" + "----" + fValue + "----\n\n" + responseOpenAI,
-        // });
+        // const newUseCase = await createDBEntry("useCases", { content: responseOpenAI, title: "Case Study", type: "caseStudy", meetingTitle: messageC.message.blocks[0].text.text });
+        await web.chat.postMessage({
+            channel: messageC.channel_id,
+            text: "<> Here you have the answer for your question\n" + "--------\n\n" + responseOpenAI,
+        });
 
     } catch (error) {
         console.log(error)
