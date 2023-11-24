@@ -22,7 +22,7 @@ import { embedText } from "@/utils/api/backend/backendCalls";
 import { useSession } from "next-auth/react";
 import { Mixpanel } from "@/utils/mixpanel";
 import ModalComponent from "@/components/modal/Modal";
-import { businessModelICP, companyTypeICP, countriesICP, employsICP, fundingRaisedICP, industriesICP, techUsedICP } from "@/utils/globalVariables";
+import { birthYearPersona, businessModelICP, companyTypeICP, countriesICP, employsICP, fundingRaisedICP, industriesICP, jobPersona, techUsedICP } from "@/utils/globalVariables";
 import { default as ReactSelect } from "react-select";
 import Option from "@/components/options/Option";
 import { POSTApiCall } from "@/utils/api/commonAPICall";
@@ -90,6 +90,16 @@ export default function Onboarding() {
         );
       case 2:
         return (
+
+          // <StepPersona
+          //   onPrevAction={() => {
+          //     handlePrev();
+          //   }}
+          //   onNextAction={(data: any) => {
+          //   }}
+          //   businessName={businessName}
+          //   setBusinessName={setBusinessName}
+          // />
           <Step2
             onPrevAction={() => {
               handlePrev();
@@ -777,6 +787,8 @@ const StepICP: FunctionComponent<StepICPProps> = ({
   const [selectedBusinessModels, setSelectedBusinessModels] = useState([]);
   const [selectedTechUsed, setSelectedTechUsed] = useState([]);
   const [selectedCountries, setSelectedCountries] = useState([]);
+  const [selectedBirth, setSelectedBirth] = useState([]);
+  const [selectdJob, setSelectedJob] = useState([]);
 
   const industriesList = industriesICP.map((industry) => ({ label: industry, value: industry }));
   const employeesList = employsICP.map((employ) => ({ label: employ, value: employ }));
@@ -785,6 +797,8 @@ const StepICP: FunctionComponent<StepICPProps> = ({
   const businessModelList = businessModelICP.map((businessModel) => ({ label: businessModel, value: businessModel }));
   const techUsedList = techUsedICP.map((techUsed) => ({ label: techUsed, value: techUsed }));
   const countriesList = countriesICP.map((country) => ({ label: country, value: country }));
+  const birthYearPersonaList = birthYearPersona.map((birth) => ({ label: birth, value: birth }));
+  const jobPersonaList = jobPersona.map((job) => ({ label: job, value: job }));
 
   const addICP = async () => {
     setLoading(true);
@@ -847,13 +861,15 @@ const StepICP: FunctionComponent<StepICPProps> = ({
 
       <VStack w={700} align="flex-start" spacing={6}>
 
-        {select('Industry', industriesList, handleChange, selectedIndustries, setSelectedIndustries)}
-        {select('Employees', employeesList, handleChange, selectedEmployees, setSelectedEmployees)}
-        {select('Funding raised', fundingRaisedList, handleChange, selectedFundingRaised, setSelectedFundingRaised)}
+        {select('Company industry', industriesList, handleChange, selectedIndustries, setSelectedIndustries)}
+        {select('Company number of Employees', employeesList, handleChange, selectedEmployees, setSelectedEmployees)}
+        {select('Company funding raised', fundingRaisedList, handleChange, selectedFundingRaised, setSelectedFundingRaised)}
         {select('Company type', companyTypesList, handleChange, selectedCompanyTypes, setSelectedCompanyTypes)}
-        {select('Business model', businessModelList, handleChange, selectedBusinessModels, setSelectedBusinessModels)}
-        {select('Tech used', techUsedList, handleChange, selectedTechUsed, setSelectedTechUsed)}
-        {select('Country', countriesList, handleChange, selectedCountries, setSelectedCountries)}
+        {select('Company business model', businessModelList, handleChange, selectedBusinessModels, setSelectedBusinessModels)}
+        {select('Company tech used', techUsedList, handleChange, selectedTechUsed, setSelectedTechUsed)}
+        {select('Company Country', countriesList, handleChange, selectedCountries, setSelectedCountries)}
+        {select('Persona birth year', birthYearPersonaList, handleChange, selectedBirth, setSelectedBirth)}
+        {select('Persona work position', jobPersonaList, handleChange, selectdJob, setSelectedJob)}
 
       </VStack>
       {loading && (
@@ -870,7 +886,7 @@ const StepICP: FunctionComponent<StepICPProps> = ({
             onNextAction({});
           }}
         >
-          Start using
+          Start Using
         </Button>
 
 
@@ -887,5 +903,6 @@ const StepICP: FunctionComponent<StepICPProps> = ({
     </>
   );
 };
+
 
 Onboarding.auth = true;

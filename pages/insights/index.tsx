@@ -353,7 +353,7 @@ export default function Insights() {
             <>
                 {!gongConnected ?
                     <Text>
-                        Gong account is not connected. <Link color='teal.500' href="/profile"> Please connect it here </Link>
+                        Gong account is not connected. <Link color='teal.500' href="/profile?integrations"> Please connect it here </Link>
                     </Text>
                     :
                     <>
@@ -388,7 +388,7 @@ export default function Insights() {
                     :
                     !slackConnected ?
                         <Text>
-                            Slack bot was not added to your channel. <Link color='teal.500' href="/profile"> Please connect it here </Link>
+                            Slack bot was not added to your channel. <Link color='teal.500' href="/profile?integrations"> Please connect it here </Link>
                         </Text>
                         :
                         <>

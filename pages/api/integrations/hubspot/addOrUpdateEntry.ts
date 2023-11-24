@@ -2,6 +2,8 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../../auth/[...nextauth]";
 import PDLJS from 'peopledatalabs';
+import { checkIfTokenNeedsRefresh } from "@/utils/common/integrations/hubspot/checkIfTokenNeedsRefresh";
+import { refreshToken } from "@/utils/common/integrations/hubspot/refreshToken";
 
 export default async function handler(
     req: NextApiRequest,
@@ -18,7 +20,11 @@ export default async function handler(
             });
         }
 
-        const { linkedin } = req.body
+
+        if(await checkIfTokenNeedsRefresh(session.user.email)){
+            console.log("refreshing token");
+            await refreshToken(session.user.email);
+        }
 
     } catch (e) {
         console.log(e);

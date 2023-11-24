@@ -5,26 +5,26 @@ import { useRouter } from "next/router";
 import { useEffect } from "react";
 import { toast } from "react-toastify";
 
-export default function GongAuth() {
+export default function HubspotAuth() {
     const router = useRouter();
 
-    async function generateCustomerToken(code: any, state: any) {
-        await fetch("/api/integrations/gong/generateCustomerToken", {
+    async function generateCustomerToken(code: any) {
+        await fetch("/api/integrations/hubspot/generateCustomerToken", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
             },
-            body: JSON.stringify({ code: code, state: state }),
+            body: JSON.stringify({ code: code }),
         }).then((res) => res.json())
             .then((data) => {
                 if (data.success) {
-                    toastDisplay("Gong connected successfully", true)
+                    toastDisplay("Hubspot connected successfully", true)
                     router.push("/profile");
                 }
             }
             ).catch((err) => {
                 console.log(err)
-                toastDisplay("Error with Gong", false)
+                toastDisplay("Error with Hubspot", false)
                 router.push("/profile");
             });
 
@@ -32,9 +32,8 @@ export default function GongAuth() {
 
     useEffect(() => {
         const { code } = router.query;
-        const { state } = router.query;
-        if (code !== undefined && state !== undefined) {
-            generateCustomerToken(code, state);
+        if (code !== undefined) {
+            generateCustomerToken(code);
         }
     }, [router])
     return (
@@ -56,4 +55,4 @@ export default function GongAuth() {
     )
 }
 
-GongAuth.auth = true;
+HubspotAuth.auth = true;
