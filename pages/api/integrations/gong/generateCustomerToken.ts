@@ -49,7 +49,6 @@ export default async function handler(
             headers,
         }).then((response) => response.json())
             .then(async (data) => {
-                console.log(data);
                 if (data.access_token !== undefined && data.refresh_token !== undefined && data.expires_in !== undefined) {
                     const currentSeconds = (new Date().getTime() / 1000) + data.expires_in;
                     await updateDBEntry("users", { gongAccessToken: data.access_token, gongRefreshToken: data.refresh_token, gongTokenExpiration: currentSeconds }, ['email'], '==', [session.user.email], 1);
@@ -61,8 +60,6 @@ export default async function handler(
                 console.log(error);
                 return null;
             })
-        console.log("response");
-        console.log(response);
         if (response && Object.keys(response).length > 0) {
             res.status(200).json({ content: response, success: true });
         }

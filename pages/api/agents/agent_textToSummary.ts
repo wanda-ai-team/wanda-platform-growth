@@ -12,7 +12,6 @@ export default async function handler(
 
     if (url !== "null") {
         summary = await getDBEntry("summaries", ["url"], ["=="], [url], 1);
-        console.log(summary)
     }
 
     if (summary.length > 0) {
@@ -35,8 +34,6 @@ export default async function handler(
             url: url
         })
     }).then((res) => res.json())
-
-    console.log(resultPyVercel.response)
 
     createDBEntry("summaries", { url: url, summary: resultPyVercel.response })
 

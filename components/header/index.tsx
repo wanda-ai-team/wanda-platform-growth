@@ -48,6 +48,20 @@ const Header = () => {
           >
             Repurpose Content
           </Button>
+          <Button
+            size='sm'
+            colorScheme="purple"
+            onClick={() => router.push('/prospecting')}
+          >
+            Prospecting
+          </Button>
+          <Button
+            size='sm'
+            colorScheme="purple"
+            onClick={() => router.push('/saleschat')}
+          >
+            Sales Professional Chat
+          </Button>
           {/* <Button
             size='sm'
             colorScheme="purple"

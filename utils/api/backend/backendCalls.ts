@@ -70,7 +70,7 @@ async function outputContentBackendCall(userPrompt: string, output: string, gong
 
 
 async function answerQuestionBackendCall(userPrompt: string) {
-    const response = await axios.post(process.env.BACKEND_URL + '/llmTools/outputContent', {
+    const response = await axios.post(process.env.BACKEND_URL + '/llmTools/embedVectorFAISSTool', {
         userPrompt: userPrompt,
         systemPrompt: "",
         config: {

@@ -14,8 +14,6 @@ export default async function handler(
     });
 
     const bucket = storage.bucket("audios-wanda");
-    console.log(req.query.file)
-    console.log(bucket)
     return await configureBucketCors(bucket)
         .then(async () => {
         const file = bucket.file(req.query.file as string);
@@ -26,8 +24,6 @@ export default async function handler(
         };
 
         const [response] = await file.generateSignedPostPolicyV4(options);
-        console.log(response)   
-    
         res.status(200).json(response);
     });
 }

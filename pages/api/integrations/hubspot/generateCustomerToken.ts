@@ -42,7 +42,6 @@ export default async function handler(
             process.env.HUBSPOT_CLIENT_ID,
             process.env.HUBSPOT_CLIENT_SECRET
         ).then(async (data) => {
-            console.log(data);
             if (data.accessToken !== undefined && data.refreshToken !== undefined && data.expiresIn !== undefined) {
                 const currentSeconds = (new Date().getTime() / 1000) + data.expiresIn;
                 await updateDBEntry("users", { hubspotAccessToken: data.accessToken, hubspotRefreshToken: data.refreshToken, hubspotTokenExpiration: currentSeconds }, ['email'], '==', [session.user.email], 1);

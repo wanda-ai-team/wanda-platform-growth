@@ -25,14 +25,12 @@ export default async function handler(
 
 
         if (await checkIfTokenNeedsRefresh(session.user.email)) {
-            console.log("refreshing token");
             await refreshToken(session.user.email);
         }
 
         const { selectedPeople } = req.body;
 
         if (!selectedPeople || selectedPeople.length <= 0) {
-            console.log(selectedPeople)
             return res.status(400).json({
                 error: {
                     code: "bad-request",
@@ -43,12 +41,6 @@ export default async function handler(
 
 
         const user = await getDBEntry("users", ["email"], ["=="], [session.user.email], 1);
-
-        if (await checkIfTokenNeedsRefresh(session.user.email)) {
-            console.log("refreshing token");
-            await refreshToken(session.user.email);
-        }
-
 
         const hubspotClient = new Client({ accessToken: user[0].data.hubspotAccessToken });
 
@@ -63,7 +55,6 @@ export default async function handler(
             }
 
             try {
-                console.log("contactObj");
                 await hubspotClient.crm.contacts.basicApi.create(contactObj as any);
             } catch (e: any) {
                 if (e.body !== undefined && e.body.message !== undefined) {
@@ -85,8 +76,6 @@ export default async function handler(
                         "subject": "Sample subject line"
                     })
                 })
-                console.log("response");
-                console.log(response);
             } catch (e) {
                 console.log(e);
             }

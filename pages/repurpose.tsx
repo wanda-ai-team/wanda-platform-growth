@@ -192,8 +192,6 @@ export default function Repurpose() {
         })
     }
 
-    console.log(outputSelected)
-
     // const response = await outputContent(transcript, outputSelected, outputSelectedT, outputSelectedW)
     const response = await fetch("/api/llm/gpt3/textToThreadStream", {
       method: "POST",
@@ -289,12 +287,9 @@ export default function Repurpose() {
           setTranscript(response.content);
           toastDisplay('Transcript done', true);
         }
-        console.log(response.content);
         const responseWhisper = await speechToTextYoutubeVideo(response.content.videoId);
 
         if (responseWhisper.success) {
-          console.log(responseWhisper);
-
           toastDisplay('Transcript done', true);
           setTranscript(responseWhisper.content);
           await summarizeTextAndCreateThread(
@@ -552,7 +547,6 @@ export default function Repurpose() {
   }
 
   function getTextArea(valueChosen: any) {
-    console.log(outputSelected)
     if (outputSelected === 'Twitter') {
       return getTwitterThread();
     }

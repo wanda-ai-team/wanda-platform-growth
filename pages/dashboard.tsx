@@ -35,12 +35,10 @@ export default function Dashboard() {
   const { data: session, status } = useSession()
 
   let handleInputChange = (e: { target: { value: any } }) => {
-    console.log("newArr")
     if (selectedPlatform === "Twitter") {
       let newArr = [...twitterThreadText];
       newArr[0] = e.target.value;
       setTwitterThreadText([...newArr]);
-      console.log(newArr)
     } else {
       setConvertedText(e.target.value);
     }
@@ -58,7 +56,6 @@ export default function Dashboard() {
     })
       .then((response) => response.json())
       .then(({ data }: any) => {
-        console.log(data.list)
         if (data.list.length > 0) {
           setIdeas(data.list);
         }
@@ -94,7 +91,6 @@ export default function Dashboard() {
     });
 
     let documentContextData = null;
-    console.log("documents")
     if (documents.ok) {
       documentContextData = await documents.json();
     }
@@ -114,7 +110,6 @@ export default function Dashboard() {
       },
       body: JSON.stringify({ idea: chosenIdeaN, platform: selectedPlatform, email: session?.user.email, documents: documentContextDataF }),
     });
-    console.log("response")
 
     if (!response.ok) {
       toastDisplay('Error while generating, try again', false)

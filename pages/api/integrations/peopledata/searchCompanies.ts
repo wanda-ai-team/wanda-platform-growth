@@ -26,15 +26,11 @@ export default async function handler(
 
 
         const { getOldCompanies } = req.body
-        console.log(getOldCompanies);
         if (getOldCompanies) {
             const userICPs = await getDBEntry("userICP", ["email"], ["=="], [session.user.email], 1);
 
             return res.status(200).json({ status: 200, data: (userICPs[0].data.companiesList) });
         } else {
-            console.log("here");
-
-
             // Create a client, specifying your API key
             const PDLJSClient = new PDLJS({ apiKey: process.env.PEOPLE_DATA_LABS_API_KEY as string });
 
@@ -44,7 +40,6 @@ export default async function handler(
             ICPInfo = ICPInfo[0].data;
 
             let sqlQuery = `SELECT * FROM company WHERE `;
-            console.log(ICPInfo.companyTypeICP);
 
             if (ICPInfo.companyTypeICP.length > 0) {
                 sqlQuery += `(`
@@ -113,7 +108,6 @@ export default async function handler(
             const jsonData = await fsPromises.readFile(dataFilePath);
             const companyData = JSON.parse(jsonData.toString())
 
-            console.log(companyData);
             await updateDBEntry("userICP", { companiesList: companyData.data }, ['email'], '==', [session?.user.email], 1);
             return res.status(200).json(companyData);
 
