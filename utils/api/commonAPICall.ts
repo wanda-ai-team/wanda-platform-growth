@@ -8,12 +8,23 @@ async function POSTApiCall(url: string, body: any) {
     }).then((res) => res.json())
 }
 
+async function POSTApiCallWithoutJSON(url: string, body: any) {
+    return await fetch(url, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(body),
+    })
+}
+
 async function GETApiCall(url: string) {
     return await fetch(url).then((res) => res.json())
 }
 
 export {
     POSTApiCall,
+    POSTApiCallWithoutJSON,
     GETApiCall
 }
 

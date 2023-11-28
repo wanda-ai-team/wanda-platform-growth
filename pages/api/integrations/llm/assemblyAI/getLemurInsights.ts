@@ -55,7 +55,6 @@ async function transcribeAudio(audio_url = "") {
             });
             responseDataT = await response.json();
         } else {
-            console.log("Transcribing audio... This might take a moment.")
             const response = await fetch("https://api.assemblyai.com/v2/transcript", {
                 method: "POST",
                 body: JSON.stringify({
@@ -69,8 +68,6 @@ async function transcribeAudio(audio_url = "") {
             });
             responseDataT = await response.json();
         }
-
-        console.log(responseDataT)
 
         const prompt = getPainPointPrompt()
 
@@ -89,8 +86,6 @@ async function transcribeAudio(audio_url = "") {
         });
 
         responseData = await response1.json();
-
-        console.log(responseData)
 
 
         return JSON.stringify({

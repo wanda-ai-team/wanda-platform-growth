@@ -1023,6 +1023,11 @@ const workPositionPersona = [
     "Writer",
 ]
 
+const salesPeopleList = [
+    "Joao From Hubspot",
+    "Joao From Salesforce",
+]
+
 export {
     userCollection,
     automationCollection,
@@ -1042,4 +1047,5 @@ export {
     techUsedICP,
     birthYearPersona,
     jobPersona,
+    salesPeopleList
 }

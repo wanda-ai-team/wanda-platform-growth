@@ -62,7 +62,7 @@ async function createPieceOfContent(web: WebClient, messageC: any) {
 
 async function answerQuestion(web: WebClient, messageC: any) {
     try {
-        const responseOpenAI = await answerQuestionBackendCall(messageC.text)
+        const responseOpenAI = await answerQuestionBackendCall("You are tommy, a hubspot sales professional, asnwering the following question based on the knowledge of how a hubspot sales professional does stuff\n " + messageC.text)
 
         // const responseOpenAI = await openAICall(false, messageC.text,
         //     "You are a professional sales person.");

@@ -34,7 +34,6 @@ export default async function handler(
             })
         });
         const result = await response.text();
-        console.log(result);
     } catch (e) {
         console.log(e);
         return res.status(500).json({

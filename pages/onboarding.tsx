@@ -337,7 +337,6 @@ const Step0: FunctionComponent<Step0Props> = ({
       .then(async ({ data, siteContent, success }: any) => {
         if (success) {
           toastDisplay('Business understood, storing ...', true);
-          console.log(data);
           setProduct(data.product);
           setTargetAudience(data.target_audience);
 

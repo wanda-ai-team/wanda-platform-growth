@@ -24,8 +24,6 @@ const handler = async (req: Request): Promise<Response> => {
 }
 
 async function transcribeAudio(audio_url = "", speakers: boolean, key_phrases: boolean, summary: boolean, sentiment_analysis: boolean, iab_categories: boolean) {
-    console.log("Transcribing audio... This might take a moment.");
-
     // Set the headers for the request, including the API token and content type
     const headers = {
         authorization: process.env.ASSEMBLYAI_API_KEY as string,

@@ -65,10 +65,8 @@ export const authOptions: NextAuthOptions = {
           token.uid = user.id;
           if (user.isActive === false) {
             const dbUser = await getUser("email", "==", user.email);
-            console.log(dbUser);
             token.isActive = dbUser!.isActive;
           } else {
-            console.log(user);
             token.isActive = user.isActive;
           }
           if (user.stripeCustomerId === undefined) {

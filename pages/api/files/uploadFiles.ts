@@ -28,7 +28,6 @@ export default async function handler(
 
         const form = new formidable.IncomingForm(customOptions);
         const files: ProcessedFiles = [];
-        console.log("ola")
         form.on('file', (field, file: any) => {
             files.push([field, file]);
         })
@@ -39,7 +38,6 @@ export default async function handler(
         });
     }).catch(e => {
         console.log(e);
-        console.log("ola2")
         status = 500;
         resultBody = {
             status: 'fail', message: 'Upload error'
@@ -68,20 +66,15 @@ export default async function handler(
         let count = 1;
         let data2 = "";
         let value = buff.length / 25000000;
-        console.log(value)
 
         if (value > 1) {
             do {
                 let buffN = buff.subarray(count * 25000000, ((value - count >= 1) ? count + 1 : (value)) * 25000000)
-                console.log(count * 25000000)
-                console.log(((value - count >= 1) ? count + 1 : (value)) * 25000000)
                 const httpbin = 'https://api.openai.com/v1/audio/transcriptions'
                 const formData = new FormData()
                 const formData1 = new Headers()
 
                 const abc = await new File([buffN], 'abc.mp3', { type: 'audio/mp3' });
-                console.log(abc)
-
                 formData1.set('Authorization', "Bearer " + process.env.OPENAI_API_KEY);
                 formData.set('model', 'whisper-1');
                 formData.set('file', abc);
@@ -90,7 +83,6 @@ export default async function handler(
                 const resW = await response.json();
                 data2 += (resW as { text: '' }).text;
                 count++;
-                console.log(resW)
             } while (value > count)
         } else {
             let buffN = buff.subarray(0, (value) * 25000000)
