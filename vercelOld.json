@@ -1,0 +1,14 @@
+{
+    "functions": {
+      "pages/api/**/*.ts": {
+        "memory": 3008,
+        "maxDuration": 300
+      }
+    },
+    "crons": [
+      {
+        "path": "/api/cronjobs/gong/checkForNewCall",
+        "schedule": "* * * * *"
+      }
+    ]
+  }

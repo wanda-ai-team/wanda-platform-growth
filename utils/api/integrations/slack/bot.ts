@@ -85,7 +85,7 @@ async function answerQuestion(web: WebClient, messageC: any) {
     } catch (error) {
         console.log(error)
         await web.chat.postMessage({
-            channel: messageC.text,
+            channel: messageC.channel_id,
             text: "Error creating piece of content, please try again later",
         });
     }
