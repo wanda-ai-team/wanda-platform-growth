@@ -36,14 +36,18 @@ export default async function handler(
             code: code as string,
             client_id: process.env.SLACK_CLIENT_ID as string,
             client_secret: process.env.SLACK_CLIENT_SECRET as string,
+            grant_type: "authorization_code",
         })
             .then(async (data) => {
                 if (data.access_token !== undefined) {
-                    if (data.refresh_token !== undefined && data.expires_in !== undefined) {
-                        const currentSeconds = (new Date().getTime() / 1000) + data.expires_in;
-                        await updateDBEntry("users", { slackAccessToken: data.access_token, slackRefreshToken: data.refresh_token, slackTokenexpiration: currentSeconds }, ['email'], '==', [session.user.email], 1);
-                        return data;
-                    }
+                    // if (data.refresh_token !== undefined && data.expires_in !== undefined) {
+                    // const currentSeconds = (new Date().getTime() / 1000) + data.expires_in;
+                    // await updateDBEntry("users", { slackBotTeam: data.team?.name, slackAccessToken: data.access_token, slackRefreshToken: data.refresh_token, slackTokenexpiration: currentSeconds }, ['email'], '==', [session.user.email], 1);
+
+                    await updateDBEntry("users", { slackAppId: data.app_id, slackBotTeam: data.team?.name, slackAccessToken: data.access_token }, ['email'], '==', [session.user.email], 1);
+
+                    return data;
+                    // }
                 }
                 return null
             })

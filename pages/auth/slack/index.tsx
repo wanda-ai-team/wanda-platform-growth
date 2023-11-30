@@ -19,14 +19,15 @@ export default function SlackAuth() {
             .then((data) => {
                 if (data.success) {
                     toastDisplay("Slack connected successfully", true)
-                    // router.push("/profile");
+                } else {
+                    toastDisplay("Error with Slack", false)
                 }
             }
             ).catch((err) => {
                 console.log(err)
                 toastDisplay("Error with Slack", false)
-                // router.push("/profile");
             });
+        router.push("/profile");
 
     }
 

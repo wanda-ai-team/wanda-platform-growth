@@ -62,10 +62,16 @@ async function createPieceOfContent(web: WebClient, messageC: any) {
 
 async function answerQuestion(web: WebClient, messageC: any) {
     try {
-        const responseOpenAI = await answerQuestionBackendCall("You are tommy, a hubspot sales professional, asnwering the following question based on the knowledge of how a hubspot sales professional does stuff\n " 
-        + "The query is being done by a sales person that works for the company " +  messageC.team_domain + " you should use context from the company to answer the question\n"
-        + "Question: "
-        + messageC.text)
+
+        const userInfo = await getDBEntry("users", ["slackAppId"], ["=="], [messageC.api_app_id], 1);
+        const prompt = "You are tommy, a hubspot sales professional, asnwering the following question based on the knowledge of how a hubspot sales professional does stuff\n "
+            + "The query is being done by a sales person that works for the company " + userInfo[0].data.slackBotTeam + " you should use context from the company to answer the question\n"
+            + "Question: "
+            + messageC.text
+
+        const responseOpenAI = await answerQuestionBackendCall(
+            prompt
+        )
 
         // const responseOpenAI = await openAICall(false, messageC.text,
         //     "You are a professional sales person.");
