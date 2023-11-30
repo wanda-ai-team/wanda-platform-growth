@@ -68,11 +68,13 @@ async function answerQuestion(web: WebClient, messageC: any) {
             + "The query is being done by a sales person that works for the company " + userInfo[0].data.slackBotTeam + " you should use context from the company to answer the question\n"
             + "Question: "
             + messageC.text
-
+        console.log("ola")
+        console.log(prompt)
         const responseOpenAI = await answerQuestionBackendCall(
             prompt
         )
 
+        console.log("ola2")
         // const responseOpenAI = await openAICall(false, messageC.text,
         //     "You are a professional sales person.");
 
@@ -83,6 +85,7 @@ async function answerQuestion(web: WebClient, messageC: any) {
         });
 
     } catch (error) {
+        console.log("error")
         console.log(error)
         await web.chat.postMessage({
             channel: messageC.channel_id,

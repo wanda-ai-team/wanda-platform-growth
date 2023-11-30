@@ -16,24 +16,18 @@ export default async function handler(
         const web = new WebClient(token);
         let messageC;
         try {
-            console.log(JSON.parse(req.body.text))
-            console.log(JSON.parse(req.body.channel_id))
-
             messageC = JSON.parse(req.body)
         } catch (error) {
             messageC = req.body
         }
 
-        console.log(messageC)
-
         await web.chat.postMessage({
             channel: messageC.channel_id,
-            text: "Answering your question, loading ...",
+            text: "Answering \" " + messageC.text + "\", loading ...",
         });
         answerQuestion(web, messageC);
 
-
-        res.status(200).json({});
+        res.status(200).json("Question being answered!");
     } catch (error) {
         console.log("error")
         console.log(error)
