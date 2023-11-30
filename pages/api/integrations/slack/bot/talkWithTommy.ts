@@ -20,12 +20,12 @@ export default async function handler(
         } catch (error) {
             messageC = req.body
         }
+        answerQuestion(web, messageC);
 
         await web.chat.postMessage({
             channel: messageC.channel_id,
             text: "Answering \" " + messageC.text + "\", loading ...",
         });
-        answerQuestion(web, messageC);
 
         res.status(200).json("Question being answered!");
     } catch (error) {
