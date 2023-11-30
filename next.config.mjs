@@ -1,6 +1,7 @@
 /** @type {import('next').NextConfig} */
 export const config = {
   webpack5: true,
+  output: 'export',
   webpack: (config) => {
     config.resolve.fallback = { fs: false };
     config.resolve.fallback = { zlib: false };
