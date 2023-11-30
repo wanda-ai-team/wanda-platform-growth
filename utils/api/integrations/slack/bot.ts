@@ -63,7 +63,15 @@ async function createPieceOfContent(web: WebClient, messageC: any) {
 async function answerQuestion(web: WebClient, messageC: any) {
     try {
 
+        console.log("entrei - 1")
+        console.log(messageC)
+        console.log(messageC.api_app_id)
         const userInfo = await getDBEntry("users", ["slackAppId"], ["=="], [messageC.api_app_id], 1);
+        console.log(userInfo)
+        console.log(userInfo[0])
+        
+        console.log(userInfo[0].data.slackBotTeam)
+
         const prompt = "You are tommy, a hubspot sales professional, asnwering the following question based on the knowledge of how a hubspot sales professional does stuff\n "
             + "The query is being done by a sales person that works for the company " + userInfo[0].data.slackBotTeam + " you should use context from the company to answer the question\n"
             + "Question: "
