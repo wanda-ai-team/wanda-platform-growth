@@ -20,14 +20,19 @@ export default async function handler(
         } catch (error) {
             messageC = req.body
         }
-        answerQuestion(web, messageC);
+
+        if(!messageC.channel_name.includes("talk-with-")) {
+            return res.status(200).json("Expert needs to called in the specific channel talk-with-...");
+        }
 
         await web.chat.postMessage({
             channel: messageC.channel_id,
-            text: "Answering \" " + messageC.text + "\", loading ...",
+            text: messageC.channel_name.split("talk-with-")[1] + " is answering \" " + messageC.text + "\", loading ...",
         });
+        
+        answerQuestion(web, messageC);
 
-        res.status(200).json("Question being answered!");
+        return res.status(200).json("Question being answered!");
     } catch (error) {
         console.log("error")
         console.log(error)

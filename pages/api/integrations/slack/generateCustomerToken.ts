@@ -43,8 +43,8 @@ export default async function handler(
                     // if (data.refresh_token !== undefined && data.expires_in !== undefined) {
                     // const currentSeconds = (new Date().getTime() / 1000) + data.expires_in;
                     // await updateDBEntry("users", { slackBotTeam: data.team?.name, slackAccessToken: data.access_token, slackRefreshToken: data.refresh_token, slackTokenexpiration: currentSeconds }, ['email'], '==', [session.user.email], 1);
-
-                    await updateDBEntry("users", { slackAppId: data.app_id, slackBotTeam: data.team?.name, slackAccessToken: data.access_token }, ['email'], '==', [session.user.email], 1);
+                    console.log(data);
+                    await updateDBEntry("users", { slackAppId: data.app_id, slackBotTeam: data.team?.name, slackAccessToken: data.access_token, slackUserId: data.authed_user?.id }, ['email'], '==', [session.user.email], 1);
 
                     return data;
                     // }

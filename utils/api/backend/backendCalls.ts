@@ -62,26 +62,38 @@ async function outputContentBackendCall(userPrompt: string, output: string, gong
                 "Authorization": `Bearer ${123}`
             }
         }
-    );
+    ).catch((error) => {
+        console.log(error)
+        return null
+    });
 
-    return response.data
+    return response === null ? response : response.data
 }
 
 
 
 async function answerQuestionBackendCall(userPrompt: string) {
-    const response = await axios.post(process.env.BACKEND_URL + '/llmTools/answerQuestionRAGTool', {
-        userPrompt: userPrompt
-    },
-        {
-            headers: {
-                "content-type": "application/json",
-                "Authorization": `Bearer ${123}`
+    try {
+        const response = await axios.post(process.env.BACKEND_URL + '/llmTools/answerQuestionRAGTool', {
+            userPrompt: userPrompt
+        },
+            {
+                headers: {
+                    "content-type": "application/json",
+                    "Authorization": `Bearer ${123}`
+                }
             }
-        }
-    );
+        ).catch((error) => {
+            console.log(error)
+            return null
+        });
 
-    return response.data
+        return response === null ? response : response.data
+
+    } catch (error) {
+        console.log(error)
+        return null
+    }
 }
 
 export {

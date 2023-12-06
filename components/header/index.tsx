@@ -34,6 +34,7 @@ const Header = () => {
 
       {!router.pathname.includes('onboarding') && !router.pathname.includes('login') && (
         <div style={{ display: 'flex', gap: '12px', verticalAlign: 'middle' }}>
+
           <Button
             size='sm'
             colorScheme="purple"
@@ -41,6 +42,7 @@ const Header = () => {
           >
             Customer Call Insights
           </Button>
+
           <Button
             size='sm'
             colorScheme="purple"
@@ -48,6 +50,7 @@ const Header = () => {
           >
             Repurpose Content
           </Button>
+
           <Button
             size='sm'
             colorScheme="purple"
@@ -55,13 +58,23 @@ const Header = () => {
           >
             Prospecting
           </Button>
+
           <Button
+            size='sm'
+            colorScheme="purple"
+            onClick={() => router.push('/expert')}
+          >
+            Sales Professional 
+          </Button>
+
+          {/* <Button
             size='sm'
             colorScheme="purple"
             onClick={() => router.push('/saleschat')}
           >
             Sales Professional Chat
-          </Button>
+          </Button> */}
+
           {/* <Button
             size='sm'
             colorScheme="purple"
