@@ -36,6 +36,6 @@ export default async function handler(
     } catch (error) {
         console.log("error")
         console.log(error)
-        res.status(200).json({ content: error, success: false });
+        return res.status(400).json({ content: error, success: false });
     }
 }
