@@ -72,11 +72,10 @@ async function answerQuestion(web: WebClient, messageC: any) {
         
         // console.log(userInfo[0].data.slackBotTeam)
 
-        const expert = await getDBEntry("experts", ["expertName"], ["=="], [messageC.channel_name.split("talk-with-")[1]], 1);
+        // const expert = await getDBEntry("experts", ["expertName"], ["=="], [messageC.channel_name.split("talk-with-")[1]], 1);
 
-        console.log(expert)
 
-        const prompt = "You are tommy, a hubspot sales professional, asnwering the following question based on the knowledge of how a hubspot sales professional does stuff\n "
+        const prompt = "You are " + messageC.channel_name.split("talk-with-")[1] + ", a hubspot sales professional, asnwering the following question based on the knowledge of how a hubspot sales professional does stuff\n "
             + "The query is being done by a sales person that works for the company " + "userInfo[0].data.slackBotTeam" + " you should use context from the company to answer the question\n"
             + "Question: "
             + messageC.text
