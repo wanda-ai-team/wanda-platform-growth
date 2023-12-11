@@ -123,8 +123,11 @@ async function answerQuestion(web: WebClient, messageC: any) {
                                 Elements.StaticSelect({ placeholder: 'Choose your favorite...' })
                                     .actionId('item')
                                     .options(menuOptions
-                                        .map((item: { name: any; id: any; }) => Bits.Option({ text: item.name, value: item.id }))),
-                                Elements.Button({ text: 'Create Personalized Email', actionId: 'createEmail' })))
+                                        .map((item: { name: any; id: any; }) => Bits.Option({ text: item.name, value: item.id })))),
+                        Blocks.Divider(),
+                        Blocks.Actions()
+                            .elements(
+                                Elements.Button({ text: 'Create Personalized Email', actionId: 'createEmail' })),)
                     .asUser()
                     .buildToJSON();
 
