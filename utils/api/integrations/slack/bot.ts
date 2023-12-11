@@ -86,7 +86,7 @@ async function answerQuestion(web: WebClient, messageC: any, person: any = "", i
             prompt = "You are a hubspot sales professional, answer the following question based on the knowledge of how a hubspot sales professional do sales\n "
                 + "The query is being done by a sales person that works for the company Wanda you should use context from the company to answer the question\n"
                 + "Write the email with good formatting and grammar, and correctly make the separation between Subject: and Content:\n"
-                + "Question: Write an email to " + person + " where you are selling wanda to them \n"
+                + "Question: You are Wei, the CPO of Wanda, write an email to " + person + " where you are selling wanda to them, don't put placeholder content on the email, put the correct information to be ready to send. \n"
 
             responseOpenAI = await answerQuestionBackendCall(
                 prompt
