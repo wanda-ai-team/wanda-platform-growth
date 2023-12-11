@@ -104,11 +104,15 @@ async function answerQuestion(web: WebClient, messageC: any) {
                 .asUser()
                 .buildToJSON();
         } else {
-            if (messageC.text.includes("prospect")) {
+            if (messageC.text.includes("prospect") || messageC.text.includes("prospecting") || messageC.text.includes("prospected") || messageC.text.includes("prospects")) {
                 responseOpenAI = "Here you have a prospected list of 10 people that work on Google, that you can reach out to: \n"
                     + "Please select one from the next list and create a personalized email to send to the prospect: \n"
 
-                const menuOptions = [{ name: "Joao", id: "Joao" }, { name: "Pedro", id: "Pedro" }, { name: "Maria", id: "Maria" }]
+                const menuOptions = [{ name: "Martim Pais, Online Marketing Sales Expert", id: "Martim Pais, Online Marketing Sales Expert" },
+                { name: "João Guia, Territory Sales Manager", id: "João Guia, Territory Sales Manager" },
+                { name: "Jacek Szymczyk, Head of Sales", id: "Jacek Szymczyk, Head of Sales" },
+                { name: "Cesar Nogueira, EMEA Head of Sales", id: "Cesar Nogueira, EMEA Head of Sales" },
+                { name: "Andrew Mesesan, Enterprise Sales Manager", id: "Andrew Mesesan, Enterprise Sales Manager" }]
 
                 messageF = Message({ channel: messageC.channel_id, text: "Prospecting response" })
                     .blocks(
