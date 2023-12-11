@@ -65,8 +65,6 @@ async function answerQuestion(web: WebClient, messageC: any) {
     try {
 
         console.log("entrei - 1")
-        console.log(messageC)
-        console.log(messageC.text)
         // const userInfo = await getDBEntry("users", ["slackAppId"], ["=="], [messageC.api_app_id], 1);
         // console.log(userInfo)
         // console.log(userInfo[0])

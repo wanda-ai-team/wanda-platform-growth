@@ -53,7 +53,10 @@ export default async function handler(
                         await sendEmail(messageC);
                         break;
                     case "createEmail":
-                        console.log(messageC.message.blocks[0].elements)
+                        console.log(messageC.message.blocks)
+                        console.log(messageC.message.state.values.IVZb6)
+                        console.log(messageC.actions[0].text)
+                        break;
                         await answerQuestion(web, messageC);
                         break;
                 }
