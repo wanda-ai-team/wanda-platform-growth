@@ -105,6 +105,7 @@ async function answerQuestion(web: WebClient, messageC: any, person: any = "", i
             const responseSlack = JSON.parse(messageF)
             await web.chat.postMessage(responseSlack);
         } else {
+            await sleep(500);
             console.log("entrei - no else")
             responseOpenAI = "Here you have a prospected list of 10 people that work on Google, that you can reach out to: \n"
                 + "Please select one from the next list and create a personalized email to send to the prospect: \n"
@@ -211,6 +212,12 @@ async function createFollowUpEmail(web: WebClient, messageC: any) {
         });
     }
 }
+
+function sleep(ms: number | undefined) {
+    return new Promise((resolve) => {
+      setTimeout(resolve, ms);
+    });
+  }
 
 async function sendEmail(messageC: any) {
     console.log(messageC.message.blocks)

@@ -27,7 +27,8 @@ export default async function handler(
 
         await web.chat.postMessage({
             channel: messageC.channel_id,
-            text: messageC.channel_name.split("talk-with-")[1] + " is answering \" " + messageC.text + "\", loading ...",
+            // text: messageC.channel_name.split("talk-with-")[1] + " is answering \" " + messageC.text + "\", loading ...",
+            text: "Tommy is answering \" " + messageC.text + "\", loading ...",
         });
         
         answerQuestion(web, messageC);
