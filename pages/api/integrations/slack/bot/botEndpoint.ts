@@ -25,7 +25,8 @@ export default async function handler(
         const web = new WebClient(token);
         let messageC;
         try {
-            messageC = JSON.parse(req.body.payload)
+            messageC = JSON.parse(req.body)
+            console.log(req.body)
             console.log(messageC)
             console.log("TYPE")
             console.log(messageC.type)
