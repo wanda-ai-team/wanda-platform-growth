@@ -57,10 +57,10 @@ export default async function handler(
                     case "createEmail":
                         const person = await getDBEntry("YCDemo", ["id"], ["=="], ["test"], 1);
                         console.log(person)
-                        await answerQuestion(web, messageC, person[0].value, true);
+                        answerQuestion(web, messageC, person[0].value, true);
                         break;
                     case "item":
-                        await createDBEntry("YCDemo", { id: "test", value: messageC.actions[0].selected_option.value });
+                        await updateDBEntry("YCDemo", { value: messageC.actions[0].selected_option.value }, ['id'], '==', ["test"], 1);
                         break;
                 }
 

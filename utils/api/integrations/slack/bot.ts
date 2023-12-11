@@ -213,7 +213,8 @@ async function createFollowUpEmail(web: WebClient, messageC: any) {
 }
 
 async function sendEmail(messageC: any) {
-    console.log(process.env.GOOGLE_PASS)
+    console.log(messageC.message.blocks)
+    console.log(messageC.message.blocks[0])
     const transporter = nodemailer.createTransport({
         service: "gmail",
         auth: {
