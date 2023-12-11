@@ -66,7 +66,7 @@ async function answerQuestion(web: WebClient, messageC: any) {
 
         console.log("entrei - 1")
         console.log(messageC)
-        console.log(messageC)
+        console.log(messageC.text)
         // const userInfo = await getDBEntry("users", ["slackAppId"], ["=="], [messageC.api_app_id], 1);
         // console.log(userInfo)
         // console.log(userInfo[0])
@@ -84,6 +84,7 @@ async function answerQuestion(web: WebClient, messageC: any) {
         let responseOpenAI = "";
         let messageF: any = {};
         if (messageC.text.includes("email")) {
+            console.log("entrei - no email")
             prompt = "You are a hubspot sales professional, answer the following question based on the knowledge of how a hubspot sales professional do sales\n "
                 + "The query is being done by a sales person that works for the company Wanda you should use context from the company to answer the question\n"
                 + "Write the email with good formatting and grammar, and correctly make the separation between Subject: and Content:\n"
@@ -103,36 +104,40 @@ async function answerQuestion(web: WebClient, messageC: any) {
                             Elements.Button({ text: 'Send Email', actionId: 'sendEmail' })))
                 .asUser()
                 .buildToJSON();
+
+            const responseSlack = JSON.parse(messageF)
+            await web.chat.postMessage(responseSlack);
         } else {
-            if (messageC.text.includes("prospect") || messageC.text.includes("prospecting") || messageC.text.includes("prospected") || messageC.text.includes("prospects")) {
-                responseOpenAI = "Here you have a prospected list of 10 people that work on Google, that you can reach out to: \n"
-                    + "Please select one from the next list and create a personalized email to send to the prospect: \n"
+            console.log("entrei - no else")
+            responseOpenAI = "Here you have a prospected list of 10 people that work on Google, that you can reach out to: \n"
+                + "Please select one from the next list and create a personalized email to send to the prospect: \n"
 
-                const menuOptions = [{ name: "Martim Pais, Online Marketing Sales Expert", id: "Martim Pais, Online Marketing Sales Expert" },
-                { name: "João Guia, Territory Sales Manager", id: "João Guia, Territory Sales Manager" },
-                { name: "Jacek Szymczyk, Head of Sales", id: "Jacek Szymczyk, Head of Sales" },
-                { name: "Cesar Nogueira, EMEA Head of Sales", id: "Cesar Nogueira, EMEA Head of Sales" },
-                { name: "Andrew Mesesan, Enterprise Sales Manager", id: "Andrew Mesesan, Enterprise Sales Manager" }]
+            const menuOptions = [{ name: "Martim Pais, Online Marketing Sales Expert", id: "Martim Pais, Online Marketing Sales Expert" },
+            { name: "João Guia, Territory Sales Manager", id: "João Guia, Territory Sales Manager" },
+            { name: "Jacek Szymczyk, Head of Sales", id: "Jacek Szymczyk, Head of Sales" },
+            { name: "Cesar Nogueira, EMEA Head of Sales", id: "Cesar Nogueira, EMEA Head of Sales" },
+            { name: "Andrew Mesesan, Enterprise Sales Manager", id: "Andrew Mesesan, Enterprise Sales Manager" }]
 
-                messageF = Message({ channel: messageC.channel_id, text: "Prospecting response" })
-                    .blocks(
-                        responseOpenAI !== "" ? Blocks.Section({ text: responseOpenAI }) : Blocks.Section({ text: "No insights selected" }),
-                        Blocks.Divider(),
-                        Blocks.Actions()
-                            .elements(
-                                Elements.StaticSelect({ placeholder: 'Choose your favorite...' })
-                                    .actionId('item')
-                                    .options(menuOptions
-                                        .map((item: { name: any; id: any; }) => Bits.Option({ text: item.name, value: item.id })))),
-                        Blocks.Divider(),
-                        Blocks.Actions()
-                            .elements(
-                                Elements.Button({ text: 'Create Personalized Email', actionId: 'createEmail' })),)
-                    .asUser()
-                    .buildToJSON();
+            messageF = Message({ channel: messageC.channel_id, text: "Prospecting response" })
+                .blocks(
+                    responseOpenAI !== "" ? Blocks.Section({ text: responseOpenAI }) : Blocks.Section({ text: "No insights selected" }),
+                    Blocks.Divider(),
+                    Blocks.Actions()
+                        .elements(
+                            Elements.StaticSelect({ placeholder: 'Choose your favorite...' })
+                                .actionId('item')
+                                .options(menuOptions
+                                    .map((item: { name: any; id: any; }) => Bits.Option({ text: item.name, value: item.id })))),
+                    Blocks.Divider(),
+                    Blocks.Actions()
+                        .elements(
+                            Elements.Button({ text: 'Create Personalized Email', actionId: 'createEmail' })),)
+                .asUser()
+                .buildToJSON();
 
-                // messageF.channel = messageC.channel_id;
-            }
+            const responseSlack = JSON.parse(messageF)
+            await web.chat.postMessage(responseSlack);
+            // messageF.channel = messageC.channel_id;
         }
 
         // let responseOpenAI = "";
@@ -144,8 +149,6 @@ async function answerQuestion(web: WebClient, messageC: any) {
 
 
 
-        const responseSlack = JSON.parse(messageF)
-        await web.chat.postMessage(responseSlack);
 
     } catch (error) {
         console.log("error")
