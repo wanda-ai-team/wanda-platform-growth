@@ -5,6 +5,7 @@ import { openAICall } from "@/utils/api/openAI/openAICalls";
 import createDBEntry from "@/utils/api/db/createDBEntry";
 import { answerQuestion, createCaseStudyURL, createFollowUpEmail, createPieceOfContent, createPieceOfContentModal, sendEmail } from "@/utils/api/integrations/slack/bot";
 import updateDBEntry from "@/utils/api/db/updateDBEntry";
+import getDBEntry from "@/utils/api/db/getDBEntry";
 
 export default async function handler(
     req: NextApiRequest,
@@ -54,15 +55,12 @@ export default async function handler(
                         await sendEmail(messageC);
                         break;
                     case "createEmail":
-                        console.log(messageC.message.blocks)
-                        console.log(messageC.message.state.values.IVZb6)
-                        console.log(messageC.actions[0].text)
-                        break;
-                        await answerQuestion(web, messageC);
+                        const person = await getDBEntry("YCDemo", ["id"], ["=="], ["test"], 1);
+                        console.log(person)
+                        await answerQuestion(web, messageC, person[0].value, true);
                         break;
                     case "item":
-                        console.log(messageC.actions[0].selected_option)
-                        // await createDBEntry("YCDemo", { id: "test", value:  });
+                        await createDBEntry("YCDemo", { id: "test", value: messageC.actions[0].selected_option.value });
                         break;
                 }
 

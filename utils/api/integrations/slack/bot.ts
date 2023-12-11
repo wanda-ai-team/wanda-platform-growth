@@ -61,7 +61,7 @@ async function createPieceOfContent(web: WebClient, messageC: any) {
     }
 }
 
-async function answerQuestion(web: WebClient, messageC: any) {
+async function answerQuestion(web: WebClient, messageC: any, person: any = "", isEmail: boolean = false) {
     try {
 
         console.log("entrei - 1")
@@ -81,19 +81,18 @@ async function answerQuestion(web: WebClient, messageC: any) {
         let prompt = ""
         let responseOpenAI = "";
         let messageF: any = {};
-        if (messageC.text.includes("email")) {
+        if (isEmail) {
             console.log("entrei - no email")
             prompt = "You are a hubspot sales professional, answer the following question based on the knowledge of how a hubspot sales professional do sales\n "
                 + "The query is being done by a sales person that works for the company Wanda you should use context from the company to answer the question\n"
                 + "Write the email with good formatting and grammar, and correctly make the separation between Subject: and Content:\n"
-                + "Question: "
-                + messageC.text
+                + "Question: Write an email to " + person + " where you are selling wanda to them \n"
 
             responseOpenAI = await answerQuestionBackendCall(
                 prompt
             )
 
-            messageF = Message({ channel: messageC.channel_id, text: "Question response" })
+            messageF = Message({ channel: messageC.container.channel_id, text: "Question response" })
                 .blocks(
                     responseOpenAI !== "" ? Blocks.Section({ text: responseOpenAI }) : Blocks.Section({ text: "No insights selected" }),
                     Blocks.Divider(),
