@@ -18,7 +18,7 @@ export default async function handler(
         const { challenge  } = req.body;
         console.log(challenge)
         if(challenge && challenge != "") {
-            res.status(200).json({ challenge });
+            return res.status(200).json({ challenge });
         }
         // Read a token from the environment variables
         const token = process.env.SLACK_TOKEN;
