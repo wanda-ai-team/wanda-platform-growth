@@ -26,17 +26,38 @@ export default async function handler(
             });
         }
 
+        const { expertId } = req.body;
+
+        console.log("slackExperts");
         // Initialize
         const user = await getDBEntry("users", ["email"], ["=="], [session.user.email], 1);
-        const { expertId } = req.body;
+
+        let slackExperts: any[] = user[0].data.slackExperts;
+
+        if (!slackExperts.includes(expertId)) {
+            return res.status(500).json({ content: "Expert already uninstalled", success: false });
+        }
+        const expertInfo = await getDBEntry("experts", ["id"], ["=="], [expertId], 1);
+
+        console.log(slackExperts);
+        if (slackExperts === undefined) {
+            slackExperts = [];
+        } else {
+            slackExperts = slackExperts.filter((expert) => expert !== expertId);
+        }
+
+        console.log("talk-with-" + expertInfo[0].data.expertName);
+
         const slackAccessToken = user[0].data.slackAccessToken;
 
         const web = new WebClient(slackAccessToken);
         let createdChannel;
         try {
             createdChannel = await web.conversations.close({
-                channel: "talk-with-test"
+                channel: "talk-with-" + expertInfo[0].data.expertName
             });
+
+            await updateDBEntry("users", { slackExperts: slackExperts }, ["email"], ["=="], [session.user.email], 1)
 
             console.log(createdChannel);
         } catch (e) {

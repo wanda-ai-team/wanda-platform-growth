@@ -1,5 +1,6 @@
 import { slackModalOutputPlatform } from "@/utils/globalVariables";
 import { WebClient } from "@slack/web-api";
+import e from "express";
 import { Modal, Blocks, Elements, Bits, Message } from 'slack-block-builder';
 import { answerQuestionBackendCall, outputContent, outputContentBackendCall } from "../../backend/backendCalls";
 import createDBEntry from "../../db/createDBEntry";
@@ -74,25 +75,46 @@ async function answerQuestion(web: WebClient, messageC: any) {
 
         // const expert = await getDBEntry("experts", ["expertName"], ["=="], [messageC.channel_name.split("talk-with-")[1]], 1);
 
+        // const prompt = "You are " + messageC.channel_name.split("talk-with-")[1] + ", a hubspot sales professional, asnwering the following question based on the knowledge of how a hubspot sales professional does stuff\n "
+        //     + "The query is being done by a sales person that works for the company " + "userInfo[0].data.slackBotTeam" + " you should use context from the company to answer the question\n"
+        //     + "Question: "
+        //     + messageC.text
 
-        const prompt = "You are " + messageC.channel_name.split("talk-with-")[1] + ", a hubspot sales professional, asnwering the following question based on the knowledge of how a hubspot sales professional does stuff\n "
-            + "The query is being done by a sales person that works for the company " + "userInfo[0].data.slackBotTeam" + " you should use context from the company to answer the question\n"
+        const prompt = ""
+        if(messageC.includes("email")){
+            "You are a hubspot sales professional, answer the following question based on the knowledge of how a hubspot sales professional do sales\n "
+            + "The query is being done by a sales person that works for the company Wanda you should use context from the company to answer the question\n"
             + "Question: "
             + messageC.text
+        }else{  
+        }
+
         console.log("ola")
         console.log(prompt)
-        const responseOpenAI = await answerQuestionBackendCall(
-            prompt
-        )
-
-        console.log("ola2")
+        // const responseOpenAI = await answerQuestionBackendCall(
+        //     prompt
+        // )
+        let responseOpenAI = "";
+        responseOpenAI = "Hello, how are you?"
         // const responseOpenAI = await openAICall(false, messageC.text,
         //     "You are a professional sales person.");
 
         // const newUseCase = await createDBEntry("useCases", { content: responseOpenAI, title: "Case Study", type: "caseStudy", meetingTitle: messageC.message.blocks[0].text.text });
+
+        const messageF = Message({ channel: messageC.channel_id, text: "Question response" })
+            .blocks(
+                responseOpenAI !== "" ? Blocks.Section({ text: responseOpenAI }) : Blocks.Section({ text: "No insights selected" }),
+                Blocks.Divider(),
+                Blocks.Actions()
+                    .elements(
+                        Elements.Button({ text: 'Send Email', actionId: 'sendEmail' })))
+            .asUser()
+            .buildToJSON();
+
         await web.chat.postMessage({
             channel: messageC.channel_id,
-            text: "<> Here you have the answer for your question\n" + "--------\n\n" + responseOpenAI,
+            // text: "<> Here you have the answer for your question\n" + "--------\n\n" + responseOpenAI,
+            text: messageF,
         });
 
     } catch (error) {

@@ -21,9 +21,9 @@ export default async function handler(
             messageC = req.body
         }
 
-        if(!messageC.channel_name.includes("talk-with-")) {
-            return res.status(200).json("Expert needs to called in the specific channel talk-with-...");
-        }
+        // if(!messageC.channel_name.includes("talk-with-")) {
+        //     return res.status(200).json("Expert needs to called in the specific channel talk-with-...");
+        // }
 
         await web.chat.postMessage({
             channel: messageC.channel_id,
