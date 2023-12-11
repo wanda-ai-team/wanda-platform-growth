@@ -64,8 +64,6 @@ async function createPieceOfContent(web: WebClient, messageC: any) {
 
 async function answerQuestion(web: WebClient, messageC: any, person: any = "", isEmail: boolean = false, isMention: boolean = false) {
     try {
-
-
         let prompt = ""
         let responseOpenAI = "";
         let messageF: any = {};

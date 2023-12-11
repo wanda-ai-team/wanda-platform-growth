@@ -93,7 +93,7 @@ export default async function handler(
                     text: "Tommy is answering \" " + messageC.event.text.split(">")[1] + "\", loading ...",
                 });
 
-                await answerQuestion(web, messageC);
+                await answerQuestion(web, messageC, "", false, true);
                 break;
         }
 
