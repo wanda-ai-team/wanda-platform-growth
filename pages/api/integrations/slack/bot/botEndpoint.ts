@@ -58,7 +58,7 @@ export default async function handler(
                         await createFollowUpEmail(web, messageC);
                         break;
                     case "sendEmail":
-                        await sendEmail(messageC);
+                        await sendEmail(web, messageC);
                         break;
                     case "createEmail":
                         const person = await getDBEntry("YCDemo", ["id"], ["=="], ["test"], 1);

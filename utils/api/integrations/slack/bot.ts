@@ -7,6 +7,8 @@ import createDBEntry from "../../db/createDBEntry";
 import getDBEntry from "../../db/getDBEntry";
 import { openAICall } from "../../openAI/openAICalls";
 import nodemailer from 'nodemailer';
+import { parse } from 'node-html-parser';
+
 async function createCaseStudyURL(web: WebClient, messageC: any) {
     try {
         await web.chat.postMessage({
@@ -86,7 +88,7 @@ async function answerQuestion(web: WebClient, messageC: any, person: any = "", i
             console.log("entrei - no email")
             prompt = "You are a hubspot sales professional, answer the following question based on the knowledge of how a hubspot sales professional do sales\n "
                 + "The query is being done by a sales person that works for the company Wanda you should use context from the company to answer the question\n"
-                + "Write the email with good formatting and grammar, and correctly make the separation between Subject: and Content:\n"
+                + "Write the email with good formatting and grammar, correctly make the separation between Subject: and Content:, and format the email as html, putting the correct HTML Elements\n"
                 + "Question: You are Wei, the CPO of Wanda, write an email to " + person + " where you are selling wanda to them, don't put placeholder content on the email, put the correct information to be ready to send. \n"
 
             responseOpenAI = await answerQuestionBackendCall(
@@ -216,27 +218,44 @@ async function createFollowUpEmail(web: WebClient, messageC: any) {
 
 function sleep(ms: number | undefined) {
     return new Promise((resolve) => {
-      setTimeout(resolve, ms);
+        setTimeout(resolve, ms);
     });
-  }
+}
 
-async function sendEmail(messageC: any) {
-    console.log(messageC.message.blocks)
-    console.log(messageC.message.blocks[0])
-    const transporter = nodemailer.createTransport({
-        service: "gmail",
-        auth: {
-            user: "hi@wanda.so",
-            pass: process.env.GOOGLE_PASS,
-        }
-    });
+async function sendEmail(web: any, messageC: any) {
+    try {
+        console.log(messageC.message.blocks)
+        console.log(messageC.message.blocks[0])
+        const transporter = nodemailer.createTransport({
+            service: "gmail",
+            auth: {
+                user: "hi@wanda.so",
+                pass: process.env.GOOGLE_PASS,
+            }
+        });
 
-    const mailRes = await transporter.sendMail({
-        from: 'hi@wanda.so',
-        to: "joao.airesmatos@gmail.com",
-        subject: messageC.message.blocks[0].text.text.split("Subject:")[1].split("Content:")[0].trim(),
-        html: messageC.message.blocks[0].text.text.split("Content:")[1].trim()
-    });
+        const mailRes = await transporter.sendMail({
+            from: 'hi@wanda.so',
+            to: "joao.airesmatos@gmail.com",
+            subject: messageC.message.blocks[0].text.text.split("Subject:")[1].split("Content:")[0].trim(),
+            html: messageC.message.blocks[0].text.text.split("Content:")[1].trim().replace("\n", "<br>")
+        });
+
+        console.log(mailRes)
+        
+        await sleep(500);
+        await web.chat.postMessage({
+            channel: messageC.container.channel_id,
+            text: "Email sent!",
+        });
+    } catch (error) {
+        console.log(error)
+        await sleep(500);
+        await web.chat.postMessage({
+            channel: messageC.container.channel_id,
+            text: "Error while sending email, please try again later",
+        });
+    }
 }
 
 
