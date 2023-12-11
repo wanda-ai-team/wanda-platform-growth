@@ -14,10 +14,8 @@ export default async function handler(
 
     try {
 
-        console.log(req.body)
-        const { challenge  } = req.body;
-        console.log(challenge)
-        if(challenge && challenge != "") {
+        const { challenge } = req.body;
+        if (challenge && challenge != "") {
             return res.status(200).json({ challenge });
         }
         // Read a token from the environment variables
@@ -30,6 +28,8 @@ export default async function handler(
             console.log(JSON.parse(req.body.payload))
 
             messageC = JSON.parse(req.body.payload)
+            console.log("TYPE")
+            console.log(messageC.type)
         } catch (error) {
             messageC = req.body.payload
         }
@@ -63,7 +63,7 @@ export default async function handler(
                     case "createEmail":
                         const person = await getDBEntry("YCDemo", ["id"], ["=="], ["test"], 1);
                         console.log(person)
-                        answerQuestion(web, messageC, person[0].value, true);
+                        answerQuestion(web, messageC, person[0].data.value, true);
 
                         await web.chat.postMessage({
                             channel: messageC.container.channel_id,
@@ -86,6 +86,15 @@ export default async function handler(
                     console.log(response);
                 })();
                 break
+            case "event_callback":
+                await web.chat.postMessage({
+                    channel: messageC.event.channel,
+                    // text: messageC.channel_name.split("talk-with-")[1] + " is answering \" " + messageC.text + "\", loading ...",
+                    text: "Tommy is answering \" " + messageC.event.text.split(">")[1] + "\", loading ...",
+                });
+
+                await answerQuestion(web, messageC);
+                break;
         }
 
         res.status(200).json({});
