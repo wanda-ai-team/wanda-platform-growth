@@ -58,6 +58,11 @@ export default async function handler(
                         const person = await getDBEntry("YCDemo", ["id"], ["=="], ["test"], 1);
                         console.log(person)
                         answerQuestion(web, messageC, person[0].value, true);
+
+                        await web.chat.postMessage({
+                            channel: messageC.container.channel_id,
+                            text: "Creating email, loading ...",
+                        });
                         break;
                     case "item":
                         await updateDBEntry("YCDemo", { value: messageC.actions[0].selected_option.value }, ['id'], '==', ["test"], 1);
