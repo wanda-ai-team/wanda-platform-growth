@@ -70,7 +70,6 @@ async function answerQuestion(web: WebClient, messageC: any, person: any = "", i
 
         if (isMention) {
             await sleep(500);
-            console.log("entrei - no else")
             responseOpenAI = "Here you have a prospected list of 5 people that work on Google, that you can reach out to: \n"
                 + "Please select one from the next list and create a personalized email to send to the prospect: \n"
 
