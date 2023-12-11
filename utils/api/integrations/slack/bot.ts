@@ -6,7 +6,7 @@ import { answerQuestionBackendCall, outputContent, outputContentBackendCall } fr
 import createDBEntry from "../../db/createDBEntry";
 import getDBEntry from "../../db/getDBEntry";
 import { openAICall } from "../../openAI/openAICalls";
-
+import nodemailer from 'nodemailer';
 async function createCaseStudyURL(web: WebClient, messageC: any) {
     try {
         await web.chat.postMessage({
@@ -70,7 +70,7 @@ async function answerQuestion(web: WebClient, messageC: any) {
         // const userInfo = await getDBEntry("users", ["slackAppId"], ["=="], [messageC.api_app_id], 1);
         // console.log(userInfo)
         // console.log(userInfo[0])
-        
+
         // console.log(userInfo[0].data.slackBotTeam)
 
         // const expert = await getDBEntry("experts", ["expertName"], ["=="], [messageC.channel_name.split("talk-with-")[1]], 1);
@@ -81,21 +81,20 @@ async function answerQuestion(web: WebClient, messageC: any) {
         //     + messageC.text
 
         const prompt = ""
-        if(messageC.includes("email")){
+        if (messageC.text.includes("email")) {
             "You are a hubspot sales professional, answer the following question based on the knowledge of how a hubspot sales professional do sales\n "
-            + "The query is being done by a sales person that works for the company Wanda you should use context from the company to answer the question\n"
-            + "Question: "
-            + messageC.text
-        }else{  
+                + "The query is being done by a sales person that works for the company Wanda you should use context from the company to answer the question\n"
+                + "Write the email with good formatting and grammar, and correctly make the separation between Subject: and Content:\n"
+                + "Question: "
+                + messageC.text
+        } else {
         }
 
-        console.log("ola")
-        console.log(prompt)
-        // const responseOpenAI = await answerQuestionBackendCall(
-        //     prompt
-        // )
-        let responseOpenAI = "";
-        responseOpenAI = "Hello, how are you?"
+        const responseOpenAI = await answerQuestionBackendCall(
+            prompt
+        )
+        // let responseOpenAI = "";
+        // responseOpenAI = "Hello, how are you?"
         // const responseOpenAI = await openAICall(false, messageC.text,
         //     "You are a professional sales person.");
 
@@ -122,7 +121,7 @@ async function answerQuestion(web: WebClient, messageC: any) {
         console.log(error)
         await web.chat.postMessage({
             channel: messageC.channel_id,
-            text: "Error creating piece of content, please try again later",
+            text: "Error answering the question, please try again later",
         });
     }
 }
@@ -182,11 +181,30 @@ async function createFollowUpEmail(web: WebClient, messageC: any) {
     }
 }
 
+async function sendEmail(messageC: any) {
+    console.log(process.env.GOOGLE_PASS)
+    const transporter = nodemailer.createTransport({
+        service: "gmail",
+        auth: {
+            user: "hi@wanda.so",
+            pass: process.env.GOOGLE_PASS,
+        }
+    });
+
+    const mailRes = await transporter.sendMail({
+        from: 'shikha.das1@gmail.com',
+        to: "joao.airesmatos@gmail.com",
+        subject: 'Your Password Reset Token',
+        html: messageC
+    });
+}
+
 
 export {
     createCaseStudyURL,
     createPieceOfContentModal,
     createPieceOfContent,
     createFollowUpEmail,
-    answerQuestion
+    answerQuestion,
+    sendEmail
 };
