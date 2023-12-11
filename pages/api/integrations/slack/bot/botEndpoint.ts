@@ -3,7 +3,7 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import { WebClient } from '@slack/web-api';
 import { openAICall } from "@/utils/api/openAI/openAICalls";
 import createDBEntry from "@/utils/api/db/createDBEntry";
-import { createCaseStudyURL, createFollowUpEmail, createPieceOfContent, createPieceOfContentModal, sendEmail } from "@/utils/api/integrations/slack/bot";
+import { answerQuestion, createCaseStudyURL, createFollowUpEmail, createPieceOfContent, createPieceOfContentModal, sendEmail } from "@/utils/api/integrations/slack/bot";
 
 export default async function handler(
     req: NextApiRequest,
@@ -17,6 +17,14 @@ export default async function handler(
 
         // Initialize
         const web = new WebClient(token);
+        const test = {
+
+            "channel_id": "C061MT4UL05",
+            "text": "prospect"
+
+        }
+        answerQuestion(web, test)
+        return;
         let messageC;
         try {
             console.log(JSON.parse(req.body.payload))
@@ -52,8 +60,10 @@ export default async function handler(
                     case "sendEmail":
                         await sendEmail(messageC);
                         break;
+                    case "createEmail":
+                        await answerQuestion(web, messageC);
+                        break;
                 }
-
 
                 break
             case "message_action":

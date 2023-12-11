@@ -1,7 +1,7 @@
 import { slackModalOutputPlatform } from "@/utils/globalVariables";
-import { WebClient } from "@slack/web-api";
+import { ChatPostMessageArguments, WebClient } from "@slack/web-api";
 import e from "express";
-import { Modal, Blocks, Elements, Bits, Message } from 'slack-block-builder';
+import { Modal, Blocks, Elements, Bits, Message, StaticSelectBuilder } from 'slack-block-builder';
 import { answerQuestionBackendCall, outputContent, outputContentBackendCall } from "../../backend/backendCalls";
 import createDBEntry from "../../db/createDBEntry";
 import getDBEntry from "../../db/getDBEntry";
@@ -66,7 +66,7 @@ async function answerQuestion(web: WebClient, messageC: any) {
 
         console.log("entrei - 1")
         console.log(messageC)
-        console.log(messageC.api_app_id)
+        console.log(messageC)
         // const userInfo = await getDBEntry("users", ["slackAppId"], ["=="], [messageC.api_app_id], 1);
         // console.log(userInfo)
         // console.log(userInfo[0])
@@ -80,19 +80,54 @@ async function answerQuestion(web: WebClient, messageC: any) {
         //     + "Question: "
         //     + messageC.text
 
-        const prompt = ""
+        let prompt = ""
+        let responseOpenAI = "";
+        let messageF: any = {};
         if (messageC.text.includes("email")) {
-            "You are a hubspot sales professional, answer the following question based on the knowledge of how a hubspot sales professional do sales\n "
+            prompt = "You are a hubspot sales professional, answer the following question based on the knowledge of how a hubspot sales professional do sales\n "
                 + "The query is being done by a sales person that works for the company Wanda you should use context from the company to answer the question\n"
                 + "Write the email with good formatting and grammar, and correctly make the separation between Subject: and Content:\n"
                 + "Question: "
                 + messageC.text
+
+            responseOpenAI = await answerQuestionBackendCall(
+                prompt
+            )
+
+            messageF = Message({ channel: messageC.channel_id, text: "Question response" })
+                .blocks(
+                    responseOpenAI !== "" ? Blocks.Section({ text: responseOpenAI }) : Blocks.Section({ text: "No insights selected" }),
+                    Blocks.Divider(),
+                    Blocks.Actions()
+                        .elements(
+                            Elements.Button({ text: 'Send Email', actionId: 'sendEmail' })))
+                .asUser()
+                .buildToJSON();
         } else {
+            if (messageC.text.includes("prospect")) {
+                responseOpenAI = "Here you have a prospected list of 10 people that work on Google, that you can reach out to: \n"
+                    + "Please select one from the next list and create a personalized email to send to the prospect: \n"
+
+                const menuOptions = [{ name: "Joao", id: "Joao" }, { name: "Pedro", id: "Pedro" }, { name: "Maria", id: "Maria" }]
+
+                messageF = Message({ channel: messageC.channel_id, text: "Prospecting response" })
+                    .blocks(
+                        responseOpenAI !== "" ? Blocks.Section({ text: responseOpenAI }) : Blocks.Section({ text: "No insights selected" }),
+                        Blocks.Divider(),
+                        Blocks.Actions()
+                            .elements(
+                                Elements.StaticSelect({ placeholder: 'Choose your favorite...' })
+                                    .actionId('item')
+                                    .options(menuOptions
+                                        .map((item: { name: any; id: any; }) => Bits.Option({ text: item.name, value: item.id }))),
+                                Elements.Button({ text: 'Create Personalized Email', actionId: 'createEmail' })))
+                    .asUser()
+                    .buildToJSON();
+
+                // messageF.channel = messageC.channel_id;
+            }
         }
 
-        const responseOpenAI = await answerQuestionBackendCall(
-            prompt
-        )
         // let responseOpenAI = "";
         // responseOpenAI = "Hello, how are you?"
         // const responseOpenAI = await openAICall(false, messageC.text,
@@ -100,21 +135,10 @@ async function answerQuestion(web: WebClient, messageC: any) {
 
         // const newUseCase = await createDBEntry("useCases", { content: responseOpenAI, title: "Case Study", type: "caseStudy", meetingTitle: messageC.message.blocks[0].text.text });
 
-        const messageF = Message({ channel: messageC.channel_id, text: "Question response" })
-            .blocks(
-                responseOpenAI !== "" ? Blocks.Section({ text: responseOpenAI }) : Blocks.Section({ text: "No insights selected" }),
-                Blocks.Divider(),
-                Blocks.Actions()
-                    .elements(
-                        Elements.Button({ text: 'Send Email', actionId: 'sendEmail' })))
-            .asUser()
-            .buildToJSON();
 
-        await web.chat.postMessage({
-            channel: messageC.channel_id,
-            // text: "<> Here you have the answer for your question\n" + "--------\n\n" + responseOpenAI,
-            text: messageF,
-        });
+
+        const responseSlack = JSON.parse(messageF)
+        await web.chat.postMessage(responseSlack);
 
     } catch (error) {
         console.log("error")
