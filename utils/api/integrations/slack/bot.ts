@@ -82,6 +82,7 @@ async function answerQuestion(web: WebClient, messageC: any, person: any = "", i
         let responseOpenAI = "";
         let messageF: any = {};
         if (isEmail) {
+            await sleep(500);
             console.log("entrei - no email")
             prompt = "You are a hubspot sales professional, answer the following question based on the knowledge of how a hubspot sales professional do sales\n "
                 + "The query is being done by a sales person that works for the company Wanda you should use context from the company to answer the question\n"
@@ -231,10 +232,10 @@ async function sendEmail(messageC: any) {
     });
 
     const mailRes = await transporter.sendMail({
-        from: 'shikha.das1@gmail.com',
+        from: 'hi@wanda.so',
         to: "joao.airesmatos@gmail.com",
-        subject: 'Your Password Reset Token',
-        html: messageC
+        subject: messageC.message.blocks[0].text.text.split("Subject:")[1].split("Content:")[0].trim(),
+        html: messageC.message.blocks[0].text.text.split("Content:")[1].trim()
     });
 }
 

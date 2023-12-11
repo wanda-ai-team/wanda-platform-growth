@@ -31,7 +31,7 @@ export default async function handler(
             text: "Tommy is answering \" " + messageC.text + "\", loading ...",
         });
         
-        answerQuestion(web, messageC);
+        await answerQuestion(web, messageC);
 
         return res.status(200).json("Question being answered!");
     } catch (error) {
