@@ -17,14 +17,6 @@ export default async function handler(
 
         // Initialize
         const web = new WebClient(token);
-        const test = {
-
-            "channel_id": "C061MT4UL05",
-            "text": "prospect"
-
-        }
-        answerQuestion(web, test)
-        return;
         let messageC;
         try {
             console.log(JSON.parse(req.body.payload))
