@@ -7,7 +7,6 @@ import createDBEntry from "../../db/createDBEntry";
 import getDBEntry from "../../db/getDBEntry";
 import { openAICall } from "../../openAI/openAICalls";
 import nodemailer from 'nodemailer';
-import { parse } from 'node-html-parser';
 
 async function createCaseStudyURL(web: WebClient, messageC: any) {
     try {
@@ -63,9 +62,47 @@ async function createPieceOfContent(web: WebClient, messageC: any) {
     }
 }
 
-async function answerQuestion(web: WebClient, messageC: any, person: any = "", isEmail: boolean = false) {
+async function answerQuestion(web: WebClient, messageC: any, person: any = "", isEmail: boolean = false, isMention: boolean = false) {
     try {
 
+
+        let prompt = ""
+        let responseOpenAI = "";
+        let messageF: any = {};
+
+        if (isMention) {
+            await sleep(500);
+            console.log("entrei - no else")
+            responseOpenAI = "Here you have a prospected list of 5 people that work on Google, that you can reach out to: \n"
+                + "Please select one from the next list and create a personalized email to send to the prospect: \n"
+
+            const menuOptions = [{ name: "Martim Pais, Online Marketing Sales Expert", id: "Martim Pais, Online Marketing Sales Expert" },
+            { name: "João Guia, Territory Sales Manager", id: "João Guia, Territory Sales Manager" },
+            { name: "Jacek Szymczyk, Head of Sales", id: "Jacek Szymczyk, Head of Sales" },
+            { name: "Cesar Nogueira, EMEA Head of Sales", id: "Cesar Nogueira, EMEA Head of Sales" },
+            { name: "Andrew Mesesan, Enterprise Sales Manager", id: "Andrew Mesesan, Enterprise Sales Manager" }]
+
+            messageF = Message({ channel: messageC.evebt.channel, text: "Prospecting response" })
+                .blocks(
+                    responseOpenAI !== "" ? Blocks.Section({ text: responseOpenAI }) : Blocks.Section({ text: "No insights selected" }),
+                    Blocks.Divider(),
+                    Blocks.Actions()
+                        .elements(
+                            Elements.StaticSelect({ placeholder: 'Choose your favorite...' })
+                                .actionId('item')
+                                .options(menuOptions
+                                    .map((item: { name: any; id: any; }) => Bits.Option({ text: item.name, value: item.id })))),
+                    Blocks.Divider(),
+                    Blocks.Actions()
+                        .elements(
+                            Elements.Button({ text: 'Create Personalized Email', actionId: 'createEmail' })),)
+                .asUser()
+                .buildToJSON();
+
+            const responseSlack = JSON.parse(messageF)
+            await web.chat.postMessage(responseSlack);
+            return
+        }
         console.log("entrei - 1")
         // const userInfo = await getDBEntry("users", ["slackAppId"], ["=="], [messageC.api_app_id], 1);
         // console.log(userInfo)
@@ -79,10 +116,6 @@ async function answerQuestion(web: WebClient, messageC: any, person: any = "", i
         //     + "The query is being done by a sales person that works for the company " + "userInfo[0].data.slackBotTeam" + " you should use context from the company to answer the question\n"
         //     + "Question: "
         //     + messageC.text
-
-        let prompt = ""
-        let responseOpenAI = "";
-        let messageF: any = {};
         if (isEmail) {
             await sleep(500);
             console.log("entrei - no email")
@@ -242,7 +275,7 @@ async function sendEmail(web: any, messageC: any) {
         });
 
         console.log(mailRes)
-        
+
         await sleep(500);
         await web.chat.postMessage({
             channel: messageC.container.channel_id,
