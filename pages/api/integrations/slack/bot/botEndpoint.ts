@@ -4,6 +4,7 @@ import { WebClient } from '@slack/web-api';
 import { openAICall } from "@/utils/api/openAI/openAICalls";
 import createDBEntry from "@/utils/api/db/createDBEntry";
 import { answerQuestion, createCaseStudyURL, createFollowUpEmail, createPieceOfContent, createPieceOfContentModal, sendEmail } from "@/utils/api/integrations/slack/bot";
+import updateDBEntry from "@/utils/api/db/updateDBEntry";
 
 export default async function handler(
     req: NextApiRequest,
@@ -58,6 +59,10 @@ export default async function handler(
                         console.log(messageC.actions[0].text)
                         break;
                         await answerQuestion(web, messageC);
+                        break;
+                    case "item":
+                        console.log(messageC.actions[0].selected_option)
+                        // await createDBEntry("YCDemo", { id: "test", value:  });
                         break;
                 }
 
