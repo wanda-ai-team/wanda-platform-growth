@@ -28,8 +28,7 @@ export default async function handler(
             messageC = req.body.payload 
             console.log("ola1")
             console.log(req.body)
-            console.log(messageC)
-            // console.log(messageC.type)
+            console.log(messageC.type)
         } catch (error) {
             console.log("ola2")
             console.log(req.body)
