@@ -87,7 +87,8 @@ async function answerQuestionBackendCall(userPrompt: string) {
             console.log(error)
             return null
         });
-
+        console.log("response")
+        console.log(response)
         return response === null ? response : response.data
 
     } catch (error) {
