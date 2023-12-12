@@ -26,12 +26,15 @@ export default async function handler(
         let messageC;
         try {
             messageC = JSON.parse(req.body)
+            console.log("ola1")
             console.log(req.body)
             console.log(messageC)
             console.log("TYPE")
-            console.log(messageC.type)
+            // console.log(messageC.type)
         } catch (error) {
-            console.log(req.body.payload)
+            console.log("req.body.payload")
+            console.log("ola2")
+            console.log(req.body)
             messageC = req.body.payload
         }
 
