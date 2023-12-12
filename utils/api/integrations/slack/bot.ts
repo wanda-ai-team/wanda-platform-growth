@@ -268,12 +268,12 @@ async function sendEmail(web: any, messageC: any) {
         });
 
         console.log("olaaa")
-        console.log(messageC.message.blocks[0].text.text.split("Content:")[1].replace("&lt;", "<").replace("&gt;", ">"))
+        console.log(messageC.message.blocks[0].text.text.split("Content:")[1].replaceAll("&lt;", "<").replaceAll("&gt;", ">"))
         const mailRes = await transporter.sendMail({
             from: 'hi@wanda.so',
             to: "joao.airesmatos@gmail.com",
             subject: messageC.message.blocks[0].text.text.split("Subject:")[1].split("Content:")[0].trim(),
-            html: messageC.message.blocks[0].text.text.split("Content:")[1].replace("&lt;", "<").replace("&gt;", ">")
+            html: messageC.message.blocks[0].text.text.split("Content:")[1].replaceAll("&lt;", "<").replaceAll("&gt;", ">")
         });
 
         console.log(mailRes)
