@@ -35,7 +35,7 @@ export default async function handler(
             console.log("req.body.payload")
             console.log("ola2")
             console.log(req.body)
-            messageC = req.body.payload
+            messageC = req.body
         }
 
         switch (messageC.type) {
