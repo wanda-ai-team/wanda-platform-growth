@@ -25,7 +25,7 @@ export default async function handler(
         const web = new WebClient(token);
         let messageC;
         try {
-            messageC = JSON.parse(req.body)
+            messageC = req.body.payload 
             console.log("ola1")
             console.log(req.body)
             console.log(messageC)
@@ -94,7 +94,7 @@ export default async function handler(
                 await web.chat.postMessage({
                     channel: messageC.event.channel,
                     // text: messageC.channel_name.split("talk-with-")[1] + " is answering \" " + messageC.text + "\", loading ...",
-                    text: "Tommy is answering \" " + messageC.event.text.split(">")[1] + "\", loading ...",
+                    text: "Tommy is answering \"" + messageC.event.text.split(">")[1] + "\", loading ...",
                 });
 
                 await answerQuestion(web, messageC, "", false, true);
