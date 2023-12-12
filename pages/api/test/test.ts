@@ -1,4 +1,5 @@
 import { answerQuestionBackendCall } from '@/utils/api/backend/backendCalls';
+import { sendEmailTest } from '@/utils/api/integrations/slack/bot';
 import type { NextApiRequest, NextApiResponse } from 'next';
 
 export default async function handler(
@@ -6,7 +7,6 @@ export default async function handler(
     res: NextApiResponse
 ) {
     
-    const responseOpenAI = await answerQuestionBackendCall(
-        "prompt"
-    )
+    const { message } = req.body;
+    sendEmailTest(message)
 }
