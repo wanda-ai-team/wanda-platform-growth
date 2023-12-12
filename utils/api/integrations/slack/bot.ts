@@ -79,7 +79,7 @@ async function answerQuestion(web: WebClient, messageC: any, person: any = "", i
             { name: "Cesar Nogueira, EMEA Head of Sales", id: "Cesar Nogueira, EMEA Head of Sales" },
             { name: "Andrew Mesesan, Enterprise Sales Manager", id: "Andrew Mesesan, Enterprise Sales Manager" }]
 
-            messageF = Message({ channel: messageC.evebt.channel, text: "Prospecting response" })
+            messageF = Message({ channel: messageC.event.channel, text: "Prospecting response" })
                 .blocks(
                     responseOpenAI !== "" ? Blocks.Section({ text: responseOpenAI }) : Blocks.Section({ text: "No insights selected" }),
                     Blocks.Divider(),
