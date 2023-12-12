@@ -267,11 +267,13 @@ async function sendEmail(web: any, messageC: any) {
             }
         });
 
+        console.log("olaaa")
+        console.log(messageC.message.blocks[0].text.text.split("Content:")[1])
         const mailRes = await transporter.sendMail({
             from: 'hi@wanda.so',
             to: "joao.airesmatos@gmail.com",
             subject: messageC.message.blocks[0].text.text.split("Subject:")[1].split("Content:")[0].trim(),
-            html: messageC.message.blocks[0].text.text.split("Content:")[1].trim().replace("\n", "<br>")
+            html: messageC.message.blocks[0].text.text.split("Content:")[1]
         });
 
         console.log(mailRes)
@@ -291,6 +293,40 @@ async function sendEmail(web: any, messageC: any) {
     }
 }
 
+async function sendEmailTest(messageC: any) {
+    try {
+        const transporter = nodemailer.createTransport({
+            service: "gmail",
+            auth: {
+                user: "hi@wanda.so",
+                pass: process.env.GOOGLE_PASS,
+            }
+        });
+
+        const mailRes = await transporter.sendMail({
+            from: 'hi@wanda.so',
+            to: "joao.airesmatos@gmail.com",
+            subject: messageC.message,
+            html: messageC
+        });
+
+        console.log(mailRes)
+
+        await sleep(500);
+        // await web.chat.postMessage({
+        //     channel: messageC.container.channel_id,
+        //     text: "Email sent!",
+        // });
+    } catch (error) {
+        console.log(error)
+        await sleep(500);
+        // await web.chat.postMessage({
+        //     channel: messageC.container.channel_id,
+        //     text: "Error while sending email, please try again later",
+        // });
+    }
+}
+
 
 export {
     createCaseStudyURL,
@@ -298,5 +334,6 @@ export {
     createPieceOfContent,
     createFollowUpEmail,
     answerQuestion,
-    sendEmail
+    sendEmail,
+    sendEmailTest
 };
