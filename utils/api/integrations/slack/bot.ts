@@ -116,10 +116,11 @@ async function answerQuestion(web: WebClient, messageC: any, person: any = "", i
         if (isEmail) {
             await sleep(500);
             console.log("entrei - no email")
-            prompt = "You are a hubspot sales professional, answer the following question based on the knowledge of how a hubspot sales professional do sales\n "
-                + "The query is being done by a sales person that works for the company Wanda you should use context from the company to answer the question\n"
-                + "Write the email with good formatting and grammar, correctly make the separation between Subject: and Content:, and format the email as html, putting the correct HTML Elements\n"
-                + "Question: You are Wei, the CPO of Wanda, write an email to " + person + " where you are selling wanda to them, don't put placeholder content on the email, put the correct information to be ready to send. \n"
+            prompt = "You are a hubspot sales professional, answer the following question based on the knowledge of how a hubspot sales professional do sales. \n"
+            + "The query is being done by a sales person that works for the company Wanda you should use context from the company to answer the question. \n"
+            + "Write the email with good formatting and grammar, correctly make the separation between Subject: and Content:, and format the email as html, putting the correct HTML Elements on the email content body, and not anywhere else. \n"
+            + "Question: You are Wei, the CPO of Wanda, write an email to " + person + ", EMEA Head of Sales where you are selling wanda to them, don't put placeholder content on the email, put the correct information to be ready to send. \n"
+            + "Here is information about Wanda Wanda is selling an AI-powered tool that helps users repurpose their webinars into long-form social posts, enabling them to work more efficiently by automating content creation and distribution across multiple platforms. Wanda is selling it to Bloggers, podcasters, YouTubers, solopreneurs, lean startups, and digital marketing agencies and teams looking to maximize their online presence through content repurposing."
 
             responseOpenAI = await answerQuestionBackendCall(
                 prompt

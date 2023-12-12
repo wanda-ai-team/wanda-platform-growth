@@ -74,7 +74,7 @@ async function outputContentBackendCall(userPrompt: string, output: string, gong
 
 async function answerQuestionBackendCall(userPrompt: string) {
     try {
-        const response = await axios.post(process.env.BACKEND_URL + '/llmTools/answerQuestionRAGTool', {
+        const response = await axios.post(process.env.BACKEND_URL + '/llmTools/answerQuestionTool', {
             userPrompt: userPrompt
         },
             {
