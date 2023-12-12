@@ -262,7 +262,7 @@ async function sendEmail(web: any, messageC: any) {
         const transporter = nodemailer.createTransport({
             service: "gmail",
             auth: {
-                user: "hi@wanda.so",
+                user: "wei@wanda.so",
                 pass: process.env.GOOGLE_PASS,
             }
         });
@@ -270,7 +270,7 @@ async function sendEmail(web: any, messageC: any) {
         console.log("olaaa")
         console.log(messageC.message.blocks[0].text.text.split("Content:")[1].replaceAll("&lt;", "<").replaceAll("&gt;", ">"))
         const mailRes = await transporter.sendMail({
-            from: 'hi@wanda.so',
+            from: 'wei@wanda.so',
             to: "joao.airesmatos@gmail.com",
             subject: messageC.message.blocks[0].text.text.split("Subject:")[1].split("Content:")[0].trim(),
             html: messageC.message.blocks[0].text.text.split("Content:")[1].replaceAll("&lt;", "<").replaceAll("&gt;", ">")
@@ -298,13 +298,13 @@ async function sendEmailTest(messageC: any) {
         const transporter = nodemailer.createTransport({
             service: "gmail",
             auth: {
-                user: "hi@wanda.so",
+                user: "wei@wanda.so",
                 pass: process.env.GOOGLE_PASS,
             }
         });
 
         const mailRes = await transporter.sendMail({
-            from: 'hi@wanda.so',
+            from: 'wei@wanda.so',
             to: "joao.airesmatos@gmail.com",
             subject: messageC.message,
             html: messageC
