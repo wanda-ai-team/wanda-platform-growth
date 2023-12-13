@@ -114,7 +114,7 @@ async function answerQuestion(web: WebClient, messageC: any, person: any = "", i
         //     + "Question: "
         //     + messageC.text
         if (isEmail) {
-            await sleep(250);
+            await sleep(3000);
             console.log("entrei - no email")
             prompt = "You are a hubspot sales professional, answer the following question based on the knowledge of how a hubspot sales professional do sales. \n"
                 + "The query is being done by a sales person that works for the company Wanda you should use context from the company to answer the question. \n"
@@ -122,9 +122,11 @@ async function answerQuestion(web: WebClient, messageC: any, person: any = "", i
                 + "Question: You are Wei, the CPO of Wanda, write an email to " + person + ", EMEA Head of Sales where you are selling wanda to them, don't put placeholder content on the email, put the correct information to be ready to send. \n"
                 + "Here is information about Wanda Wanda is selling an AI-powered tool that helps users repurpose their webinars into long-form social posts, enabling them to work more efficiently by automating content creation and distribution across multiple platforms. Wanda is selling it to Bloggers, podcasters, YouTubers, solopreneurs, lean startups, and digital marketing agencies and teams looking to maximize their online presence through content repurposing."
 
-            responseOpenAI = await answerQuestionBackendCall(
-                prompt
-            )
+            //responseOpenAI = await answerQuestionBackendCall(
+            //    prompt
+            //)
+            responseOpenAI = "Subject: Increase 20% response rate in 20 seconds Content: <DOCTYPE html> <html> <head> </head> <body> <p>Hi Andrew ,</p> <p>Your blog post on Dropbox’s product-led approach was really interesting - completely agree with your point that the job of the sales team is totally different when you have thousands of users.</p> <p>A lot of PLG focused growth managers (like you) find that personalized outreach messages based on specific user behavoir is much more effective at driving response rates. </p> <p>Dropbox users in the enterprise space probably have very difference needs based on their company, product and buyer persona. I’m guessing you are sending a similar sequence to buyers at Airbnb as the Gitlab. Trust me, these folks want to hear very different things.</p> <p>Companies like Box, Notion and Atlassian have found that AI-agents (like the ones from Waroom) can help drive a 15-20% improvement in response rate with highly personalized tactics and email campaigns. </p> <p>Assuming Dropbox probably invests a lot in improving email response rate, and there’s a lot to do - can we make certain tasks faster or easier for you?</p> <p>Wei</p> <p>—<br> Wei Zhu<br> Customer Advocate | Cofounder<br> Waroom.ai</p> </body> </html>"
+
 
             messageF = Message({ channel: messageC.container.channel_id, text: "Question response" })
                 .blocks(
