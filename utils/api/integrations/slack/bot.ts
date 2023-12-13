@@ -257,8 +257,6 @@ function sleep(ms: number | undefined) {
 
 async function sendEmail(web: any, messageC: any) {
     try {
-        console.log(messageC.message.blocks)
-        console.log(messageC.message.blocks[0])
         const transporter = nodemailer.createTransport({
             service: "gmail",
             auth: {
@@ -267,11 +265,9 @@ async function sendEmail(web: any, messageC: any) {
             }
         });
 
-        console.log("olaaa")
-        console.log(messageC.message.blocks[0].text.text.split("Content:")[1].replaceAll("&lt;", "<").replaceAll("&gt;", ">"))
         const mailRes = await transporter.sendMail({
             from: 'wei@wanda.so',
-            to: "joao.airesmatos@gmail.com",
+            to: messageC.message.blocks[0].text.text.split("Dear ")[1].split(" ")[0] + "@google.com",
             subject: messageC.message.blocks[0].text.text.split("Subject:")[1].split("Content:")[0].trim(),
             html: messageC.message.blocks[0].text.text.split("Content:")[1].replaceAll("&lt;", "<").replaceAll("&gt;", ">")
         });
@@ -303,6 +299,7 @@ async function sendEmailTest(messageC: any) {
             }
         });
 
+        
         const mailRes = await transporter.sendMail({
             from: 'wei@wanda.so',
             to: "joao.airesmatos@gmail.com",

@@ -26,12 +26,7 @@ export default async function handler(
         let messageC;
         try {
             messageC = req.body.payload ? JSON.parse(req.body.payload) : req.body;
-            console.log("ola1")
-            console.log(req.body)
-            console.log(messageC.type)
         } catch (error) {
-            console.log("ola2")
-            console.log(req.body)
             messageC = req.body
         }
 
@@ -63,7 +58,6 @@ export default async function handler(
                         break;
                     case "createEmail":
                         const person = await getDBEntry("YCDemo", ["id"], ["=="], ["test"], 1);
-                        console.log(person)
                         await web.chat.postMessage({
                             channel: messageC.container.channel_id,
                             text: "Creating email, loading ...",
@@ -84,7 +78,6 @@ export default async function handler(
                         channel: messageC.container.channel_id,
                         text: "Hello there",
                     });
-                    console.log(response);
                 })();
                 break
             case "event_callback":
