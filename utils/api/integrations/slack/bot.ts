@@ -125,7 +125,7 @@ async function answerQuestion(web: WebClient, messageC: any, person: any = "", i
             //responseOpenAI = await answerQuestionBackendCall(
             //    prompt
             //)
-            responseOpenAI = "Subject: Increase 20% response rate in 20 seconds Content: <DOCTYPE html> <html> <head> </head> <body> <p>Hi Andrew ,</p> <p>Your blog post on Dropbox’s product-led approach was really interesting - completely agree with your point that the job of the sales team is totally different when you have thousands of users.</p> <p>A lot of PLG focused growth managers (like you) find that personalized outreach messages based on specific user behavoir is much more effective at driving response rates. </p> <p>Dropbox users in the enterprise space probably have very difference needs based on their company, product and buyer persona. I’m guessing you are sending a similar sequence to buyers at Airbnb as the Gitlab. Trust me, these folks want to hear very different things.</p> <p>Companies like Box, Notion and Atlassian have found that AI-agents (like the ones from Waroom) can help drive a 15-20% improvement in response rate with highly personalized tactics and email campaigns. </p> <p>Assuming Dropbox probably invests a lot in improving email response rate, and there’s a lot to do - can we make certain tasks faster or easier for you?</p> <p>Wei</p> <p>—<br> Wei Zhu<br> Customer Advocate | Cofounder<br> Waroom.ai</p> </body> </html>"
+            responseOpenAI = "Subject: Increase 20% response rate in 20 seconds \n Content: <DOCTYPE html> \n <html> \n<head> \n</head> \n<body> \n<p>Hi Andrew ,</p> \n<p>Your blog post on Dropbox’s product-led approach was really interesting - completely agree with your point that the job of the sales team is totally different when you have thousands of users.</p> \n<p>A lot of PLG focused growth managers (like you) find that personalized outreach messages based on specific user behavoir is much more effective at driving response rates. </p> \n<p>Dropbox users in the enterprise space probably have very difference needs based on their company, product and buyer persona. I’m guessing you are sending a similar sequence to buyers at Airbnb as the Gitlab. Trust me, these folks want to hear very different things.</p> \n<p>Companies like Box, Notion and Atlassian have found that AI-agents (like the ones from Waroom) can help drive a 15-20% improvement in response rate with highly personalized tactics and email campaigns. </p> \n<p>Assuming Dropbox probably invests a lot in improving email response rate, and there’s a lot to do - can we make certain tasks faster or easier for you?</p> \n<p>Wei</p> \n<p>—<br> Wei Zhu<br> \nCustomer Advocate | Cofounder<br> \nWaroom.ai</p> </body> </html>"
 
 
             messageF = Message({ channel: messageC.container.channel_id, text: "Question response" })
@@ -275,7 +275,7 @@ async function sendEmail(web: any, messageC: any) {
             from: 'wei@wanda.so',
             to: "joao.airesmatos@gmail.com",
             subject: messageC.message.blocks[0].text.text.split("Subject:")[1].split("Content:")[0].trim(),
-            html: messageC.message.blocks[0].text.text.split("Content:")[1].replaceAll("&lt;", "<").replaceAll("&gt;", ">")
+            html: messageC.message.blocks[0].text.text.split("Content:")[1].replaceAll("&lt;", "<").replaceAll("&gt;", ">").replaceAll("\n","")
         });
 
         console.log(mailRes)
