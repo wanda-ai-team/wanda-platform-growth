@@ -70,7 +70,7 @@ async function answerQuestion(web: WebClient, messageC: any, person: any = "", i
 
         if (isMention) {
             await sleep(500);
-            responseOpenAI = "Here you have a prospected list of 5 people that work on Google, that you can reach out to: \n"
+            responseOpenAI = "Here you have a prospected list of 5 people that work on Dropbox, that you can reach out to: \n"
                 + "Please select one from the next list and create a personalized email to send to the prospect: \n"
 
             const menuOptions = [{ name: "Martim Pais, Online Marketing Sales Expert", id: "Martim Pais, Online Marketing Sales Expert" },
@@ -143,7 +143,7 @@ async function answerQuestion(web: WebClient, messageC: any, person: any = "", i
         } else {
             await sleep(500);
             console.log("entrei - no else")
-            responseOpenAI = "Here you have a prospected list of 10 people that work on Google, that you can reach out to: \n"
+            responseOpenAI = "Here you have a prospected list of 10 people that work on Dropbox, that you can reach out to: \n"
                 + "Please select one from the next list and create a personalized email to send to the prospect: \n"
 
             const menuOptions = [{ name: "Martim Pais, Online Marketing Sales Expert", id: "Martim Pais, Online Marketing Sales Expert" },
