@@ -3,7 +3,7 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import { WebClient } from '@slack/web-api';
 import { openAICall } from "@/utils/api/openAI/openAICalls";
 import createDBEntry from "@/utils/api/db/createDBEntry";
-import { answerQuestion, createCaseStudyURL, createFollowUpEmail, createPieceOfContent, createPieceOfContentModal, sendEmail } from "@/utils/api/integrations/slack/bot";
+import { answerQuestion, assistantQuestion, createCaseStudyURL, createFollowUpEmail, createPieceOfContent, createPieceOfContentModal, sendEmail } from "@/utils/api/integrations/slack/bot";
 import updateDBEntry from "@/utils/api/db/updateDBEntry";
 import getDBEntry from "@/utils/api/db/getDBEntry";
 
@@ -26,12 +26,7 @@ export default async function handler(
         let messageC;
         try {
             messageC = req.body.payload ? JSON.parse(req.body.payload) : req.body;
-            console.log("ola1")
-            console.log(req.body)
-            console.log(messageC.type)
         } catch (error) {
-            console.log("ola2")
-            console.log(req.body)
             messageC = req.body
         }
 
@@ -63,7 +58,6 @@ export default async function handler(
                         break;
                     case "createEmail":
                         const person = await getDBEntry("YCDemo", ["id"], ["=="], ["test"], 1);
-                        console.log(person)
                         await web.chat.postMessage({
                             channel: messageC.container.channel_id,
                             text: "Creating email, loading ...",
@@ -84,7 +78,6 @@ export default async function handler(
                         channel: messageC.container.channel_id,
                         text: "Hello there",
                     });
-                    console.log(response);
                 })();
                 break
             case "event_callback":
@@ -93,8 +86,8 @@ export default async function handler(
                     // text: messageC.channel_name.split("talk-with-")[1] + " is answering \" " + messageC.text + "\", loading ...",
                     text: "Tommy is answering \"" + messageC.event.text.split(">")[1] + "\", loading ...",
                 });
-
-                await answerQuestion(web, messageC, "", false, true);
+                await assistantQuestion(web, messageC);
+                // await answerQuestion(web, messageC, "", false, true);
                 break;
         }
 
