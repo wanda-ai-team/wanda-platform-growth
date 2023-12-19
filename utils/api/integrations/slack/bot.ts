@@ -331,19 +331,13 @@ async function assistantQuestion(web: any, messageC: any) {
             assistantId: "asst_oIJmwVBHJoWJ5ZK7TgSiRX1y",
             asAgent: false,
         });
-        console.log(messageC.event)
-        console.log(messageC.event.text)
         const assistantResponse = await assistant.invoke({
             content: messageC.event.text.split(">")[1],
         });
-        console.log("1")
-        console.log(assistantResponse)
         if (Array.isArray(assistantResponse) && assistantResponse.length > 0) {
             if ("content" in assistantResponse[0] && "text" in assistantResponse[0].content[0]) {
-                console.log("1")
-                console.log(assistantResponse[0].content[0])
                 await web.chat.postMessage({
-                    channel: messageC.channel_id,
+                    channel: messageC.event.channel,
                     text: assistantResponse[0].content[0].text.value,
                 });
             }
@@ -351,8 +345,8 @@ async function assistantQuestion(web: any, messageC: any) {
     } catch (error) {
         console.log(error)
         await web.chat.postMessage({
-            channel: messageC.channel_id,
-            text: "Error while sending email, please try again later",
+            channel:  messageC.event.channel,
+            text: "Error while answering the question, please try again later",
         });
 
     }
