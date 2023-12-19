@@ -352,24 +352,25 @@ async function assistantQuestion(web: any, messageC: any) {
     }
 }
 
-async function assistantQuestionTest() {
+async function assistantQuestionTest(message: string) {
 
     const assistant = new OpenAIAssistantRunnable({
         assistantId: "asst_oIJmwVBHJoWJ5ZK7TgSiRX1y",
     });
 
-    console.log("entrei")
-    console.log(assistant)
     const assistantResponse = await assistant.invoke({
-        content: "messageC.text",
+        content: message,
     });
 
-    console.log(Array.isArray(assistantResponse))
-
-    // await web.chat.postMessage({
-    //     channel: messageC.channel_id,
-    //     text: assistantResponse,
-    // });
+    if (Array.isArray(assistantResponse) && assistantResponse.length > 0) {
+        if ("content" in assistantResponse[0] && "text" in assistantResponse[0].content[0]) {
+            return assistantResponse[0].content[0].text.value
+        }else{
+            return "Error"
+        }
+    }else{
+        return "Error"
+    }
 }
 
 
