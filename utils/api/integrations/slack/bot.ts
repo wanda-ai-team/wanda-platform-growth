@@ -334,6 +334,8 @@ async function assistantQuestion(web: any, messageC: any) {
             assistantId: "asst_oIJmwVBHJoWJ5ZK7TgSiRX1y",
             asAgent: false,
         });
+        console.log(messageC)
+        console.log(messageC.text)
         const assistantResponse = await assistant.invoke({
             content: messageC.text,
         });
