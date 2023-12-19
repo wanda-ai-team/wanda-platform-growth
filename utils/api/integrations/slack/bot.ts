@@ -331,10 +331,10 @@ async function assistantQuestion(web: any, messageC: any) {
             assistantId: "asst_oIJmwVBHJoWJ5ZK7TgSiRX1y",
             asAgent: false,
         });
-        console.log(messageC)
-        console.log(messageC.text)
+        console.log(messageC.event)
+        console.log(messageC.event.text)
         const assistantResponse = await assistant.invoke({
-            content: messageC.text,
+            content: messageC.event.text.split(">")[1],
         });
         console.log("1")
         console.log(assistantResponse)
