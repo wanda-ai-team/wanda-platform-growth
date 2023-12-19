@@ -329,25 +329,38 @@ async function sendEmailTest(messageC: any) {
 }
 
 async function assistantQuestion(web: any, messageC: any) {
-    const assistant = new OpenAIAssistantRunnable({
-        assistantId: "asst_oIJmwVBHJoWJ5ZK7TgSiRX1y",
-        asAgent: false,
-    });
-    const assistantResponse = await assistant.invoke({
-        content: messageC.text,
-    });
-    if(Array.isArray(assistantResponse) && assistantResponse.length > 0){
-        if ("content" in assistantResponse[0] && "text" in assistantResponse[0].content[0]) {
-            await web.chat.postMessage({
-                channel: messageC.channel_id,
-                text: assistantResponse[0].content[0].text.value,
-            });
+    try {
+        const assistant = new OpenAIAssistantRunnable({
+            assistantId: "asst_oIJmwVBHJoWJ5ZK7TgSiRX1y",
+            asAgent: false,
+        });
+        const assistantResponse = await assistant.invoke({
+            content: messageC.text,
+        });
+        console.log("1")
+        console.log(assistantResponse)
+        if (Array.isArray(assistantResponse) && assistantResponse.length > 0) {
+            if ("content" in assistantResponse[0] && "text" in assistantResponse[0].content[0]) {
+                console.log("1")
+                console.log(assistantResponse[0].content[0])
+                await web.chat.postMessage({
+                    channel: messageC.channel_id,
+                    text: assistantResponse[0].content[0].text.value,
+                });
+            }
         }
-}
+    } catch (error) {
+        console.log(error)
+        await web.chat.postMessage({
+            channel: messageC.channel_id,
+            text: "Error while sending email, please try again later",
+        });
+
+    }
 }
 
-async function assistantQuestionTest(){
-    
+async function assistantQuestionTest() {
+
     const assistant = new OpenAIAssistantRunnable({
         assistantId: "asst_oIJmwVBHJoWJ5ZK7TgSiRX1y",
     });
