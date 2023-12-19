@@ -3,7 +3,7 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import {
     Configuration,
 } from "openai";
-import { OpenAI } from "langchain/llms";
+import { OpenAI } from "langchain/llms/openai";
 import { LLMChain, loadSummarizationChain } from "langchain/chains";
 import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
 import { PromptTemplate } from "langchain/prompts";

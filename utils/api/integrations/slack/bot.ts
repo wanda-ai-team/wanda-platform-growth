@@ -7,6 +7,7 @@ import createDBEntry from "../../db/createDBEntry";
 import getDBEntry from "../../db/getDBEntry";
 import { openAICall } from "../../openAI/openAICalls";
 import nodemailer from 'nodemailer';
+import { OpenAIAssistantRunnable } from "langchain/experimental/openai_assistant";
 
 async function createCaseStudyURL(web: WebClient, messageC: any) {
     try {
@@ -299,7 +300,7 @@ async function sendEmailTest(messageC: any) {
             }
         });
 
-        
+
         const mailRes = await transporter.sendMail({
             from: 'wei@wanda.so',
             to: "joao.airesmatos@gmail.com",
@@ -324,6 +325,20 @@ async function sendEmailTest(messageC: any) {
     }
 }
 
+async function assistantQuestion(web: any, messageC: any) {
+    const assistant = new OpenAIAssistantRunnable({
+        assistantId: "asst_oIJmwVBHJoWJ5ZK7TgSiRX1y",
+    });
+    const assistantResponse = await assistant.invoke({
+        content: messageC.text,
+    });
+
+    await web.chat.postMessage({
+        channel: messageC.channel_id,
+        text: assistantResponse,
+    });
+}
+
 
 export {
     createCaseStudyURL,
@@ -332,5 +347,6 @@ export {
     createFollowUpEmail,
     answerQuestion,
     sendEmail,
-    sendEmailTest
+    sendEmailTest,
+    assistantQuestion
 };

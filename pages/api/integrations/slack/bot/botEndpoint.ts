@@ -3,7 +3,7 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import { WebClient } from '@slack/web-api';
 import { openAICall } from "@/utils/api/openAI/openAICalls";
 import createDBEntry from "@/utils/api/db/createDBEntry";
-import { answerQuestion, createCaseStudyURL, createFollowUpEmail, createPieceOfContent, createPieceOfContentModal, sendEmail } from "@/utils/api/integrations/slack/bot";
+import { answerQuestion, assistantQuestion, createCaseStudyURL, createFollowUpEmail, createPieceOfContent, createPieceOfContentModal, sendEmail } from "@/utils/api/integrations/slack/bot";
 import updateDBEntry from "@/utils/api/db/updateDBEntry";
 import getDBEntry from "@/utils/api/db/getDBEntry";
 
@@ -86,8 +86,8 @@ export default async function handler(
                     // text: messageC.channel_name.split("talk-with-")[1] + " is answering \" " + messageC.text + "\", loading ...",
                     text: "Tommy is answering \"" + messageC.event.text.split(">")[1] + "\", loading ...",
                 });
-
-                await answerQuestion(web, messageC, "", false, true);
+                await assistantQuestion(web, messageC);
+                // await answerQuestion(web, messageC, "", false, true);
                 break;
         }
 
