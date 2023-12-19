@@ -328,15 +328,39 @@ async function sendEmailTest(messageC: any) {
 async function assistantQuestion(web: any, messageC: any) {
     const assistant = new OpenAIAssistantRunnable({
         assistantId: "asst_oIJmwVBHJoWJ5ZK7TgSiRX1y",
+        asAgent: false,
     });
     const assistantResponse = await assistant.invoke({
         content: messageC.text,
     });
+    if(Array.isArray(assistantResponse) && assistantResponse.length > 0){
+        if ("content" in assistantResponse[0] && "text" in assistantResponse[0].content[0]) {
+            await web.chat.postMessage({
+                channel: messageC.channel_id,
+                text: assistantResponse[0].content[0].text.value,
+            });
+        }
+}
+}
 
-    await web.chat.postMessage({
-        channel: messageC.channel_id,
-        text: assistantResponse,
+async function assistantQuestionTest(){
+    
+    const assistant = new OpenAIAssistantRunnable({
+        assistantId: "asst_oIJmwVBHJoWJ5ZK7TgSiRX1y",
     });
+
+    console.log("entrei")
+    console.log(assistant)
+    const assistantResponse = await assistant.invoke({
+        content: "messageC.text",
+    });
+
+    console.log(Array.isArray(assistantResponse))
+
+    // await web.chat.postMessage({
+    //     channel: messageC.channel_id,
+    //     text: assistantResponse,
+    // });
 }
 
 
@@ -348,5 +372,6 @@ export {
     answerQuestion,
     sendEmail,
     sendEmailTest,
-    assistantQuestion
+    assistantQuestion,
+    assistantQuestionTest
 };
