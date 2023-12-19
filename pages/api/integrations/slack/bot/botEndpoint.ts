@@ -81,10 +81,11 @@ export default async function handler(
                 })();
                 break
             case "event_callback":
+                console.log(messageC)
                 await web.chat.postMessage({
                     channel: messageC.event.channel,
                     // text: messageC.channel_name.split("talk-with-")[1] + " is answering \" " + messageC.text + "\", loading ...",
-                    text: "Tommy is answering \"" + messageC.event.text.split(">")[1] + "\", loading ...",
+                    text: "Tommy is answering \"" + messageC.event.text.split(">")[1] + "\", loading...",
                 });
                 await assistantQuestion(web, messageC);
                 // await answerQuestion(web, messageC, "", false, true);
