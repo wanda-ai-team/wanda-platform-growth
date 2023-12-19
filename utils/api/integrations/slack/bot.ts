@@ -333,8 +333,12 @@ async function assistantQuestion(web: any, messageC: any) {
     const assistantResponse = await assistant.invoke({
         content: messageC.text,
     });
+    console.log("1")
+    console.log(assistantResponse)
     if(Array.isArray(assistantResponse) && assistantResponse.length > 0){
         if ("content" in assistantResponse[0] && "text" in assistantResponse[0].content[0]) {
+            console.log("1")
+            console.log(assistantResponse[0].content[0])
             await web.chat.postMessage({
                 channel: messageC.channel_id,
                 text: assistantResponse[0].content[0].text.value,
