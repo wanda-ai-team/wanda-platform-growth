@@ -2,6 +2,7 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { WebClient } from '@slack/web-api';
 import { answerQuestion } from "@/utils/api/integrations/slack/bot";
+import axios from "axios";
 
 export default async function handler(
     req: NextApiRequest,
@@ -29,6 +30,30 @@ export default async function handler(
             channel: messageC.channel_id,
             // text: messageC.channel_name.split("talk-with-")[1] + " is answering \" " + messageC.text + "\", loading ...",
             text: "Tommy is answering \" " + messageC.text + "\", loading ...",
+        });
+
+        const response = await axios.post(process.env.BACKEND_URL + 'llmTools/assistant/createWithGoogle', {
+            userPrompt: messageC.text,
+            systemPrompt: "",
+            config: {
+                "output": "",
+                "tone": "",
+                "url": "",
+                "writing": ""
+            }
+        },
+            {
+                headers: {
+                    "content-type": "application/json",
+                    "Authorization": `Bearer ${123}`
+                }
+            }
+        );
+
+        await web.chat.postMessage({
+            channel: messageC.channel_id,
+            // text: messageC.channel_name.split("talk-with-")[1] + " is answering \" " + messageC.text + "\", loading ...",
+            text: response.data,
         });
         
         await answerQuestion(web, messageC);
