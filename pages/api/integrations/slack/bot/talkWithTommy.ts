@@ -50,6 +50,8 @@ export default async function handler(
                     }
                 }
             );
+
+            console.log(response.data)
     
             await web.chat.postMessage({
                 channel: messageC.channel_id,
