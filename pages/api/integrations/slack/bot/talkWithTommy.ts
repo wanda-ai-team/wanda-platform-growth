@@ -33,7 +33,7 @@ export default async function handler(
         });
 
         (async () => {
-            const response = await axios.post(process.env.BACKEND_URL + 'llmTools/assistant/createWithGoogle', {
+            const response = await axios.post(process.env.BACKEND_URL + '/llmTools/assistant/createWithGoogle', {
                 userPrompt: messageC.text,
                 systemPrompt: "",
                 config: {
