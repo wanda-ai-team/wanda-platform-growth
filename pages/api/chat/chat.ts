@@ -21,8 +21,16 @@ const handler = async (req: Request): Promise<Response> => {
       assistantName: 'Tommy',
     },
   ]
-  messages.push(...body?.messages)
 
+  console.log('messages', body?.message)
+  const userMessage: ChatGPTMessage = {
+    role: 'user',
+    content: body?.message,
+    assistantName: 'Tommy',
+  }
+  messages.push(userMessage)
+
+  console.log('messages', messages)
   const requestHeaders: Record<string, string> = {
     'Content-Type': 'application/json',
     Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
@@ -47,7 +55,9 @@ const handler = async (req: Request): Promise<Response> => {
     n: 1,
   }
 
+
   const stream = await OpenAIStream(payload)
+  console.log('payload', stream)
   return new Response(stream)
 }
 export default handler
