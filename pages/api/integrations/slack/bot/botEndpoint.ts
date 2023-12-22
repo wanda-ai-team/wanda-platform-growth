@@ -7,6 +7,7 @@ import { answerQuestion, assistantQuestion, createCaseStudyURL, createFollowUpEm
 import updateDBEntry from "@/utils/api/db/updateDBEntry";
 import getDBEntry from "@/utils/api/db/getDBEntry";
 import { transcribeSlackVideoFile } from "@/utils/api/backend/backendCalls";
+import deleteDBEntry from "@/utils/api/db/deleteDBEntry";
 
 export default async function handler(
     req: NextApiRequest,
@@ -89,7 +90,13 @@ export default async function handler(
                 //     text: "Tommy is answering is taking care of the file, loading...",
                 // });
                 if(messageC.event.files && messageC.event.files.length > 0) {
-                    await transcribeSlackVideoFile(messageC.event.channel, messageC.event.files[0].url_private_download);
+                    
+                    const videoProcessing = await getDBEntry("botVideoProcessing", ["video"], ["=="], [messageC.event.files[0].url_private_download], 1);
+                    if(videoProcessing.length == 0){
+                        await createDBEntry("botVideoProcessing", { video: messageC.event.files[0].url_private_download });
+                        await transcribeSlackVideoFile(messageC.event.channel, messageC.event.files[0].url_private_download);
+                        await deleteDBEntry("botVideoProcessing", ["video"], ["=="], [messageC.event.files[0].url_private_download], 1);
+                    }
                     // await transcribeVideoFile(web, messageC);
 
                 }else{
