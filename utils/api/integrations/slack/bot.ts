@@ -387,17 +387,22 @@ async function transcribeVideoFile(web: any, messageC: any) {
         speaker_labels: true
     }
 
-    const transcript = await client.transcripts.transcribe(params)
-    console.log()
-    await web.chat.postMessage({
-        channel: messageC.event.channel,
-        text: transcript.text,
-    });
+    console.log(params)
+    try {
+        const transcript = await client.transcripts.transcribe(params)
+        console.log(transcript)
+        await web.chat.postMessage({
+            channel: messageC.event.channel,
+            text: transcript.text,
+        });
 
-    await web.chat.postMessage({
-        channel: messageC.event.channel,
-        text: transcript.utterances,
-    });
+        await web.chat.postMessage({
+            channel: messageC.event.channel,
+            text: transcript.utterances,
+        });
+    } catch (error) {
+        console.log(error)
+    }
 
     return;
 
