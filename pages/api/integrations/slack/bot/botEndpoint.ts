@@ -3,7 +3,7 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import { WebClient } from '@slack/web-api';
 import { openAICall } from "@/utils/api/openAI/openAICalls";
 import createDBEntry from "@/utils/api/db/createDBEntry";
-import { answerQuestion, assistantQuestion, createCaseStudyURL, createFollowUpEmail, createPieceOfContent, createPieceOfContentModal, sendEmail } from "@/utils/api/integrations/slack/bot";
+import { answerQuestion, assistantQuestion, createCaseStudyURL, createFollowUpEmail, createPieceOfContent, createPieceOfContentModal, sendEmail, transcribeVideoFile } from "@/utils/api/integrations/slack/bot";
 import updateDBEntry from "@/utils/api/db/updateDBEntry";
 import getDBEntry from "@/utils/api/db/getDBEntry";
 
@@ -88,8 +88,8 @@ export default async function handler(
                     text: "Tommy is answering \"" + messageC.event.text.split(">")[1] + "\", loading...",
                 });
                 if(messageC.event.files && messageC.event.files.length > 0) {
-                    console.log(messageC.event.files[0])
-                    console.log(messageC.event.files[0].url_private)
+                    await transcribeVideoFile(web, messageC);
+
                 }else{
                     await assistantQuestion(web, messageC);
                 }
