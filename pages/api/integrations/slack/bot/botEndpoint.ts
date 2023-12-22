@@ -87,7 +87,12 @@ export default async function handler(
                     // text: messageC.channel_name.split("talk-with-")[1] + " is answering \" " + messageC.text + "\", loading ...",
                     text: "Tommy is answering \"" + messageC.event.text.split(">")[1] + "\", loading...",
                 });
-                await assistantQuestion(web, messageC);
+                if(messageC.event.files && messageC.event.files.length > 0) {
+                    console.log(messageC.event.files[0])
+                    console.log(messageC.event.files[0].url_private)
+                }else{
+                    await assistantQuestion(web, messageC);
+                }
                 // await answerQuestion(web, messageC, "", false, true);
                 break;
         }
