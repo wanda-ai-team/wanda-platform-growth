@@ -82,12 +82,12 @@ export default async function handler(
                 })();
                 break
             case "event_callback":
-                console.log(messageC)
-                await web.chat.postMessage({
-                    channel: messageC.event.channel,
-                    // text: messageC.channel_name.split("talk-with-")[1] + " is answering \" " + messageC.text + "\", loading ...",
-                    text: "Tommy is answering is taking care of the file, loading...",
-                });
+                // console.log(messageC)
+                // await web.chat.postMessage({
+                //     channel: messageC.event.channel,
+                //     // text: messageC.channel_name.split("talk-with-")[1] + " is answering \" " + messageC.text + "\", loading ...",
+                //     text: "Tommy is answering is taking care of the file, loading...",
+                // });
                 if(messageC.event.files && messageC.event.files.length > 0) {
                     transcribeSlackVideoFile(messageC.event.channel, messageC.event.files[0].url_private_download);
                     // await transcribeVideoFile(web, messageC);
