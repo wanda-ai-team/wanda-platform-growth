@@ -98,23 +98,29 @@ async function answerQuestionBackendCall(userPrompt: string) {
 }
 
 async function transcribeSlackVideoFile(slackChannelS: string, audioUrlS: string) {
-    console.log("transcribeSlackVideoFile")
-    console.log(process.env.BACKEND_URL + '/llmTools/transcription/transcribe')
-    await axios.post(process.env.BACKEND_URL + '/llmTools/transcription/transcribe', {
-        config: {
-            slackChannel: slackChannelS,
-            audioUrl: audioUrlS
-        }
-    },
-        {
-            headers: {
-                "content-type": "application/json",
-                "Authorization": `Bearer ${123}`
+    try {
+
+        console.log("transcribeSlackVideoFile")
+        console.log(process.env.BACKEND_URL + '/llmTools/transcription/transcribe')
+        await axios.post(process.env.BACKEND_URL + '/llmTools/transcription/transcribe', {
+            config: {
+                slackChannel: slackChannelS,
+                audioUrl: audioUrlS
             }
-        }
-    ).catch((error) => {
+        },
+            {
+                headers: {
+                    "content-type": "application/json",
+                    "Authorization": `Bearer ${123}`
+                }
+            }
+        ).catch((error) => {
+            console.log(error)
+        });
+    } catch (error) {
         console.log(error)
-    });
+        return null
+    }
 }
 
 export {
