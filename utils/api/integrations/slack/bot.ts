@@ -389,6 +389,7 @@ async function transcribeVideoFile(web: any, messageC: any) {
 
     console.log(params)
     try {
+        console.log("transcript")
         const transcript = await client.transcripts.transcribe(params)
         console.log(transcript)
         await web.chat.postMessage({
@@ -401,6 +402,7 @@ async function transcribeVideoFile(web: any, messageC: any) {
             text: transcript.utterances,
         });
     } catch (error) {
+        console.log("error")
         console.log(error)
     }
 
