@@ -87,6 +87,7 @@ export default async function handler(
                     // text: messageC.channel_name.split("talk-with-")[1] + " is answering \" " + messageC.text + "\", loading ...",
                     text: "Tommy is answering \"" + messageC.event.text.split(">")[1] + "\", loading...",
                 });
+                res.json({ok:true});
                 if(messageC.event.files && messageC.event.files.length > 0) {
                     await transcribeVideoFile(web, messageC);
 
