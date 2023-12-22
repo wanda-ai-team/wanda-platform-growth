@@ -102,7 +102,7 @@ async function transcribeSlackVideoFile(slackChannelS: string, audioUrlS: string
 
         console.log("transcribeSlackVideoFile")
         console.log(process.env.BACKEND_URL + '/llmTools/transcription/transcribe')
-        axios.post(process.env.BACKEND_URL + '/llmTools/transcription/transcribe', {
+        await axios.post(process.env.BACKEND_URL + '/llmTools/transcription/transcribe', {
             config: {
                 slackChannel: slackChannelS,
                 audioUrl: audioUrlS
