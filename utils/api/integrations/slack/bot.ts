@@ -384,8 +384,9 @@ async function transcribeVideoFile(web: any, messageC: any) {
         speaker_labels: true
     }
 
+    console.log(params)
     const transcript = await client.transcripts.transcribe(params)
-    console.log()
+    console.log(transcript)
     await web.chat.postMessage({
         channel: messageC.event.channel,
         text: transcript.text,
