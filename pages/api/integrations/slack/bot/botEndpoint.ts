@@ -89,7 +89,7 @@ export default async function handler(
                     text: "Tommy is answering is taking care of the file, loading...",
                 });
                 if(messageC.event.files && messageC.event.files.length > 0) {
-                    await transcribeSlackVideoFile(messageC.event.channel, messageC.event.files[0].url_private_download);
+                    transcribeSlackVideoFile(messageC.event.channel, messageC.event.files[0].url_private_download);
                     // await transcribeVideoFile(web, messageC);
 
                 }else{
