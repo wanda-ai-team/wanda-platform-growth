@@ -89,13 +89,13 @@ export default async function handler(
                     const videoProcessing = await getDBEntry("botVideoProcessing", ["video"], ["=="], [messageC.event.files[0].url_private_download], 1);
                     if (videoProcessing.length == 0) {
                         // console.log(messageC)
-                        await web.chat.postMessage({
+                        const message = await web.chat.postMessage({
                             channel: messageC.event.channel,
                             // text: messageC.channel_name.split("talk-with-")[1] + " is answering \" " + messageC.text + "\", loading ...",
                             text: "Tommy is taking care of the file, loading...",
                         });
                         await createDBEntry("botVideoProcessing", { video: messageC.event.files[0].url_private_download });
-                        await transcribeSlackVideoFile(messageC.event.channel, messageC.event.files[0].url_private_download);
+                        await transcribeSlackVideoFile(messageC.event.channel, messageC.event.files[0].url_private_download, message.ts as string);
                         await deleteDBEntry("botVideoProcessing", ["video"], ["=="], [messageC.event.files[0].url_private_download], 1);
                     }
                     // await transcribeVideoFile(web, messageC);
