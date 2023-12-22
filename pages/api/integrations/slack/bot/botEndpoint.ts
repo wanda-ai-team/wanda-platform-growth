@@ -6,6 +6,7 @@ import createDBEntry from "@/utils/api/db/createDBEntry";
 import { answerQuestion, assistantQuestion, createCaseStudyURL, createFollowUpEmail, createPieceOfContent, createPieceOfContentModal, sendEmail, transcribeVideoFile } from "@/utils/api/integrations/slack/bot";
 import updateDBEntry from "@/utils/api/db/updateDBEntry";
 import getDBEntry from "@/utils/api/db/getDBEntry";
+import { transcribeSlackVideoFile } from "@/utils/api/backend/backendCalls";
 
 export default async function handler(
     req: NextApiRequest,
@@ -85,11 +86,11 @@ export default async function handler(
                 await web.chat.postMessage({
                     channel: messageC.event.channel,
                     // text: messageC.channel_name.split("talk-with-")[1] + " is answering \" " + messageC.text + "\", loading ...",
-                    text: "Tommy is answering \"" + messageC.event.text.split(">")[1] + "\", loading...",
+                    text: "Tommy is answering is taking care of the file, loading...",
                 });
-                res.json({ok:true});
                 if(messageC.event.files && messageC.event.files.length > 0) {
-                    await transcribeVideoFile(web, messageC);
+                    await transcribeSlackVideoFile(messageC.event.channel, messageC.event.files[0].url_private_download);
+                    // await transcribeVideoFile(web, messageC);
 
                 }else{
                     await assistantQuestion(web, messageC);
