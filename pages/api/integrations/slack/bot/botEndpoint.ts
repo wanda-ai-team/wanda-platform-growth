@@ -97,8 +97,9 @@ export default async function handler(
                 // await answerQuestion(web, messageC, "", false, true);
                 break;
         }
-
+        console.log("success")
         res.status(200).json({});
+        return;
     } catch (error) {
         console.log("error")
         console.log(error)
