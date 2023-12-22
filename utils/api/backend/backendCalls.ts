@@ -102,7 +102,7 @@ async function transcribeSlackVideoFile(slackChannelS: string, audioUrlS: string
 
         console.log("transcribeSlackVideoFile")
         console.log(process.env.BACKEND_URL + '/llmTools/transcription/transcribe')
-        await axios.post(process.env.BACKEND_URL + '/llmTools/transcription/transcribe', {
+        const response = await axios.post(process.env.BACKEND_URL + '/llmTools/transcription/transcribe', {
             config: {
                 slackChannel: slackChannelS,
                 audioUrl: audioUrlS
@@ -117,6 +117,9 @@ async function transcribeSlackVideoFile(slackChannelS: string, audioUrlS: string
         ).catch((error) => {
             console.log(error)
         });
+        console.log("response")
+        console.log(response)
+        return response === null ? response : response
     } catch (error) {
         console.log("error")
         console.log(error)
