@@ -97,17 +97,13 @@ async function answerQuestionBackendCall(userPrompt: string) {
     }
 }
 
-async function transcribeSlackVideoFile(slackChannel: string, audioUrl: string) {
+async function transcribeSlackVideoFile(slackChannelS: string, audioUrlS: string) {
     console.log("transcribeSlackVideoFile")
-    console.log(slackChannel)
-    console.log(audioUrl)
     console.log(process.env.BACKEND_URL + '/llmTools/transcription/transcribe')
-    axios.post(process.env.BACKEND_URL + '/llmTools/transcription/transcribe', {
-        userPrompt: "",
-        systemPrompt: "",
+    await axios.post(process.env.BACKEND_URL + '/llmTools/transcription/transcribe', {
         config: {
-            "slackChannel": slackChannel,
-            "audioUrl": audioUrl
+            slackChannel: slackChannelS,
+            audioUrl: audioUrlS
         }
     },
         {
