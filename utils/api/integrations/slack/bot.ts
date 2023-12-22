@@ -8,6 +8,7 @@ import getDBEntry from "../../db/getDBEntry";
 import { openAICall } from "../../openAI/openAICalls";
 import nodemailer from 'nodemailer';
 import { OpenAIAssistantRunnable } from "langchain/experimental/openai_assistant";
+import { AssemblyAI } from "assemblyai";
 
 async function createCaseStudyURL(web: WebClient, messageC: any) {
     try {
@@ -348,7 +349,7 @@ async function assistantQuestion(web: any, messageC: any) {
     } catch (error) {
         console.log(error)
         await web.chat.postMessage({
-            channel:  messageC.event.channel,
+            channel: messageC.event.channel,
             text: "Error while answering the question, please try again later",
         });
 
@@ -368,12 +369,43 @@ async function assistantQuestionTest(message: string) {
     if (Array.isArray(assistantResponse) && assistantResponse.length > 0) {
         if ("content" in assistantResponse[0] && "text" in assistantResponse[0].content[0]) {
             return assistantResponse[0].content[0].text.value
-        }else{
+        } else {
             return "Error"
         }
-    }else{
+    } else {
         return "Error"
     }
+}
+
+async function transcribeVideoFile(web: any, messageC: any) {
+    const client = new AssemblyAI({
+        apiKey: process.env.ASSEMBLYAI_API_KEY as string
+    })
+
+    const params = {
+        audio: messageC.event.files[0].url_private_download,
+        speaker_labels: true
+    }
+
+    const transcript = await client.transcripts.transcribe(params)
+    console.log()
+    await web.chat.postMessage({
+        channel: messageC.event.channel,
+        text: transcript.text,
+    });
+
+    await web.chat.postMessage({
+        channel: messageC.event.channel,
+        text: transcript.utterances,
+    });
+
+    return;
+
+    // await web.chat.postMessage({
+    //     channel: messageC.event.channel,
+    //     // text: messageC.channel_name.split("talk-with-")[1] + " is answering \" " + messageC.text + "\", loading ...",
+    //     text: "Tommy is answering \"" + messageC.event.text.split(">")[1] + "\", loading...",
+    // });
 }
 
 
@@ -386,5 +418,6 @@ export {
     sendEmail,
     sendEmailTest,
     assistantQuestion,
-    assistantQuestionTest
+    assistantQuestionTest,
+    transcribeVideoFile
 };
