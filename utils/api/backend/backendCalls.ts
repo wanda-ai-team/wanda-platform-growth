@@ -97,10 +97,31 @@ async function answerQuestionBackendCall(userPrompt: string) {
     }
 }
 
+async function transcribeSlackVideoFile(slackChannel: string, audioUrl: string) {
+    axios.post(process.env.BACKEND_URL + '/llmTools/outputContent', {
+        userPrompt: "",
+        systemPrompt: "",
+        config: {
+            "slackChannel": slackChannel,
+            "audioUrl": audioUrl
+        }
+    },
+        {
+            headers: {
+                "content-type": "application/json",
+                "Authorization": `Bearer ${123}`
+            }
+        }
+    ).catch((error) => {
+        console.log(error)
+    });
+}
+
 export {
     embedText,
     vectorDBQuery,
     outputContent,
     outputContentBackendCall,
-    answerQuestionBackendCall
+    answerQuestionBackendCall,
+    transcribeSlackVideoFile
 };
