@@ -329,10 +329,10 @@ async function sendEmailTest(messageC: any) {
     }
 }
 
-async function assistantQuestion(web: any, messageC: any) {
+async function assistantQuestion(web: any, messageC: any, messageTs: any) {
     try {
         const assistant = new OpenAIAssistantRunnable({
-            assistantId: "asst_oIJmwVBHJoWJ5ZK7TgSiRX1y",
+            assistantId: process.env.TOMMY_ASSISTANT_ID as string,
             asAgent: false,
         });
         const assistantResponse = await assistant.invoke({
@@ -343,6 +343,7 @@ async function assistantQuestion(web: any, messageC: any) {
                 await web.chat.postMessage({
                     channel: messageC.event.channel,
                     text: assistantResponse[0].content[0].text.value,
+                    thread_ts: messageTs
                 });
             }
         }
@@ -351,6 +352,7 @@ async function assistantQuestion(web: any, messageC: any) {
         await web.chat.postMessage({
             channel: messageC.event.channel,
             text: "Error while answering the question, please try again later",
+            thread_ts: messageTs
         });
 
     }
@@ -359,7 +361,7 @@ async function assistantQuestion(web: any, messageC: any) {
 async function assistantQuestionTest(message: string) {
 
     const assistant = new OpenAIAssistantRunnable({
-        assistantId: "asst_oIJmwVBHJoWJ5ZK7TgSiRX1y",
+        assistantId: process.env.TOMMY_ASSISTANT_ID as string,
     });
 
     const assistantResponse = await assistant.invoke({

@@ -101,7 +101,12 @@ export default async function handler(
                     // await transcribeVideoFile(web, messageC);
 
                 } else {
-                    await assistantQuestion(web, messageC);
+                    const message = await web.chat.postMessage({
+                        channel: messageC.event.channel,
+                        // text: messageC.channel_name.split("talk-with-")[1] + " is answering \" " + messageC.text + "\", loading ...",
+                        text: "Tommy is answering your question, loading...",
+                    });
+                    await assistantQuestion(web, messageC, message.ts as string);
                 }
                 // await answerQuestion(web, messageC, "", false, true);
                 break;
