@@ -6,7 +6,7 @@ import createDBEntry from "@/utils/api/db/createDBEntry";
 import { answerQuestion, assistantQuestion, createCaseStudyURL, createFollowUpEmail, createPieceOfContent, createPieceOfContentModal, sendEmail, transcribeVideoFile } from "@/utils/api/integrations/slack/bot";
 import updateDBEntry from "@/utils/api/db/updateDBEntry";
 import getDBEntry from "@/utils/api/db/getDBEntry";
-import { transcribeSlackVideoFile } from "@/utils/api/backend/backendCalls";
+import { assistantQuestionBackend, transcribeSlackVideoFile } from "@/utils/api/backend/backendCalls";
 import deleteDBEntry from "@/utils/api/db/deleteDBEntry";
 
 export default async function handler(
@@ -111,7 +111,7 @@ export default async function handler(
                             // text: messageC.channel_name.split("talk-with-")[1] + " is answering \" " + messageC.text + "\", loading ...",
                             text: "Tommy is answering your question, loading...",
                         });
-                        await assistantQuestion(web, messageC, message.ts as string);
+                        await assistantQuestionBackend(messageC.event.channel, message.ts as string, messageC.event.text);
                         await deleteDBEntry("botQuestionProcessing", ["question"], ["=="], [messageC.event.channel + "_" + messageC.event.text], 1);
                     }
                 }

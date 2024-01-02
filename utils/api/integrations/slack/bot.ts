@@ -9,6 +9,7 @@ import { openAICall } from "../../openAI/openAICalls";
 import nodemailer from 'nodemailer';
 import { OpenAIAssistantRunnable } from "langchain/experimental/openai_assistant";
 import { AssemblyAI } from "assemblyai";
+import axios from "axios";
 
 async function createCaseStudyURL(web: WebClient, messageC: any) {
     try {

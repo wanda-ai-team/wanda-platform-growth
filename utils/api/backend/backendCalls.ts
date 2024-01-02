@@ -125,11 +125,42 @@ async function transcribeSlackVideoFile(slackChannelS: string, audioUrlS: string
     }
 }
 
+
+
+async function assistantQuestionBackend(slackChannelS: any, messageTs: any, query: any) {
+    try {
+        const response = await axios.post(process.env.BACKEND_URL + '/assistant/createWithGoogle', {
+            userPrompt: query,
+            config: {
+                slackChannel: slackChannelS,
+                slackThreadTs: messageTs
+            }
+        },
+            {
+                headers: {
+                    "content-type": "application/json",
+                    "Authorization": `Bearer ${123}`
+                }
+            }
+        ).catch((error) => {
+            console.log(error)
+        });
+        console.log("response")
+        console.log(response)
+        return response === null ? response : response
+    } catch (error) {
+        console.log("error")
+        console.log(error)
+        return null
+    }
+}
+
 export {
     embedText,
     vectorDBQuery,
     outputContent,
     outputContentBackendCall,
     answerQuestionBackendCall,
-    transcribeSlackVideoFile
+    transcribeSlackVideoFile,
+    assistantQuestionBackend
 };
