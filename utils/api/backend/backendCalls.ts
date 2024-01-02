@@ -129,7 +129,7 @@ async function transcribeSlackVideoFile(slackChannelS: string, audioUrlS: string
 
 async function assistantQuestionBackend(slackChannelS: any, messageTs: any, query: any) {
     try {
-        const response = await axios.post(process.env.BACKEND_URL + '/assistant/createWithGoogle', {
+        const response = await axios.post(process.env.BACKEND_URL + '/llmTools/assistant/createWithGoogle', {
             userPrompt: query,
             config: {
                 slackChannel: slackChannelS,
