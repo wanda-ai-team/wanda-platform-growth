@@ -32,6 +32,8 @@ export default async function handler(
             messageC = req.body
         }
 
+        console.log(messageC)
+
         switch (messageC.type) {
             case "view_submission":
                 switch (messageC.view.title.text) {
@@ -88,7 +90,6 @@ export default async function handler(
 
                     const videoProcessing = await getDBEntry("botVideoProcessing", ["video"], ["=="], [messageC.event.files[0].url_private_download], 1);
                     if (videoProcessing.length == 0) {
-                        // console.log(messageC)
                         await createDBEntry("botVideoProcessing", { video: messageC.event.files[0].url_private_download });
 
                         const message = await web.chat.postMessage({
