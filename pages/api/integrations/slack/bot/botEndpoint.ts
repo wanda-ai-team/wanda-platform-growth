@@ -20,11 +20,7 @@ export default async function handler(
         if (challenge && challenge != "") {
             return res.status(200).json({ challenge });
         }
-        // Read a token from the environment variables
-        const token = process.env.SLACK_TOKEN;
 
-        // Initialize
-        const web = new WebClient(token);
         let messageC;
         try {
             messageC = req.body.payload ? JSON.parse(req.body.payload) : req.body;
@@ -33,6 +29,9 @@ export default async function handler(
         }
 
         console.log(messageC)
+
+        const videoProcessing = await getDBEntry("slackExperts", ["slackBotTeamID"], ["=="], [messageC.team_id], 1);
+        const web = new WebClient(videoProcessing[0].data.slackAccessToken);
 
         switch (messageC.type) {
             case "view_submission":
