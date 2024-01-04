@@ -30,7 +30,7 @@ export default async function handler(
         }
 
         // Read a token from the environment variables
-        const token = process.env.SLACK_TOKEN;
+        const token = process.env.SLACK_TOKEN_BOT;
 
         // Initialize
         const web = new WebClient(token);
@@ -41,17 +41,18 @@ export default async function handler(
             grant_type: "authorization_code",
         })
             .then(async (data) => {
+                console.log(data);
                 if (data.access_token !== undefined) {
                     // if (data.refresh_token !== undefined && data.expires_in !== undefined) {
                     // const currentSeconds = (new Date().getTime() / 1000) + data.expires_in;
                     // await updateDBEntry("users", { slackBotTeam: data.team?.name, slackAccessToken: data.access_token, slackRefreshToken: data.refresh_token, slackTokenexpiration: currentSeconds }, ['email'], '==', [session.user.email], 1);
                     console.log(data);
-                    await updateDBEntry("users", { slackAppId: data.app_id, slackBotTeam: data.team?.name, slackAccessToken: data.access_token, slackUserId: data.authed_user?.id }, ['email'], '==', [session.user.email], 1);
+                    await updateDBEntry("users", { slackAppId: data.app_id, slackBotTeam: data.team?.name, slackBotTeamID: data.team?.id, slackAccessToken: data.access_token, slackUserId: data.authed_user?.id }, ['email'], '==', [session.user.email], 1);
                     const slackExpert = await getDBEntry("slackExperts", ["slackBotTeam"], ["=="], [data.team?.name], 1);
                     if (slackExpert.length == 0) {
-                        await createDBEntry("slackExperts", { slackAppId: data.app_id, slackBotTeam: data.team?.name, slackAccessToken: data.access_token, slackUserId: data.authed_user?.id });
+                        await createDBEntry("slackExperts", { slackAppId: data.app_id, slackBotTeam: data.team?.name, slackBotTeamID: data.team?.id, slackAccessToken: data.access_token, slackUserId: data.authed_user?.id });
                     } else {
-                        await updateDBEntry("slackExperts", { slackAppId: data.app_id, slackBotTeam: data.team?.name, slackAccessToken: data.access_token, slackUserId: data.authed_user?.id }, ["slackBotTeam"], "==", [data.team?.name], 1);
+                        await updateDBEntry("slackExperts", { slackAppId: data.app_id, slackBotTeam: data.team?.name, slackBotTeamID: data.team?.id, slackAccessToken: data.access_token, slackUserId: data.authed_user?.id }, ["slackBotTeam"], "==", [data.team?.name], 1);
                     }
                     return data;
                     // }
