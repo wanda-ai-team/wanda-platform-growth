@@ -19,9 +19,8 @@ export default function Profile() {
     const redirect_uri = process.env.NEXT_PUBLIC_URL + "/auth/gong"
     const gongURL = "https://app.gong.io/oauth2/authorize?client_id=" + client_id + "&response_type=code&scope=api:calls:create%20api:calls:read:basic&redirect_uri=" + redirect_uri + "&state=296bc9a0-a2a2-4a57"
 
-    const slack_client_id = "4964233382976.6071462192929"
     const slack_redirect_uri = process.env.NEXT_PUBLIC_URLS + "/auth/slack"
-    const slackBotURL = "https://slack.com/oauth/v2/authorize?client_id=4964233382976.6071462192929&scope=channels:join,channels:manage,channels:read,chat:write,commands,groups:read,im:read,mpim:read,users:read&user_scope=" + "&redirect_uri=" + slack_redirect_uri
+    const slackBotURL = "https://slack.com/oauth/v2/authorize?client_id=4964233382976.6071462192929&scope=app_mentions:read,channels:join,channels:manage,channels:read,chat:write,chat:write.customize,commands,groups:read,im:read,mpim:read,users:read,files:read,files:write&user_scope=" + "&redirect_uri=" + slack_redirect_uri
     // const slackBotURL = "https://slack.com/oauth/v2/authorize?scope=channels:manage,chat:write,users:read&user_scope=&client_id=" + slack_client_id 
 
     const hubspotRedirectUri = process.env.NEXT_PUBLIC_URL + "/auth/hubspot"
