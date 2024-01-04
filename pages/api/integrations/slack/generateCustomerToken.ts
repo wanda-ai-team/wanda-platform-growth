@@ -1,4 +1,6 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
+import createDBEntry from "@/utils/api/db/createDBEntry";
+import getDBEntry from "@/utils/api/db/getDBEntry";
 import updateDBEntry from "@/utils/api/db/updateDBEntry";
 import { WebClient } from "@slack/web-api";
 import type { NextApiRequest, NextApiResponse } from "next";
@@ -45,7 +47,12 @@ export default async function handler(
                     // await updateDBEntry("users", { slackBotTeam: data.team?.name, slackAccessToken: data.access_token, slackRefreshToken: data.refresh_token, slackTokenexpiration: currentSeconds }, ['email'], '==', [session.user.email], 1);
                     console.log(data);
                     await updateDBEntry("users", { slackAppId: data.app_id, slackBotTeam: data.team?.name, slackAccessToken: data.access_token, slackUserId: data.authed_user?.id }, ['email'], '==', [session.user.email], 1);
-
+                    const slackExpert = await getDBEntry("slackExperts", ["slackBotTeam"], ["=="], [data.team?.name], 1);
+                    if (slackExpert.length == 0) {
+                        await createDBEntry("slackExperts", { slackAppId: data.app_id, slackBotTeam: data.team?.name, slackAccessToken: data.access_token, slackUserId: data.authed_user?.id });
+                    } else {
+                        await updateDBEntry("slackExperts", { slackAppId: data.app_id, slackBotTeam: data.team?.name, slackAccessToken: data.access_token, slackUserId: data.authed_user?.id }, ["slackBotTeam"], "==", [data.team?.name], 1);
+                    }
                     return data;
                     // }
                 }
