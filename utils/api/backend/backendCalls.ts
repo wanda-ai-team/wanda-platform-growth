@@ -127,7 +127,7 @@ async function transcribeSlackVideoFile(slackChannelS: string, audioUrlS: string
 
 
 
-async function assistantQuestionBackend(slackChannelS: any, messageTs: any, query: any) {
+async function assistantQuestionBackend(slackChannelS: any, messageTs: any, query: any, web: any) {
     try {
         const response = await axios.post(process.env.BACKEND_URL + '/llmTools/assistant/createWithGoogle', {
             userPrompt: query,
@@ -145,8 +145,21 @@ async function assistantQuestionBackend(slackChannelS: any, messageTs: any, quer
         ).catch((error) => {
             console.log(error)
         });
-        console.log("response")
-        console.log(response)
+        if (response === null) {
+            await web.chat.postMessage({
+                channel: slackChannelS,
+                thread_ts: messageTs,
+                text: "Error while answering the question, please try again later.",
+            });
+        } else {
+            if (response && response.data && response.data) {
+                await web.chat.postMessage({
+                    channel: slackChannelS,
+                    thread_ts: messageTs,
+                    text: response.data,
+                });
+            }
+        }
         return response === null ? response : response
     } catch (error) {
         console.log("error")
