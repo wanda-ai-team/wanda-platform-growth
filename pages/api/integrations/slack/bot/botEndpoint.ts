@@ -110,8 +110,9 @@ export default async function handler(
                             channel: messageC.event.channel,
                             // text: messageC.channel_name.split("talk-with-")[1] + " is answering \" " + messageC.text + "\", loading ...",
                             text: "Tommy is answering your question, loading...",
+                            thread_ts: messageC.event.ts
                         });
-                        await assistantQuestionBackend(messageC.event.channel, message.ts as string, messageC.event.text, web);
+                        await assistantQuestionBackend(messageC.event.channel,messageC.event.ts as string, messageC.event.text, web);
                         await deleteDBEntry("botQuestionProcessing", ["question"], ["=="], [messageC.event.channel + "_" + messageC.event.text], 1);
                     }
                 }
