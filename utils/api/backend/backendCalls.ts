@@ -1,4 +1,5 @@
 import axios from "axios";
+import { Blocks, Elements, Message } from "slack-block-builder";
 
 async function embedText(contet: string, company: string, url: string, typeOfContent: string) {
     await fetch('/api/backend/embedText',
@@ -153,11 +154,19 @@ async function assistantQuestionBackend(slackChannelS: any, messageTs: any, quer
             });
         } else {
             if (response && response.data && response.data) {
-                await web.chat.postMessage({
-                    channel: slackChannelS,
-                    thread_ts: messageTs,
-                    text: response.data,
-                });
+                const messageF = Message({ channel: slackChannelS, text: "Answering questiom", threadTs: messageTs })
+                    .blocks(
+                        Blocks.Section({ text: response.data }),
+                        Blocks.Actions()
+                            .elements(
+                                Elements.Button({ text: 'Great!', actionId: 'tommyActionGreat' }).primary(),
+                                Elements.Button({ text: 'Tell me more ...', actionId: 'tommyActionTellMeMore' }),
+                                Elements.Button({ text: 'Ask the real Tommy', actionId: 'tommyActionAskRealTommy' }).danger()
+                            ))
+                    .asUser()
+                    .buildToJSON();
+
+                await web.chat.postMessage(messageF);
             }
         }
         return response === null ? response : response

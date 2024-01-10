@@ -71,13 +71,22 @@ export default async function handler(
                     case "item":
                         await updateDBEntry("YCDemo", { value: messageC.actions[0].selected_option.value }, ['id'], '==', ["test"], 1);
                         break;
+                    case "tommyActionGreat":
+
+                        break;
+                    case "tommyActionTellMeMore":
+
+                        break;
+                    case "tommyActionAskRealTommy":
+
+                        break;
                 }
 
                 break
             case "message_action":
                 // const responseOpenAI = await openAICall(false, "userContent", "systemContent");
                 (async () => {
-                    const response = await web.chat.postMessage({
+                    await web.chat.postMessage({
                         channel: messageC.container.channel_id,
                         text: "Hello there",
                     });
@@ -91,12 +100,13 @@ export default async function handler(
                     if (videoProcessing.length == 0) {
                         await createDBEntry("botVideoProcessing", { video: messageC.event.files[0].url_private_download });
 
-                        const message = await web.chat.postMessage({
+                        await web.chat.postMessage({
                             channel: messageC.event.channel,
                             // text: messageC.channel_name.split("talk-with-")[1] + " is answering \" " + messageC.text + "\", loading ...",
                             text: "Tommy is taking care of the file, loading...",
+                            thread_ts: messageC.event.ts
                         });
-                        await transcribeSlackVideoFile(messageC.event.channel, messageC.event.files[0].url_private_download, message.ts as string);
+                        await transcribeSlackVideoFile(messageC.event.channel, messageC.event.files[0].url_private_download, messageC.event.ts as string);
                         await deleteDBEntry("botVideoProcessing", ["video"], ["=="], [messageC.event.files[0].url_private_download], 1);
                     }
                     // await transcribeVideoFile(web, messageC);
@@ -106,13 +116,13 @@ export default async function handler(
                     if (questionProcessing.length == 0) {
                         await createDBEntry("botQuestionProcessing", { question: messageC.event.channel + "_" + messageC.event.text });
 
-                        const message = await web.chat.postMessage({
+                        await web.chat.postMessage({
                             channel: messageC.event.channel,
                             // text: messageC.channel_name.split("talk-with-")[1] + " is answering \" " + messageC.text + "\", loading ...",
                             text: "Tommy is answering your question, loading...",
                             thread_ts: messageC.event.ts
                         });
-                        await assistantQuestionBackend(messageC.event.channel,messageC.event.ts as string, messageC.event.text, web);
+                        await assistantQuestionBackend(messageC.event.channel, messageC.event.ts as string, messageC.event.text, web);
                         await deleteDBEntry("botQuestionProcessing", ["question"], ["=="], [messageC.event.channel + "_" + messageC.event.text], 1);
                     }
                 }
