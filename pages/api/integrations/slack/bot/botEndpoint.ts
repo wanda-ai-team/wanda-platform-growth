@@ -144,7 +144,7 @@ export default async function handler(
                             if (payload && 'channelId' in payload && 'threadTs' in payload && 'userId' in payload) {
                                 await web.chat.postMessage({
                                     channel: payload?.channelId as string,
-                                    text: "<@" +payload?.userId as string + ">" +  messageC.event.text.split(" ")[1],
+                                    text: "<@" +payload?.userId as string + "> " +  messageC.event.text.replaceAll(messageC.event.text.split(" ")[0], ""),
                                     thread_ts: payload.threadTs as string
                                 })
                             }
