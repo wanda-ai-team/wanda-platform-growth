@@ -90,7 +90,7 @@ export default async function handler(
                             text: "Asnwer the question as the real tommy(Wanda): " + messageC.message.blocks[0].text.text,
                             metadata: {
                                 "event_type": "thread_from_real_tommy",
-                                "event_payload": { threadTs: messageC.message.ts, text: messageC.message.blocks[0].text.text }
+                                "event_payload": { threadTs: messageC.message.thread_ts, text: messageC.message.blocks[0].text.text, channelId: messageC.container.channel_id }
                             }
                         });
                         break;
@@ -131,31 +131,38 @@ export default async function handler(
                         include_all_metadata: true
                     })
 
-                    if(threadContent.messages && threadContent.messages.length > 0){
+                    if (threadContent.messages && threadContent.messages.length > 0 && threadContent.messages[0].metadata?.event_type === "thread_from_real_tommy") {
 
                         console.log(threadContent.messages[0].metadata);
-                    }
-
-                    await web.chat.postMessage({
-                        channel: messageC.event.channel,
-                        // text: messageC.channel_name.split("talk-with-")[1] + " is answering \" " + messageC.text + "\", loading ...",
-                        text: "Thank you for the answer",
-                        thread_ts: messageC.event.thread_ts
-                    });
-                    break;
-                    
-                    const questionProcessing = await getDBEntry("botQuestionProcessing", ["question"], ["=="], [messageC.event.channel + "_" + messageC.event.text], 1);
-                    if (questionProcessing.length == 0) {
-                        await createDBEntry("botQuestionProcessing", { question: messageC.event.channel + "_" + messageC.event.text });
-
                         await web.chat.postMessage({
                             channel: messageC.event.channel,
                             // text: messageC.channel_name.split("talk-with-")[1] + " is answering \" " + messageC.text + "\", loading ...",
-                            text: "Tommy is answering your question, loading...",
-                            thread_ts: messageC.event.ts
+                            text: "Thank you for the answer",
+                            thread_ts: messageC.event.thread_ts
                         });
-                        await assistantQuestionBackend(messageC.event.channel, messageC.event.ts as string, messageC.event.text, web);
-                        await deleteDBEntry("botQuestionProcessing", ["question"], ["=="], [messageC.event.channel + "_" + messageC.event.text], 1);
+                        const payload = threadContent.messages[0].metadata.event_payload;
+                        if (payload && 'channelId' in payload && 'threadTs' in payload) {
+                            await web.chat.postMessage({
+                                channel: payload?.channelId as string,
+                                text: messageC.event.text,
+                                thread_ts: payload.threadTs as string
+                            })
+                        }
+
+                    } else {
+                        const questionProcessing = await getDBEntry("botQuestionProcessing", ["question"], ["=="], [messageC.event.channel + "_" + messageC.event.text], 1);
+                        if (questionProcessing.length == 0) {
+                            await createDBEntry("botQuestionProcessing", { question: messageC.event.channel + "_" + messageC.event.text });
+
+                            await web.chat.postMessage({
+                                channel: messageC.event.channel,
+                                // text: messageC.channel_name.split("talk-with-")[1] + " is answering \" " + messageC.text + "\", loading ...",
+                                text: "Tommy is answering your question, loading...",
+                                thread_ts: messageC.event.ts
+                            });
+                            await assistantQuestionBackend(messageC.event.channel, messageC.event.ts as string, messageC.event.text, web);
+                            await deleteDBEntry("botQuestionProcessing", ["question"], ["=="], [messageC.event.channel + "_" + messageC.event.text], 1);
+                        }
                     }
                 }
                 // await answerQuestion(web, messageC, "", false, true);
