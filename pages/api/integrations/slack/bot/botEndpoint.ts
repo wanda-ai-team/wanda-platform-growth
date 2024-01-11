@@ -90,7 +90,7 @@ export default async function handler(
                             text: "Asnwer the question as the real tommy(Wanda): " + messageC.message.blocks[0].text.text,
                             metadata: {
                                 "event_type": "thread_from_real_tommy",
-                                "event_payload": { threadTs: messageC.message.thread_ts, text: messageC.message.blocks[0].text.text, channelId: messageC.container.channel_id }
+                                "event_payload": { threadTs: messageC.message.thread_ts, text: messageC.message.blocks[0].text.text, channelId: messageC.container.channel_id, userId: messageC.user.id }
                             }
                         });
                         break;
@@ -141,10 +141,10 @@ export default async function handler(
                                 thread_ts: messageC.event.thread_ts
                             });
                             const payload = threadContent.messages[0].metadata.event_payload;
-                            if (payload && 'channelId' in payload && 'threadTs' in payload) {
+                            if (payload && 'channelId' in payload && 'threadTs' in payload && 'userId' in payload) {
                                 await web.chat.postMessage({
                                     channel: payload?.channelId as string,
-                                    text: messageC.event.text,
+                                    text: "<@" +payload?.userId as string + ">" +  messageC.event.text.split(" ")[1],
                                     thread_ts: payload.threadTs as string
                                 })
                             }
