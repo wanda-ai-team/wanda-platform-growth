@@ -131,7 +131,10 @@ export default async function handler(
                         include_all_metadata: true
                     })
 
-                    console.log(threadContent);
+                    if(threadContent.messages && threadContent.messages.length > 0){
+
+                        console.log(threadContent.messages[0].metadata);
+                    }
 
                     await web.chat.postMessage({
                         channel: messageC.event.channel,
