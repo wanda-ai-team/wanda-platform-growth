@@ -154,6 +154,8 @@ async function assistantQuestionBackend(slackChannelS: any, messageTs: any, quer
             });
         } else {
             if (response && response.data && response.data) {
+                console.log(response.data)
+                console.log("entrei")
                 const messageF = Message({ channel: slackChannelS, text: "Answering questiom", threadTs: messageTs })
                     .blocks(
                         Blocks.Section({ text: response.data }),
@@ -166,7 +168,8 @@ async function assistantQuestionBackend(slackChannelS: any, messageTs: any, quer
                     .asUser()
                     .buildToJSON();
 
-                await web.chat.postMessage(messageF);
+                const responseSlack = JSON.parse(messageF)
+                await web.chat.postMessage(responseSlack);
             }
         }
         return response === null ? response : response
