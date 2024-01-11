@@ -13,7 +13,6 @@ export default async function handler(
         // Read a token from the environment variables
         const token = process.env.SLACK_TOKEN;
 
-        // Initialize
         const web = new WebClient(token);
         let messageC;
         try {
@@ -22,42 +21,8 @@ export default async function handler(
             messageC = req.body
         }
 
-        // if(!messageC.channel_name.includes("talk-with-")) {
-        //     return res.status(200).json("Expert needs to called in the specific channel talk-with-...");
-        // }
-
-        await web.chat.postMessage({
-            channel: messageC.channel_id,
-            // text: messageC.channel_name.split("talk-with-")[1] + " is answering \" " + messageC.text + "\", loading ...",
-            text: "Tommy is answering \" " + messageC.text + "\", loading ...",
-        });
-
-        const response = await axios.post(process.env.BACKEND_URL + '/llmTools/assistant/createWithGoogle', {
-            userPrompt: messageC.text,
-            systemPrompt: "",
-            config: {
-                "output": "",
-                "tone": "",
-                "url": "",
-                "writing": ""
-            }
-        },
-            {
-                headers: {
-                    "content-type": "application/json",
-                    "Authorization": `Bearer ${123}`
-                }
-            }
-        );
-
-        console.log(response.data)
-
-        await web.chat.postMessage({
-            channel: messageC.channel_id,
-            // text: messageC.channel_name.split("talk-with-")[1] + " is answering \" " + messageC.text + "\", loading ...",
-            text: response.data,
-        });
-        // await answerQuestion(web, messageC);
+        console.log(messageC)
+        
 
         return res.status(200).json("Question being answered!");
     } catch (error) {
