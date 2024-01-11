@@ -30,8 +30,14 @@ export default async function handler(
 
         console.log(messageC)
 
-        const videoProcessing = await getDBEntry("slackExperts", ["slackBotTeamID"], ["=="], [messageC.team_id], 1);
-        const web = new WebClient(videoProcessing[0].data.slackAccessToken);
+        let slackExpert;
+        try {
+            slackExpert = await getDBEntry("slackExperts", ["slackBotTeamID"], ["=="], [messageC.team_id], 1)
+        } catch (error) {
+            slackExpert = await getDBEntry("slackExperts", ["slackBotTeamID"], ["=="], [messageC.user.team_id], 1)
+        }
+
+        const web = new WebClient(slackExpert[0].data.slackAccessToken);
 
         switch (messageC.type) {
             case "view_submission":
