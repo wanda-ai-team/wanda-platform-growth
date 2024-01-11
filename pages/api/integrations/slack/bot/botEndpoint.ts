@@ -87,7 +87,7 @@ export default async function handler(
                         await createDBEntry("realTommyQuestions", { threadTs: messageC.message.ts, text: messageC.message.blocks[0].text.text });
                         await web.chat.postMessage({
                             channel: process.env.TOMMY_CHANNEL as string,
-                            text: "Asnwer the question: " + messageC.message.blocks[0].text.text,
+                            text: "Asnwer the question as the real tommy(Wanda): " + messageC.message.blocks[0].text.text,
                             metadata: {
                                 "event_type": "thread_from_real_tommy",
                                 "event_payload": { threadTs: messageC.message.ts, text: messageC.message.blocks[0].text.text }
@@ -127,13 +127,19 @@ export default async function handler(
 
                     const threadContent = await web.conversations.replies({
                         channel: messageC.event.channel,
-                        ts: messageC.event.ts,
+                        ts: messageC.event.thread_ts,
                         include_all_metadata: true
                     })
 
                     console.log(threadContent);
 
-                    return;
+                    await web.chat.postMessage({
+                        channel: messageC.event.channel,
+                        // text: messageC.channel_name.split("talk-with-")[1] + " is answering \" " + messageC.text + "\", loading ...",
+                        text: "Thank you for the answer",
+                        thread_ts: messageC.event.thread_ts
+                    });
+                    break;
                     
                     const questionProcessing = await getDBEntry("botQuestionProcessing", ["question"], ["=="], [messageC.event.channel + "_" + messageC.event.text], 1);
                     if (questionProcessing.length == 0) {
