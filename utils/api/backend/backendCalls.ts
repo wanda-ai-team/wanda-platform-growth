@@ -126,8 +126,6 @@ async function transcribeSlackVideoFile(slackChannelS: string, audioUrlS: string
     }
 }
 
-
-
 async function assistantQuestionBackend(slackChannelS: any, messageTs: any, query: any, web: any) {
     try {
         const response = await axios.post(process.env.BACKEND_URL + '/llmTools/assistant/createWithGoogle', {
@@ -154,8 +152,6 @@ async function assistantQuestionBackend(slackChannelS: any, messageTs: any, quer
             });
         } else {
             if (response && response.data && response.data) {
-                console.log(response.data)
-                console.log("entrei")
                 const messageF = Message({ channel: slackChannelS, text: "Answering questiom", threadTs: messageTs })
                     .blocks(
                         Blocks.Section({ text: response.data }),
