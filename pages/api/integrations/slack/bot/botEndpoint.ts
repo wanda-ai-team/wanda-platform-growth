@@ -107,9 +107,7 @@ export default async function handler(
                 })();
                 break
             case "event_callback":
-
                 if (messageC.event.files && messageC.event.files.length > 0) {
-
                     const videoProcessing = await getDBEntry("botVideoProcessing", ["video"], ["=="], [messageC.event.files[0].url_private_download], 1);
                     if (videoProcessing.length == 0) {
                         await createDBEntry("botVideoProcessing", { video: messageC.event.files[0].url_private_download });
@@ -126,6 +124,17 @@ export default async function handler(
                     // await transcribeVideoFile(web, messageC);
 
                 } else {
+
+                    const threadContent = await web.conversations.replies({
+                        channel: messageC.event.channel,
+                        ts: messageC.event.ts,
+                        include_all_metadata: true
+                    })
+
+                    console.log(threadContent);
+
+                    return;
+                    
                     const questionProcessing = await getDBEntry("botQuestionProcessing", ["question"], ["=="], [messageC.event.channel + "_" + messageC.event.text], 1);
                     if (questionProcessing.length == 0) {
                         await createDBEntry("botQuestionProcessing", { question: messageC.event.channel + "_" + messageC.event.text });
