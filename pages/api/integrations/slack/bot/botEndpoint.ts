@@ -84,12 +84,14 @@ export default async function handler(
 
                         break;
                     case "tommyActionAskRealTommy":
-                        console.log("real tommy")
-                        console.log(messageC.message.blocks)
                         await createDBEntry("realTommyQuestions", { threadTs: messageC.message.ts, text: messageC.message.blocks[0].text.text });
                         await web.chat.postMessage({
                             channel: process.env.TOMMY_CHANNEL as string,
                             text: "Asnwer the question: " + messageC.message.blocks[0].text.text,
+                            metadata: {
+                                "event_type": "thread_from_real_tommy",
+                                "event_payload": { threadTs: messageC.message.ts, text: messageC.message.blocks[0].text.text }
+                            }
                         });
                         break;
                 }
