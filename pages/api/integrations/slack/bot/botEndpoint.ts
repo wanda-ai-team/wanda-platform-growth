@@ -124,31 +124,32 @@ export default async function handler(
                     // await transcribeVideoFile(web, messageC);
 
                 } else {
-
-                    const threadContent = await web.conversations.replies({
-                        channel: messageC.event.channel,
-                        ts: messageC.event.thread_ts,
-                        include_all_metadata: true
-                    })
-
-                    if (threadContent.messages && threadContent.messages.length > 0 && threadContent.messages[0].metadata?.event_type === "thread_from_real_tommy") {
-
-                        console.log(threadContent.messages[0].metadata);
-                        await web.chat.postMessage({
+                    if (messageC.event.thread_ts && messageC.event.thread_ts != "") {
+                        const threadContent = await web.conversations.replies({
                             channel: messageC.event.channel,
-                            // text: messageC.channel_name.split("talk-with-")[1] + " is answering \" " + messageC.text + "\", loading ...",
-                            text: "Thank you for the answer",
-                            thread_ts: messageC.event.thread_ts
-                        });
-                        const payload = threadContent.messages[0].metadata.event_payload;
-                        if (payload && 'channelId' in payload && 'threadTs' in payload) {
-                            await web.chat.postMessage({
-                                channel: payload?.channelId as string,
-                                text: messageC.event.text,
-                                thread_ts: payload.threadTs as string
-                            })
-                        }
+                            ts: messageC.event.thread_ts,
+                            include_all_metadata: true
+                        })
 
+                        if (threadContent.messages && threadContent.messages.length > 0 && threadContent.messages[0].metadata?.event_type === "thread_from_real_tommy") {
+
+                            console.log(threadContent.messages[0].metadata);
+                            await web.chat.postMessage({
+                                channel: messageC.event.channel,
+                                // text: messageC.channel_name.split("talk-with-")[1] + " is answering \" " + messageC.text + "\", loading ...",
+                                text: "Thank you for the answer",
+                                thread_ts: messageC.event.thread_ts
+                            });
+                            const payload = threadContent.messages[0].metadata.event_payload;
+                            if (payload && 'channelId' in payload && 'threadTs' in payload) {
+                                await web.chat.postMessage({
+                                    channel: payload?.channelId as string,
+                                    text: messageC.event.text,
+                                    thread_ts: payload.threadTs as string
+                                })
+                            }
+
+                        }
                     } else {
                         const questionProcessing = await getDBEntry("botQuestionProcessing", ["question"], ["=="], [messageC.event.channel + "_" + messageC.event.text], 1);
                         if (questionProcessing.length == 0) {
